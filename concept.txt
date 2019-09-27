@@ -174,7 +174,7 @@ Syntax Definition
     c-expr-list    := const-expr { ',' const-expr } .
 
     access-op      := '->' identifier | '[' expr ']' .
-    ident-access   := identifier { access-op } [ '(' expr-list ')' ] .
+    ident-access   := identifier { access-op } [ '(' [ call-arg-list ] ')' ] .
 
     num-base-e     := real-lit | int-lit 
                     | '(' expr ')'          -- expression result cannot be string
@@ -199,7 +199,10 @@ Syntax Definition
                     | ident-access . -- access result must be bool
 
     expr           := num-e | str-e | bool-e .
-    expr-list      := const-expr { ',' const-expr } .
+    expr-list      := expr { ',' expr } .
+    
+    call-arg       := [ identifier '=>' ] ( 'default' | expr ) .
+    call-arg-list  := call-arg { ',' call-arg } .
    
     optional-block := '{' [ statement-list ] '}' | ';' .
     arg-declarator := '(' [ argument-list ] ')' .
@@ -210,28 +213,57 @@ Syntax Definition
     impl-clause    := 'implements' ident-list .
     visiblity      := 'private' | 'protected' | 'public' .
     access-type    := 'readonly' | 'readwrite' | 'writeonly' .
-    attrib-decl    := [ access-type ] [ visibility ] 'attribute' ident-list ':' type [ '=' c-expr-list ] ';' .
-    method-decl    := [ 'final' ] [ 'override' ] [ 'static' ] [ visiblity ] 'method' identifier
-                      arg-declarator [ return-decl ] optional-block .
+    storage-type   := 'static' .
+    derivation     := 'override' | 'final' .
+    implementation := 'implementation' .
+    attrib-flag    := visibility | access-type | storage-type | derivation | implementation .
+    attrib-flags   := attrib-flag { attrib-flag } . -- each may occur only once
+    attrib-decl    := [ attrib-flags ] 'attribute' ident-list ':' type [ '=' c-expr-list ] ';' .
+    method-flag    := visibility | storage-type | derivation | implementation .
+    method-flags   := method-flag { method-flag } . -- each may occur only once
+    method-decl    := [ method-flags ] 'method' identifier arg-declarator [ return-decl ] optional-block .
     field          := attrib-decl | method-decl | const-decl | enum-decl .   
     field-list     := field { field } .
     class-decl     := 'class' identifier [ extends-clause ] [ impl-clause ] '{' [ field-list ] '}' .
 
-    func-decl      := 'function' ident arg-declarator return-decl optional-block .
-    proc-decl      := 'procedure' ident arg-declarator optional-block .
+    iattrib-decl   := [ access-type ] 'attribute' ident-list ':' type ';' .
+    imethod-decl   := 'method' identifier arg-declarator [ return-decl ] ';' .
+    ifield         := iattrib-decl | imethod-decl | const-decl | enum-decl .
+    interface-decl := 'interface' identifier [ extends-clause ] '{' [ ifield-list ] '}' .
 
+    func-decl      := [ visibility ] 'function' ident arg-declarator return-decl optional-block .
+    proc-decl      := [ visibility ] 'procedure' ident arg-declarator optional-block .
+
+    var-decl       := 'var' ident-list ':' type ';' .
     const-decl     := 'const' ident-list '=' c-expr-list ';' .
 
     enum-item      := identifier [ '=' const-expr ] .
     enum-item-list := enum-item { ',' enum-item } [ ',' ] .
     enum-decl      := 'enum' ident '{' enum-item-list '}' .
 
-    let-stmt       := 'let' ident-list '=' expr-list .
+    let-stmt       := 'let' ident-list '=' expr-list ';' .
 
-    decl-stmt      := class-decl | const-decl | enum-decl | func-decl | proc-decl .
+    decl-stmt      := class-decl | interface-decl | const-decl | enum-decl | func-decl | proc-decl | var-decl .
 
-    strlit-list    := str-lit { ',' str-lit } .
-    include-stmt   := 'include' strlit-list .
+    import-path    := identifier { '/' identifier } .
+    import-list    := import-path { ',' import-path } .
+    import-stmt    := 'import' import-path ';' .
 
-
-
+    xref-type      := 'module' | 'package' | 'library' .
+    str-lit-list   := str-lit { ',' str-lit } .
+    
+    platform-spec  := 'platform' str-lit-list .
+    language-spec  := 'language' str-lit-list .
+    header-spec    := 'header' str-lit-list .
+    function-spec  := 'function' str-lit-list .
+    procedure-spec := 'procedure' str-lit-list .
+    class-spec     := 'class' str-lit-list .
+    alien-spec     := platform-spec | language-spec | header-spec | function-spec | procedure-spec | class-spec .
+    alien-specs    := alien-spec { ',' alien-spec } .
+    alien-stmt     := 'alien' xref-type identifier [ ',' alien-specs ] ';' .
+                      
+    global-stmt    := decl-stmt .                      
+    global-stmts   := decl-stmt { decl-stmt } .
+    global-intro   := import-stmt | alien-stmt .
+    global-spec    := ( 'program' | xref-type ) identifier ';' .
+    global-scope   := [ global-spec ] { global-intro } { global-stmts } .
