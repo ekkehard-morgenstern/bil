@@ -1,0 +1,237 @@
+
+Basic Implementation Language (BIL)
+-----------------------------------
+
+License
+-------
+
+    General Implementation Language (GIL) toolkit
+    Copyright (C) 2019  Ekkehard Morgenstern
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    E-Mail: ekkehard@ekkehardmorgenstern.de 
+    Mail: Ekkehard Morgenstern, Mozartstr. 1, 76744 Woerth am Rhein, Germany, Europe
+
+Requirements
+------------
+
+Language must be compilable to C or C++.
+Implementation language doesn't matter but should also be C or C++.
+
+
+Language Elements
+-----------------
+
+
+Literals
+--------
+
+123458          a decimal integer 
+1232.3282       a decimal floating-point value 
+1232.232e23     a decimal floating-point value 
+"abc"           a string
+true            a boolean value (bits all set to 1)
+false           a boolean value (bits all set to 0)
+
+
+Data Types
+----------
+
+Basic Types:
+int             a 64 bit integer (signed)
+real            a 64 bit floating-point value
+string          a utf-8 encoded string
+byte            an 8 bit byte (signed)
+bool            a boolean value
+
+Pointer Types:
+type*           a pointer to a series of 'type' type cells
+type^           a pointer to a class type 
+
+Constant Types:
+const type      a constant
+
+Enumerations:
+enum type {     an enumeration (only of basic types)
+
+}
+
+Cell spaces:
+
+new type [ initialsize ]            create an auto-scaling cell space with a minimum size 
+delete name                         delete cell space
+
+Classes:
+
+new type ( expression-list )        instantiate an object
+delete name                         delete an object
+
+class name [ extends name-list ] [ implements name-list ] {    a data structure or class
+
+    [ readonly | writeonly | readwrite ] attribute name-list : type [ = expression-list ] ; 
+
+    [ override ] method name ( name-list : type; ... ) returning type-list { ... }
+
+}
+
+interface name [ extends name-list ] {      an interface declaration
+
+    [ override ] method name ( name-list : type; ... ) returns type-list;
+
+}
+
+Operators:
+
+    + - * /                         basic arithmetic
+    mod                             modulo
+    
+    and or xor not                  logical operators
+    shl shr                         shift operators
+
+    >= <= > < = <>                  comparison operators 
+
+    [ n ]                           access cell space
+    -> name                         access class member 
+
+Programs:
+
+program "progname"[,entrypoint]     This module constitutes a program (default entry point is main)
+
+Modules:
+
+module "modname"                    this module constitutes just a module
+
+Library:
+
+library "libname"                   this module constitutes a library
+
+export identifier-list              this module exports specified identifiers
+
+import "libormodname"[,"platform"][,"language"][,header-file-list][,identifier-list]   include a library 
+
+
+
+Syntax Definition
+-----------------
+
+    int-lit    := /[0-9]+/ .
+    real-lit   := /[0-9]+\.[0-9]+([eE][+-][0-9]+)/ .
+    str-lit    := /"[^"]+"/ .
+    bool-lit   := 'true' | 'false' .
+    identifier := /[a-zA-Z_][a-zA-Z0-9_]*/ .
+
+    base-type      := 'int' | 'real' | 'string' | 'byte' | 'bool' .
+    object-pointer := identifier '^' .
+    cell-type      := base-type | object-pointer .
+    cell-pointer   := cell-type '*' .
+    type           := cell-pointer | object-pointer | base-type .
+    type-list      := type { ',' type } .
+
+    neg-op         := '-' | 'not' .
+    mult-op        := '*' | '/' | 'mod' .
+    add-op         := '+' | '-' .
+    shf-op         := 'shl' | 'shr' .
+    cmp-op         := '=' | '<>' | '<' | '>' | '<=' | '>=' .
+    and-op         := 'and' .
+    or-op          := 'or' | 'xor' .
+
+    c-num-base-e   := real-lit | int-lit
+                    | '(' const-expr ')'    -- expression result cannot be string.
+                    | identifier .          -- identifier must be numerical constant or enum.
+    c-num-neg-e    := [ neg-op ] c-num-base-e .
+    c-num-mult-e   := c-num-neg-e { mult-op c-num-neg-e } .
+    c-num-add-e    := c-num-mult-e { add-op c-num-mult-e } .
+    c-num-shf-e    := c-num-add-e [ shf-op c-num-add-e ] .
+    c-num-cmp-e    := c-num-shf-e [ cmp-op c-num-shf-e ] .
+    c-num-and-e    := c-num-cmp-e { and-op c-num-cmp-e } .
+    c-num-or-e     := c-num-and-e { or-op c-num-and-e } .
+    c-num-e        := c-num-or-e .
+
+    c-str-base-e   := str-lit 
+                    | identifier .  -- identifier must be string constant or enum.
+    c-str-add-e    := str-base-e { '+' str-base-e } .
+    c-str-cmp-e    := c-str-add-e [ cmp-op c-str-add-e ] .
+    c-str-and-e    := c-str-cmp-e { and-op c-str-cmp-e } .
+    c-str-or-e     := c-str-or-e { or-op c-str-or-e } .
+    c-str-e        := c-str-or-e .
+
+    c-bool-e       := bool-lit 
+                    | identifier . -- identifier must be bool constant or enum.
+
+    const-expr     := c-num-e | c-str-e | c-bool-e .
+    c-expr-list    := const-expr { ',' const-expr } .
+
+    access-op      := '->' identifier | '[' expr ']' .
+    ident-access   := identifier { access-op } [ '(' expr-list ')' ] .
+
+    num-base-e     := real-lit | int-lit 
+                    | '(' expr ')'          -- expression result cannot be string
+                    | ident-access.         -- access result must be numeric
+    num-mult-e     := num-neg-e { mult-op num-neg-e } .
+    num-add-e      := num-mult-e { add-op num-mult-e } .
+    num-shf-e      := num-add-e [ shf-op num-add-e ] .
+    num-cmp-e      := num-shf-e [ cmp-op num-shf-e ] .
+    num-and-e      := num-cmp-e { and-op num-cmp-e } .
+    num-or-e       := num-and-e { or-op num-and-e } .
+    num-e          := num-or-e .
+
+    str-base-e     := str-lit 
+                    | ident-access .  -- access result must be string
+    str-add-e      := str-base-e { '+' str-base-e } .
+    str-cmp-e      := str-add-e [ cmp-op str-add-e ] .
+    str-and-e      := str-cmp-e { and-op str-cmp-e } .
+    str-or-e       := str-or-e { or-op str-or-e } .
+    str-e          := str-or-e .
+
+    bool-e         := bool-lit 
+                    | ident-access . -- access result must be bool
+
+    expr           := num-e | str-e | bool-e .
+    expr-list      := const-expr { ',' const-expr } .
+   
+    optional-block := '{' [ statement-list ] '}' | ';' .
+    arg-declarator := '(' [ argument-list ] ')' .
+    return-decl    := 'returning' type-list .
+    ident-list     := identifier { ',' identifier } .
+
+    extends-clause := 'extends' ident-list .
+    impl-clause    := 'implements' ident-list .
+    visiblity      := 'private' | 'protected' | 'public' .
+    access-type    := 'readonly' | 'readwrite' | 'writeonly' .
+    attrib-decl    := [ access-type ] [ visibility ] 'attribute' ident-list ':' type [ '=' c-expr-list ] ';' .
+    method-decl    := [ 'final' ] [ 'override' ] [ 'static' ] [ visiblity ] 'method' identifier
+                      arg-declarator [ return-decl ] optional-block .
+    field          := attrib-decl | method-decl | const-decl | enum-decl .   
+    field-list     := field { field } .
+    class-decl     := 'class' identifier [ extends-clause ] [ impl-clause ] '{' [ field-list ] '}' .
+
+    func-decl      := 'function' ident arg-declarator return-decl optional-block .
+    proc-decl      := 'procedure' ident arg-declarator optional-block .
+
+    const-decl     := 'const' ident-list '=' c-expr-list ';' .
+
+    enum-item      := identifier [ '=' const-expr ] .
+    enum-item-list := enum-item { ',' enum-item } [ ',' ] .
+    enum-decl      := 'enum' ident '{' enum-item-list '}' .
+
+    let-stmt       := 'let' ident-list '=' expr-list .
+
+    decl-stmt      := class-decl | const-decl | enum-decl | func-decl | proc-decl .
+
+    strlit-list    := str-lit { ',' str-lit } .
+    include-stmt   := 'include' strlit-list .
+
+
+
