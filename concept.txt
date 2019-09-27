@@ -204,7 +204,8 @@ Syntax Definition
     call-arg       := [ identifier '=>' ] ( 'default' | expr ) .
     call-arg-list  := call-arg { ',' call-arg } .
    
-    optional-block := '{' [ statement-list ] '}' | ';' .
+    block          := '{' [ statement-list ] '}' .
+    optional-block := block | ';' .
     arg-declarator := '(' [ argument-list ] ')' .
     return-decl    := 'returning' type-list .
     ident-list     := identifier { ',' identifier } .
@@ -244,6 +245,7 @@ Syntax Definition
     let-stmt       := 'let' ident-list '=' expr-list ';' .
 
     decl-stmt      := class-decl | interface-decl | const-decl | enum-decl | func-decl | proc-decl | var-decl .
+    block-decl     := const-decl | enum-decl | var-decl .
 
     import-path    := identifier { '/' identifier } .
     import-list    := import-path { ',' import-path } .
@@ -267,3 +269,40 @@ Syntax Definition
     global-intro   := import-stmt | alien-stmt .
     global-spec    := ( 'program' | xref-type ) identifier ';' .
     global-scope   := [ global-spec ] { global-intro } { global-stmts } .
+
+    label-decl     := identifier ':' .
+
+    call-stmt      := 'call' ident-access ';' .
+
+    end            := [ ';' ] .
+
+    block-or-stmt  := block | stmt .
+    if-stmt        := ( 'if' | 'unless' ) expr block-or-stmt [ 'else' block-or-stmt ] .
+    
+    while-stmt     := ( 'while' | 'until' ) expr block-or-stmt .
+    repeat-stmt    := ( 'repeat' | 'do' ) block ( 'while' | 'until' ) expr ';' .
+    loop-stmt      := ( 'loop' | 'forever' ) block-or-stmt .
+    for-stmt       := 'for' identifier '=' expr ( 'to' | 'downto' ) expr 'do' block-or-stmt .
+    loop-type-stmt := while-stmt | repeat-stmt | loop-stmt | for-stmt .
+
+    switch-case    := 'case' c-expr-list ':' block-or-stmt .
+    default-case   := 'default' ':' block-or-stmt .
+    any-case       := switch-case | default-case .
+    case-list      := any-case { any-case } .
+    switch-stmt    := 'switch' expr '{' case-list '}' .
+
+    goto-stmt      := ( 'goto' | 'gosub' ) identifier .
+    return-stmt    := 'return' .
+    resultis-stmt  := 'resultis' expr-list .
+
+    flow-ctrl-stmt := if-stmt | loop-type-stmt | switch-stmt | goto-stmt | return-stmt |
+                      resultis-stmt | call-stmt .
+
+    
+
+
+
+
+
+    stmt           := block-decl | let-stmt | flow-ctrl-stmt .
+    statement      := [ label-decl ] stmt .
