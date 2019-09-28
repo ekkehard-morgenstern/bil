@@ -39,7 +39,7 @@ neg-op         := '-' | 'not' .
 mult-op        := '*' | '/' | 'mod' .
 add-op         := '+' | '-' .
 shf-op         := 'shl' | 'shr' .
-cmp-op         := '=' | '<>' | '<' | '>' | '<=' | '>=' .
+cmp-op         := '<>' | '<=' | '>=' | '=' | '<' | '>' .
 and-op         := 'and' .
 or-op          := 'or' | 'xor' .
 
