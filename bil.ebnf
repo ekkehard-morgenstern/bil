@@ -1,0 +1,233 @@
+--------------------------------------------------------------------------------------------
+--    Basic Implementation Language (BIL)                                                 --
+--    Copyright (C) 2019  Ekkehard Morgenstern                                            --
+--                                                                                        --
+--    This program is free software: you can redistribute it and/or modify                --
+--    it under the terms of the GNU General Public License as published by                --
+--    the Free Software Foundation, either version 3 of the License, or                   --
+--    (at your option) any later version.                                                 --
+--                                                                                        --
+--    This program is distributed in the hope that it will be useful,                     --
+--    but WITHOUT ANY WARRANTY; without even the implied warranty of                      --
+--    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                       --
+--    GNU General Public License for more details.                                        --
+--                                                                                        --
+--    You should have received a copy of the GNU General Public License                   --
+--    along with this program.  If not, see <https://www.gnu.org/licenses/>.              --
+--                                                                                        --
+--    Contact Info:                                                                       --
+--    E-Mail: ekkehard@ekkehardmorgenstern.de                                             --
+--    Mail: Ekkehard Morgenstern, Mozartstr. 1, 76744 Woerth am Rhein, Germany, Europe    --
+--------------------------------------------------------------------------------------------
+
+
+int-lit    := /[0-9]+/ .
+real-lit   := int-lit '.' int-lit [ /[eE]/ [ '-' ] int-lit ] .
+str-lit    := /"[^"]+"/ .
+bool-lit   := 'true' | 'false' .
+ptr-lit    := 'nil' .
+identifier := /[a-zA-Z_][a-zA-Z0-9_]*/ .
+
+base-type      := 'int' | 'real' | 'string' | 'byte' | 'bool' .
+object-pointer := identifier '^' .
+cell-type      := base-type | object-pointer .
+cell-pointer   := cell-type '*' .
+type           := cell-pointer | object-pointer | base-type .
+type-list      := type { ',' type } .
+
+neg-op         := '-' | 'not' .
+mult-op        := '*' | '/' | 'mod' .
+add-op         := '+' | '-' .
+shf-op         := 'shl' | 'shr' .
+cmp-op         := '=' | '<>' | '<' | '>' | '<=' | '>=' .
+and-op         := 'and' .
+or-op          := 'or' | 'xor' .
+
+c-num-base-e   := real-lit | int-lit
+                | '(' const-expr ')'    -- expression result cannot be string.
+                | identifier .          -- identifier must be numerical constant or enum.
+c-num-neg-e    := [ neg-op ] c-num-base-e .
+c-num-mult-e   := c-num-neg-e { mult-op c-num-neg-e } .
+c-num-add-e    := c-num-mult-e { add-op c-num-mult-e } .
+c-num-shf-e    := c-num-add-e [ shf-op c-num-add-e ] .
+c-num-cmp-e    := c-num-shf-e [ cmp-op c-num-shf-e ] .
+c-num-and-e    := c-num-cmp-e { and-op c-num-cmp-e } .
+c-num-or-e     := c-num-and-e { or-op c-num-and-e } .
+c-num-e        := c-num-or-e .
+
+c-str-base-e   := str-lit 
+                | identifier .  -- identifier must be string constant or enum.
+c-str-add-e    := str-base-e { '+' str-base-e } .
+c-str-cmp-e    := c-str-add-e [ cmp-op c-str-add-e ] .
+c-str-and-e    := c-str-cmp-e { and-op c-str-cmp-e } .
+c-str-or-e     := c-str-or-e { or-op c-str-or-e } .
+c-str-e        := c-str-or-e .
+
+c-bool-base-e  := bool-lit 
+                | identifier . -- identifier must be bool constant or enum.
+c-bool-not-e   := [ 'not' ] c-bool-base-e .
+c-bool-and-e   := c-bool-not-e { and-op c-bool-not-e } .
+c-bool-or-e    := c-bool-and-e { or-op c-bool-and-e } .
+c-bool-e       := c-bool-or-e .
+
+c-ptr-e        := ptr-lit .
+
+const-expr     := c-num-e | c-str-e | c-bool-e | c-ptr-e .
+c-expr-list    := const-expr { ',' const-expr } .
+
+access-op      := '->' identifier | '[' expr ']' .
+ident-access   := identifier { access-op } [ '(' [ call-arg-list ] ')' ] .
+valof-expr     := 'valof' type block .
+
+num-base-e     := real-lit | int-lit 
+                | '(' expr ')'          -- expression result cannot be string
+                | ident-access          -- access result must be numeric
+                | valof-expr .          -- access result must be numeric
+num-neg-e      := [ neg-op ] num-base-e .
+num-mult-e     := num-neg-e { mult-op num-neg-e } .
+num-add-e      := num-mult-e { add-op num-mult-e } .
+num-shf-e      := num-add-e [ shf-op num-add-e ] .
+num-cmp-e      := num-shf-e [ cmp-op num-shf-e ] .
+num-and-e      := num-cmp-e { and-op num-cmp-e } .
+num-or-e       := num-and-e { or-op num-and-e } .
+num-e          := num-or-e .
+
+str-base-e     := str-lit 
+                | ident-access    -- access result must be string
+                | valof-expr .    -- access result must be string
+str-add-e      := str-base-e { '+' str-base-e } .
+str-cmp-e      := str-add-e [ cmp-op str-add-e ] .
+str-and-e      := str-cmp-e { and-op str-cmp-e } .
+str-or-e       := str-or-e { or-op str-or-e } .
+str-e          := str-or-e .
+
+bool-base-e    := bool-lit 
+                | ident-access    -- access result must be bool
+                | valof-expr .    -- access result must be bool
+bool-not-e     := [ 'not' ] bool-base-e .
+bool-and-e     := bool-not-e { and-op bool-not-e } .
+bool-or-e      := bool-and-e { or-op bool-and-e } .
+bool-e         := bool-or-e.
+
+array-inst     := '[' ( 'dynamic' | 'assoc' | num-e ) ']' .
+object-inst    := '(' [ expr-list ] ')' . 
+ptr-e          := 'new' type [ array-inst | object-inst ] | ptr-lit .
+
+expr           := num-e | str-e | bool-e | ptr-e .
+expr-list      := expr { ',' expr } .
+
+call-arg       := [ identifier '=>' ] ( 'default' | expr ) .
+call-arg-list  := call-arg { ',' call-arg } .
+
+block          := '{' [ statement-list ] '}' .
+optional-block := block | ';' .
+
+argument-decl  := ident-list ':' type [ '=' c-expr-list ] | '...' .
+argument-list  := argument-decl { ';' argument-decl } .
+arg-declarator := '(' [ argument-list ] ')' .
+
+return-decl    := 'returning' type-list .
+ident-list     := identifier { ',' identifier } .
+
+extends-clause := 'extends' ident-list .
+impl-clause    := 'implements' ident-list .
+
+visibility     := 'private' | 'protected' | 'public' .
+access-type    := 'readonly' | 'readwrite' | 'writeonly' .
+storage-type   := 'static' .
+derivation     := 'override' | 'final' .
+implementation := 'implementation' .
+
+attrib-flag    := visibility | access-type | storage-type | derivation | implementation .
+attrib-flags   := attrib-flag { attrib-flag } . -- each may occur only once
+attrib-decl    := [ attrib-flags ] 'attribute' ident-list ':' type [ '=' c-expr-list ] ';' .
+
+method-flag    := visibility | storage-type | derivation | implementation .
+method-flags   := method-flag { method-flag } . -- each may occur only once
+method-decl    := [ method-flags ] 'method' identifier arg-declarator [ return-decl ] optional-block .
+
+field          := attrib-decl | method-decl | const-decl | enum-decl .   
+field-list     := field { field } .
+
+class-decl     := 'class' identifier [ extends-clause ] [ impl-clause ] '{' [ field-list ] '}' .
+
+iattrib-decl   := [ access-type ] 'attribute' ident-list ':' type ';' .
+imethod-decl   := 'method' identifier arg-declarator [ return-decl ] ';' .
+
+ifield         := iattrib-decl | imethod-decl | const-decl | enum-decl .
+ifield-list    := ifield { ifield } .
+
+interface-decl := 'interface' identifier [ extends-clause ] '{' [ ifield-list ] '}' .
+
+func-decl      := [ visibility ] 'function' identifier arg-declarator return-decl optional-block .
+proc-decl      := [ visibility ] 'procedure' identifier arg-declarator optional-block .
+
+var-decl       := 'var' ident-list ':' type ';' .
+const-decl     := 'const' ident-list '=' c-expr-list ';' .
+
+enum-item      := identifier [ '=' const-expr ] .
+enum-item-list := enum-item { ',' enum-item } [ ',' ] .
+enum-decl      := 'enum' identifier '{' enum-item-list '}' .
+
+let-stmt       := 'let' ident-list '=' expr-list ';' .
+
+decl-stmt      := class-decl | interface-decl | const-decl | enum-decl | func-decl | proc-decl | var-decl .
+block-decl     := const-decl | enum-decl | var-decl .
+
+import-path    := identifier { '/' identifier } .
+import-list    := import-path { ',' import-path } .
+import-stmt    := 'import' import-path ';' .
+
+xref-type      := 'module' | 'package' | 'library' .
+str-lit-list   := str-lit { ',' str-lit } .
+
+platform-spec  := 'platform' str-lit-list .
+language-spec  := 'language' str-lit-list .
+header-spec    := 'header' str-lit-list .
+function-spec  := 'function' str-lit-list .
+procedure-spec := 'procedure' str-lit-list .
+class-spec     := 'class' str-lit-list .
+alien-spec     := platform-spec | language-spec | header-spec | function-spec | procedure-spec | class-spec .
+alien-specs    := alien-spec { ',' alien-spec } .
+alien-stmt     := 'alien' xref-type identifier [ ',' alien-specs ] ';' .
+                  
+global-stmt    := decl-stmt .                      
+global-stmts   := decl-stmt { decl-stmt } .
+global-intro   := import-stmt | alien-stmt .
+global-spec    := ( 'program' | xref-type ) identifier ';' .
+global-scope   := [ global-spec ] { global-intro } { global-stmts } .
+
+label-decl     := identifier ':' .
+
+call-stmt      := 'call' ident-access ';' .
+
+end            := [ ';' ] .
+
+block-or-stmt  := block | stmt .
+if-stmt        := ( 'if' | 'unless' ) expr block-or-stmt [ 'else' block-or-stmt ] .
+
+while-stmt     := ( 'while' | 'until' ) expr block-or-stmt .
+repeat-stmt    := ( 'repeat' | 'do' ) block ( 'while' | 'until' ) expr ';' .
+loop-stmt      := ( 'loop' | 'forever' ) block-or-stmt .
+for-stmt       := 'for' identifier '=' expr ( 'to' | 'downto' ) expr 'do' block-or-stmt .
+loop-control   := ( 'break' | 'continue' | 'again' ) [ identifier ] ';' .
+loop-type-stmt := while-stmt | repeat-stmt | loop-stmt | for-stmt | loop-control .
+
+switch-case    := 'case' c-expr-list ':' block-or-stmt .
+default-case   := 'default' ':' block-or-stmt .
+any-case       := switch-case | default-case .
+case-list      := any-case { any-case } .
+switch-stmt    := 'switch' expr '{' case-list '}' .
+
+goto-stmt      := ( 'goto' | 'gosub' ) identifier ';' .
+return-stmt    := 'return' ';' .
+resultis-stmt  := 'resultis' expr-list ';' .
+
+delete-stmt    := 'delete' ident-list ';' .
+
+flow-ctrl-stmt := if-stmt | loop-type-stmt | switch-stmt | goto-stmt | return-stmt |
+                  resultis-stmt | call-stmt | delete-stmt .
+
+stmt           := block-decl | let-stmt | flow-ctrl-stmt .
+statement      := [ label-decl ] stmt .
+statement-list := statement { statement } .
