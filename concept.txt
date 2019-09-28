@@ -226,6 +226,8 @@ Syntax Definition
    
     block          := '{' [ statement-list ] '}' .
     optional-block := block | ';' .
+    argument-decl  := ident-list ':' type [ '=' expr-list ] | '...' .
+    argument-list  := argument-decl { ';' argument-decl } .
     arg-declarator := '(' [ argument-list ] ')' .
     return-decl    := 'returning' type-list .
     ident-list     := identifier { ',' identifier } .
