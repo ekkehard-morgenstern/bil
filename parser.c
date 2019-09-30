@@ -111,13 +111,60 @@ static void fatal( const char* fmt, ... ) {
     exit( EXIT_FAILURE );
 }
 
+static void skip_space( const char** pTextPos ) {
+    const char* textPos = *pTextPos;
+REDO:
+    while ( *textPos == ' ' || *textPos == '\t' || *textPos == '\r' || *textPos == '\n' ) ++textPos;
+    if ( textPos[0] == '/' && textPos[1] == '*' ) {
+        textPos += 2;
+        while ( textPos[0] != '\0' && !( textPos[0] == '*' && textPos[1] == '/' ) ) ++textPos;
+        if ( textPos[0] == '\0' ) fatal( "multi-line comment not terminated" );
+        textPos += 2;
+        goto REDO;
+    } else if ( textPos[0] == '/' && textPos[1] == '/' ) {
+        textPos += 2;
+        while ( *textPos != '\0' && *textPos != '\r' && *textPos != '\n' ) ++textPos;
+        goto REDO;
+    }
+    *pTextPos = textPos;
+}
+
+static bool ident_first_char( char c ) {
+    if ( ( c >= 'A' && c <= 'Z' ) || ( c >= 'a' && c <= 'z' ) || c == '_' ) return true;
+    return false;
+}
+
+static bool ident_char( char c ) {
+    if ( ( c >= 'A' && c <= 'Z' ) || ( c >= 'a' && c <= 'z' ) || ( c >= '0' && c <= '9' ) || c == '_' ) return true;
+    return false;
+}
+
+static size_t ident_extent( const char* pos ) {
+    const char* start = pos;
+    const char* end   = start;
+    do { ++end; } while ( ident_char( *end ) );
+    return (size_t)( end - start );
+}
+
 static treenode_t* parse_node( const parsingnode_t* node, const char** pTextPos ) {
-    treenode_t* temp; treenode_t* result = 0; size_t i;
+    treenode_t* temp; treenode_t* result = 0; size_t i, identLen, symLen; const char* textPos = *pTextPos;
     switch ( node->nodeClass ) {
         case NC_TERMINAL:
             switch ( node->termType ) {
                 case TT_STRING:
-                    break;
+                    skip_space( &textPos );
+                    identLen = 0;
+                    if ( ident_first_char( *textPos ) ) identLen = ident_extent( textPos );
+                    symLen = strlen( node->text );
+                    if ( identLen ) {
+                        if ( symLen != identLen || strncmp( textPos, node->text, symLen ) != 0 ) return 0;
+                    } else {
+                        if ( strncmp( textPos, node->text, symLen ) != 0 ) return 0;
+                    }
+                    result    = create_node( node->nodeType, 0 );
+                    textPos  += symLen;
+                    *pTextPos = textPos;
+                    return result;
                 case TT_REGEX:
                     break;
                 default:
@@ -130,10 +177,11 @@ static treenode_t* parse_node( const parsingnode_t* node, const char** pTextPos 
         case NC_MANDATORY:
             result = create_node( node->nodeType, 0 );
             for ( i=0; i < node->numBranches; ++i ) {
-                temp = parse_node( &parsingTable[branches[node->branches+i]], pTextPos );
+                temp = parse_node( &parsingTable[branches[node->branches+i]], &textPos );
                 if ( temp == 0 ) { delete_node( result ); return 0; }
                 add_branch( result, temp );
             }
+            *pTextPos = textPos;
             break;
         case NC_ALTERNATIVE:
             for ( i=0; i < node->numBranches; ++i ) {
