@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include <string.h>
 #include <stdio.h>
+#include <sys/types.h>
+#include <regex.h>
 
 // include auto-generated file from ebnfcomp
 #include "parsingtable.c"
@@ -18,6 +20,15 @@ typedef struct _treenode_t {
     size_t                  branchAlloc;
     size_t                  numBranches;
 } treenode_t;
+
+typedef struct _regex_cacheitem_t {
+    struct _regex_cacheitem_t*  next;
+    char*                       text;
+    regex_t                     regex;
+} regex_cacheitem_t;
+
+static regex_cacheitem_t*   regex_first = 0;
+static regex_cacheitem_t*   regex_last  = 0;
 
 static void* xmalloc( size_t size ) {
     size_t reqSize = size ? size : 1U;
@@ -48,6 +59,57 @@ static char* xstrdup( const char* text ) {
     char* blk = (char*) xmalloc( len + 1U );
     strcpy( blk, text );
     return blk;
+}
+
+static regex_cacheitem_t* add_regex_cacheitem( const char* orig_regex ) {
+    regex_cacheitem_t* item = (regex_cacheitem_t*) xmalloc( sizeof(regex_cacheitem_t) );
+    size_t             len  = strlen( orig_regex ) + 2U;
+    char*              buf  = (char*) xmalloc( len );
+    buf[0] = '^';
+    memcpy( &buf[1], orig_regex, len-1U );
+    item->next = 0;
+    item->text = buf;
+    int rv = regcomp( &item->regex, item->text, REG_EXTENDED );
+    if ( rv != 0 ) {
+        char tmp[512]; tmp[0] = '\0';
+        regerror( rv, &item->regex, tmp, sizeof(tmp) );
+        fprintf( stderr, "fatal: regular expression '%s' failed to compile, code %d: '%s'\n", item->text, rv, tmp );
+        exit( EXIT_FAILURE );
+    }
+    if ( regex_first == 0 ) {
+        regex_first = regex_last = item;
+    } else {
+        regex_last->next = item;
+        regex_last       = item;
+    }
+    return item;
+}
+
+static void delete_regex_cache( void ) {
+    regex_cacheitem_t* item = regex_first;
+    while ( item ) {
+        regex_cacheitem_t* next = item->next;
+        regfree( &item->regex );
+        free( item->text );
+        free( item );
+        item = next;
+    }
+    regex_first = regex_last = 0;
+}
+
+static regex_cacheitem_t* find_regex_cacheitem( const char* orig_regex ) {
+    regex_cacheitem_t* item = regex_first;
+    while ( item ) {
+        if ( strcmp( item->text+1, orig_regex ) == 0 ) return item;
+        item = item->next;
+    }
+    return 0;
+}
+
+static regex_cacheitem_t* lookup_regex_cacheitem( const char* orig_regex ) {
+    regex_cacheitem_t* item = find_regex_cacheitem( orig_regex );
+    if ( item ) return item;
+    return add_regex_cacheitem( orig_regex );
 }
 
 static void dump_tree_node( treenode_t* node, int indent ) {
@@ -147,7 +209,8 @@ static size_t ident_extent( const char* pos ) {
 }
 
 static treenode_t* parse_node( const parsingnode_t* node, const char** pTextPos ) {
-    treenode_t* temp; treenode_t* result = 0; size_t i, identLen, symLen; const char* textPos = *pTextPos;
+    treenode_t* temp; treenode_t* result = 0; size_t i, identLen, symLen, len; const char* textPos = *pTextPos;
+    regex_cacheitem_t* cachedRegEx; regmatch_t matches[1]; int rv; char* buf;
     switch ( node->nodeClass ) {
         case NC_TERMINAL:
             switch ( node->termType ) {
@@ -166,7 +229,21 @@ static treenode_t* parse_node( const parsingnode_t* node, const char** pTextPos 
                     *pTextPos = textPos;
                     return result;
                 case TT_REGEX:
-                    break;
+                    skip_space( &textPos );
+                    cachedRegEx = lookup_regex_cacheitem( node->text );
+                    rv = regexec( &cachedRegEx->regex, textPos, 1U, matches, 0 );
+                    if ( rv == 0 ) {    // match
+                        len = ( matches[0].rm_eo - matches[0].rm_so ) + 1U;
+                        buf = (char*) xmalloc( len );
+                        memcpy( buf, textPos + matches[0].rm_so, len-1U );
+                        buf[len-1U] = '\0';
+                        result = create_node( node->nodeType, buf );
+                        free( buf );
+                        textPos += len - 1U;
+                        *pTextPos = textPos;
+                        return result;
+                    }
+                    return 0;
                 default:
                     fatal( "bad parsing node (type A)" );
             }
