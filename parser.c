@@ -1,3 +1,25 @@
+/*  Basic Implementation Language (BIL)
+    Copyright (C) 2019  Ekkehard Morgenstern
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    NOTE: Programs created with BIL do not fall under this license.
+
+    CONTACT INFO:
+        E-Mail: ekkehard@ekkehardmorgenstern.de
+        Mail: Ekkehard Morgenstern, Mozartstr. 1, D-76744 Woerth am Rhein, Germany, Europe */
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdarg.h>
@@ -9,17 +31,15 @@
 // include auto-generated file from ebnfcomp
 #include "parsingtable.c"
 
+// include auto-generated file from gennodetype2text
+#include "nodetype2text.c"
+
+// include parser header
+#include "parser.h"
+
 // NOTE to self: When encountering a TT_STRING node, check the length of the underlying character sequence
 // (important for identifiers and keywords).
 // Make sure EBNF is coded such that the longest sequence matches first. (comparison operators etc.)
-
-typedef struct _treenode_t {
-    nodetype_t              nodetype;
-    char*                   text;
-    struct _treenode_t**    branches;
-    size_t                  branchAlloc;
-    size_t                  numBranches;
-} treenode_t;
 
 typedef struct _regex_cacheitem_t {
     struct _regex_cacheitem_t*  next;
@@ -30,7 +50,9 @@ typedef struct _regex_cacheitem_t {
 static regex_cacheitem_t*   regex_first = 0;
 static regex_cacheitem_t*   regex_last  = 0;
 
-static void* xmalloc( size_t size ) {
+static const char*          startPos = 0;
+
+void* xmalloc( size_t size ) {
     size_t reqSize = size ? size : 1U;
     void* blk = malloc( reqSize );
     if ( blk == 0 ) {
@@ -40,7 +62,7 @@ static void* xmalloc( size_t size ) {
     return blk;
 }
 
-static void xrealloc( void** pBlk, size_t newSize ) {
+void xrealloc( void** pBlk, size_t newSize ) {
     size_t reqSize = newSize ? newSize : 0U;
     if ( *pBlk == 0 ) {
         *pBlk = xmalloc( reqSize );
@@ -54,7 +76,7 @@ static void xrealloc( void** pBlk, size_t newSize ) {
     }
 }
 
-static char* xstrdup( const char* text ) {
+char* xstrdup( const char* text ) {
     size_t len = strlen( text );
     char* blk = (char*) xmalloc( len + 1U );
     strcpy( blk, text );
@@ -112,7 +134,7 @@ static regex_cacheitem_t* lookup_regex_cacheitem( const char* orig_regex ) {
     return add_regex_cacheitem( orig_regex );
 }
 
-static void dump_tree_node( treenode_t* node, int indent ) {
+void dump_tree_node( treenode_t* node, int indent ) {
     if ( node == 0 ) return;
     if ( node->text == 0 ) {
         printf( "%-*.*s%d\n", indent, indent, "", (int) node->nodetype );
@@ -134,7 +156,7 @@ static treenode_t* create_node( nodetype_t nodetype, const char* text ) {
     return node;
 }
 
-static void delete_node( treenode_t* node ) {
+void delete_node( treenode_t* node ) {
     while ( node->numBranches > 0U ) {
         treenode_t* branch = node->branches[--node->numBranches];
         if ( branch ) delete_node( branch );
@@ -163,13 +185,32 @@ static const parsingnode_t* find_parsing_node( nodetype_t nodetype ) {
     return 0;
 }
 
-static void fatal( const char* fmt, ... ) {
+void fatal( const char* pos, const char* fmt, ... ) {
+    int line = 0; char linebuf[256]; linebuf[0] = '\0';
+    if ( startPos && pos ) {
+        const char* p = startPos; const char* s = startPos;
+        line = 1;
+        while ( p < pos ) {
+            if ( *p == '\n' ) { ++line; s = p+1; }
+            ++p;
+        }
+        size_t len = (size_t)( p - s ); if ( len > 255U ) len = 255U;
+        if ( len ) memcpy( linebuf, s, len );
+        linebuf[len] = '\0';
+    }
+    char lineclause[32];
+    if ( line ) {
+        snprintf( lineclause, sizeof(lineclause), " in line %d", line );
+    } else {
+        lineclause[0] = '\0';
+    }
     va_list ap;
     va_start( ap, fmt );
-    fprintf( stderr, "fatal: " );
+    fprintf( stderr, "fatal%s: ", lineclause );
     vfprintf( stderr, fmt, ap );
     fprintf( stderr, "\n" );
     va_end( ap );
+    if ( linebuf[0] ) fprintf( stderr, "%s\n", linebuf );
     exit( EXIT_FAILURE );
 }
 
@@ -180,7 +221,7 @@ REDO:
     if ( textPos[0] == '/' && textPos[1] == '*' ) {
         textPos += 2;
         while ( textPos[0] != '\0' && !( textPos[0] == '*' && textPos[1] == '/' ) ) ++textPos;
-        if ( textPos[0] == '\0' ) fatal( "multi-line comment not terminated" );
+        if ( textPos[0] == '\0' ) fatal( textPos, "multi-line comment not terminated" );
         textPos += 2;
         goto REDO;
     } else if ( textPos[0] == '/' && textPos[1] == '/' ) {
@@ -224,6 +265,7 @@ static treenode_t* parse_node( const parsingnode_t* node, const char** pTextPos 
                     } else {
                         if ( strncmp( textPos, node->text, symLen ) != 0 ) return 0;
                     }
+printf( "TT_STRING matched '%s'\n", node->text );                    
                     result    = create_node( node->nodeType, 0 );
                     textPos  += symLen;
                     *pTextPos = textPos;
@@ -237,6 +279,7 @@ static treenode_t* parse_node( const parsingnode_t* node, const char** pTextPos 
                         buf = (char*) xmalloc( len );
                         memcpy( buf, textPos + matches[0].rm_so, len-1U );
                         buf[len-1U] = '\0';
+printf( "TT_REGEX '%s' matched '%s'\n", node->text, buf );
                         result = create_node( node->nodeType, buf );
                         free( buf );
                         textPos += len - 1U;
@@ -245,16 +288,17 @@ static treenode_t* parse_node( const parsingnode_t* node, const char** pTextPos 
                     }
                     return 0;
                 default:
-                    fatal( "bad parsing node (type A)" );
+                    fatal( textPos, "bad parsing node (type A)" );
             }
             break;
         case NC_PRODUCTION:
-            if ( node->numBranches != 1U ) fatal( "bad parsing node (type C)" );
+            if ( node->numBranches != 1U ) fatal( textPos, "bad parsing node (type C)" );
             return parse_node( &parsingTable[branches[node->branches]], pTextPos );           
         case NC_MANDATORY:
             result = create_node( node->nodeType, 0 );
             for ( i=0; i < node->numBranches; ++i ) {
-                temp = parse_node( &parsingTable[branches[node->branches+i]], &textPos );
+                parsingnode_t* branch = &parsingTable[branches[node->branches+i]];
+                temp = parse_node( branch, &textPos );
                 if ( temp == 0 ) { delete_node( result ); return 0; }
                 add_branch( result, temp );
             }
@@ -267,10 +311,13 @@ static treenode_t* parse_node( const parsingnode_t* node, const char** pTextPos 
             }
             return 0;          
         case NC_OPTIONAL:
-            if ( node->numBranches != 1U ) fatal( "bad parsing node (type D)" );
-            return parse_node( &parsingTable[branches[node->branches]], pTextPos );
+            if ( node->numBranches != 1U ) fatal( textPos, "bad parsing node (type D)" );
+            result = parse_node( &parsingTable[branches[node->branches]], pTextPos );
+            if ( result ) return result;
+            result = create_node( node->nodeType, 0 );
+            break;
         case NC_OPTIONAL_REPETITIVE:
-            if ( node->numBranches != 1U ) fatal( "bad parsing node (type E)" );
+            if ( node->numBranches != 1U ) fatal( textPos, "bad parsing node (type E)" );
             result = create_node( node->nodeType, 0 );
             for (;;) {
                 temp = parse_node( &parsingTable[branches[node->branches]], pTextPos );
@@ -279,10 +326,9 @@ static treenode_t* parse_node( const parsingnode_t* node, const char** pTextPos 
             }
             break;
         default:
-            fatal( "bad parsing node (type B)" );
+            fatal( textPos, "bad parsing node (type B)" );
     }
     if ( result ) {
-        if ( result->numBranches == 0U ) { delete_node( result ); return 0; }
         if ( result->numBranches == 1U ) {
             temp = result->branches[0]; result->branches[0] = 0;
             delete_node( result ); result = temp;
@@ -295,5 +341,9 @@ treenode_t* parse( const char* text ) {
     const parsingnode_t* node  = find_parsing_node( NT_GLOBAL_SCOPE );
     if ( node == 0 ) return 0;
     const char* textPos = text;
-    return parse_node( node, &textPos );
+    startPos = textPos;
+    treenode_t* result = parse_node( node, &textPos );
+    skip_space( &textPos );
+    if ( *textPos != '\0' ) fatal( textPos, "syntax error" );
+    return result;
 }

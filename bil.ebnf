@@ -201,8 +201,6 @@ label-decl     := identifier ':' .
 
 call-stmt      := 'call' ident-access ';' .
 
-end            := [ ';' ] .
-
 block-or-stmt  := block | stmt .
 if-stmt        := ( 'if' | 'unless' ) expr block-or-stmt [ 'else' block-or-stmt ] .
 
