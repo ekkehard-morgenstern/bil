@@ -135,11 +135,15 @@ static regex_cacheitem_t* lookup_regex_cacheitem( const char* orig_regex ) {
 }
 
 void dump_tree_node( treenode_t* node, int indent ) {
-    if ( node == 0 ) return;
+    if ( node == 0 ) {
+        printf( "%-*.*s(null)\n", indent, indent, "" );
+        return;
+    }
+    const char* nodetype = nodetype2text( node->nodetype );
     if ( node->text == 0 ) {
-        printf( "%-*.*s%d\n", indent, indent, "", (int) node->nodetype );
+        printf( "%-*.*s%s\n", indent, indent, "", nodetype );
     } else {
-        printf( "%-*.*s%d '%s'\n", indent, indent, "", (int) node->nodetype, node->text );
+        printf( "%-*.*s%s '%s'\n", indent, indent, "", nodetype, node->text );
     }
     for ( size_t i=0; i < node->numBranches; ++i ) {
         dump_tree_node( node->branches[i], indent+2 );
@@ -266,7 +270,7 @@ static treenode_t* parse_node( const parsingnode_t* node, const char** pTextPos 
                         if ( strncmp( textPos, node->text, symLen ) != 0 ) return 0;
                     }
 printf( "TT_STRING matched '%s'\n", node->text );                    
-                    result    = create_node( node->nodeType, 0 );
+                    result    = create_node( node->nodeType, node->text );
                     textPos  += symLen;
                     *pTextPos = textPos;
                     return result;
@@ -297,9 +301,12 @@ printf( "TT_REGEX '%s' matched '%s'\n", node->text, buf );
         case NC_MANDATORY:
             result = create_node( node->nodeType, 0 );
             for ( i=0; i < node->numBranches; ++i ) {
-                parsingnode_t* branch = &parsingTable[branches[node->branches+i]];
+                const parsingnode_t* branch = &parsingTable[branches[node->branches+i]];
                 temp = parse_node( branch, &textPos );
-                if ( temp == 0 ) { delete_node( result ); return 0; }
+                if ( temp == 0 && branch->nodeClass != NC_OPTIONAL && branch->nodeClass != NC_OPTIONAL_REPETITIVE ) { 
+                    delete_node( result ); 
+                    return 0; 
+                }
                 add_branch( result, temp );
             }
             *pTextPos = textPos;
@@ -312,10 +319,7 @@ printf( "TT_REGEX '%s' matched '%s'\n", node->text, buf );
             return 0;          
         case NC_OPTIONAL:
             if ( node->numBranches != 1U ) fatal( textPos, "bad parsing node (type D)" );
-            result = parse_node( &parsingTable[branches[node->branches]], pTextPos );
-            if ( result ) return result;
-            result = create_node( node->nodeType, 0 );
-            break;
+            return parse_node( &parsingTable[branches[node->branches]], pTextPos );
         case NC_OPTIONAL_REPETITIVE:
             if ( node->numBranches != 1U ) fatal( textPos, "bad parsing node (type E)" );
             result = create_node( node->nodeType, 0 );
@@ -329,6 +333,7 @@ printf( "TT_REGEX '%s' matched '%s'\n", node->text, buf );
             fatal( textPos, "bad parsing node (type B)" );
     }
     if ( result ) {
+        if ( result->numBranches == 0U ) { delete_node( result ); return 0; }
         if ( result->numBranches == 1U ) {
             temp = result->branches[0]; result->branches[0] = 0;
             delete_node( result ); result = temp;
