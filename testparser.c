@@ -21,6 +21,7 @@
         Mail: Ekkehard Morgenstern, Mozartstr. 1, D-76744 Woerth am Rhein, Germany, Europe */
 
 #include <stdlib.h>
+#include <mcheck.h>
 #include <stdio.h>
 #include "parser.h"
 
@@ -49,6 +50,8 @@ int main( int argc, char** argv ) {
         return EXIT_FAILURE;
     }
 
+    mtrace();
+
     const char* filename = argv[1];
 
     char* file = readfile( filename );
@@ -63,6 +66,7 @@ int main( int argc, char** argv ) {
     dump_tree_node( tree, 0 );
 
 
+    muntrace();
 
     return EXIT_SUCCESS;
 }

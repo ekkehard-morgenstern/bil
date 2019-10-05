@@ -25,5 +25,9 @@ program test1;
 
 function main( argc: int; argv: string* ) returning int {
 
+    for i=1 to argc-1 do {
+        call print "arg "+string(i)+": "+argv[i]+"\n";
+    }
+
     resultis 0;
 }

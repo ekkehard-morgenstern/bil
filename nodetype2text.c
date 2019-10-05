@@ -81,6 +81,7 @@ static const char* nodetype2text( int nodetype ) {
         case NT_TERMINAL_LBRACK: return "NT_TERMINAL_LBRACK";
         case NT_TERMINAL_RBRACK: return "NT_TERMINAL_RBRACK";
         case NT_IDENT_ACCESS: return "NT_IDENT_ACCESS";
+        case NT_CALL_ACCESS: return "NT_CALL_ACCESS";
         case NT_VALOF_EXPR: return "NT_VALOF_EXPR";
         case NT_TERMINAL_VALOF: return "NT_TERMINAL_VALOF";
         case NT_NUM_BASE_E: return "NT_NUM_BASE_E";
@@ -112,7 +113,7 @@ static const char* nodetype2text( int nodetype ) {
         case NT_EXPR: return "NT_EXPR";
         case NT_EXPR_LIST: return "NT_EXPR_LIST";
         case NT_CALL_ARG: return "NT_CALL_ARG";
-        case NT_TERMINAL_253: return "NT_TERMINAL_253";
+        case NT_TERMINAL_257: return "NT_TERMINAL_257";
         case NT_TERMINAL_DEFAULT: return "NT_TERMINAL_DEFAULT";
         case NT_CALL_ARG_LIST: return "NT_CALL_ARG_LIST";
         case NT_BLOCK: return "NT_BLOCK";

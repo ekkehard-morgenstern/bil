@@ -60,7 +60,7 @@ c-str-base-e   := str-lit
 c-str-add-e    := str-base-e { '+' str-base-e } .
 c-str-cmp-e    := c-str-add-e [ cmp-op c-str-add-e ] .
 c-str-and-e    := c-str-cmp-e { and-op c-str-cmp-e } .
-c-str-or-e     := c-str-or-e { or-op c-str-or-e } .
+c-str-or-e     := c-str-and-e { or-op c-str-and-e } .
 c-str-e        := c-str-or-e .
 
 c-bool-base-e  := bool-lit 
@@ -77,6 +77,7 @@ c-expr-list    := const-expr { ',' const-expr } .
 
 access-op      := '->' identifier | '[' expr ']' .
 ident-access   := identifier { access-op } [ '(' [ call-arg-list ] ')' ] .
+call-access    := identifier { access-op } [ call-arg-list ] .
 valof-expr     := 'valof' type block .
 
 num-base-e     := real-lit | int-lit 
@@ -98,7 +99,7 @@ str-base-e     := str-lit
 str-add-e      := str-base-e { '+' str-base-e } .
 str-cmp-e      := str-add-e [ cmp-op str-add-e ] .
 str-and-e      := str-cmp-e { and-op str-cmp-e } .
-str-or-e       := str-or-e { or-op str-or-e } .
+str-or-e       := str-and-e { or-op str-and-e } .
 str-e          := str-or-e .
 
 bool-base-e    := bool-lit 
@@ -199,7 +200,7 @@ global-scope   := [ global-spec ] { global-intro } { global-stmts } .
 
 label-decl     := identifier ':' .
 
-call-stmt      := 'call' ident-access ';' .
+call-stmt      := 'call' call-access ';' .
 
 block-or-stmt  := block | stmt .
 if-stmt        := ( 'if' | 'unless' ) expr block-or-stmt [ 'else' block-or-stmt ] .

@@ -85,10 +85,11 @@ char* xstrdup( const char* text ) {
 
 static regex_cacheitem_t* add_regex_cacheitem( const char* orig_regex ) {
     regex_cacheitem_t* item = (regex_cacheitem_t*) xmalloc( sizeof(regex_cacheitem_t) );
-    size_t             len  = strlen( orig_regex ) + 2U;
-    char*              buf  = (char*) xmalloc( len );
+    size_t             len  = strlen( orig_regex );
+    char*              buf  = (char*) xmalloc( len + 2U );
     buf[0] = '^';
-    memcpy( &buf[1], orig_regex, len-1U );
+    if ( len ) memcpy( &buf[1], orig_regex, len );
+    buf[len+1U] = '\0';
     item->next = 0;
     item->text = buf;
     int rv = regcomp( &item->regex, item->text, REG_EXTENDED );
@@ -154,18 +155,19 @@ static treenode_t* create_node( nodetype_t nodetype, const char* text ) {
     treenode_t* node = (treenode_t*) xmalloc( sizeof(treenode_t) );
     node->nodetype     = nodetype;
     node->text         = text ? xstrdup(text) : 0;
-    node->branches     = (struct _treenode_t**) xmalloc( sizeof(struct _treenode_t*) * 5U );
-    node->branchAlloc  = 5U;
-    node->numBranches  = 0U;
+    node->branches     = 0;
+    node->branchAlloc  = 0;
+    node->numBranches  = 0;
     return node;
 }
 
 void delete_node( treenode_t* node ) {
+    if ( node == 0 ) return;
     while ( node->numBranches > 0U ) {
         treenode_t* branch = node->branches[--node->numBranches];
         if ( branch ) delete_node( branch );
     }
-    free( (void*)(node->branches) ); node->branches = 0;
+    if ( node->branches ) { free( (void*)(node->branches) ); node->branches = 0; }
     node->branchAlloc = 0U;
     if ( node->text ) { free( node->text ); node->text = 0; }
     free( node );
@@ -173,7 +175,7 @@ void delete_node( treenode_t* node ) {
 
 static void add_branch( treenode_t* node, treenode_t* branch ) {
     if ( node->numBranches >= node->branchAlloc ) {
-        size_t newSize = node->branchAlloc * 2U;
+        size_t newSize = node->branchAlloc * 2U; if ( newSize == 0U ) newSize = 5U;
         xrealloc( (void**)(&node->branches), sizeof(struct _treenode_t*) * newSize );
         node->branchAlloc = newSize;
     }
@@ -269,7 +271,7 @@ static treenode_t* parse_node( const parsingnode_t* node, const char** pTextPos 
                     } else {
                         if ( strncmp( textPos, node->text, symLen ) != 0 ) return 0;
                     }
-// printf( "TT_STRING matched '%s'\n", node->text );                    
+printf( "TT_STRING matched '%s'\n", node->text );                    
                     result    = create_node( node->nodeType, 0 );
                     textPos  += symLen;
                     *pTextPos = textPos;
@@ -283,7 +285,7 @@ static treenode_t* parse_node( const parsingnode_t* node, const char** pTextPos 
                         buf = (char*) xmalloc( len );
                         memcpy( buf, textPos + matches[0].rm_so, len-1U );
                         buf[len-1U] = '\0';
-// printf( "TT_REGEX '%s' matched '%s'\n", node->text, buf );
+printf( "TT_REGEX '%s' matched '%s'\n", node->text, buf );
                         result = create_node( node->nodeType, buf );
                         free( buf );
                         textPos += len - 1U;

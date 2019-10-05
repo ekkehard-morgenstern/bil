@@ -100,6 +100,7 @@ typedef enum _nodetype_t {
     NT_TERMINAL_LBRACK,
     NT_TERMINAL_RBRACK,
     NT_IDENT_ACCESS,
+    NT_CALL_ACCESS,
     NT_VALOF_EXPR,
     NT_TERMINAL_VALOF,
     NT_NUM_BASE_E,
@@ -131,7 +132,7 @@ typedef enum _nodetype_t {
     NT_EXPR,
     NT_EXPR_LIST,
     NT_CALL_ARG,
-    NT_TERMINAL_253,
+    NT_TERMINAL_257,
     NT_TERMINAL_DEFAULT,
     NT_CALL_ARG_LIST,
     NT_BLOCK,
@@ -287,7 +288,7 @@ typedef struct _parsingnode_t {
 
 // branches
 
-static const int branches[771] = {
+static const int branches[777] = {
     // 0: production_int_lit branches
     1, 
     // 1: production_real_lit branches
@@ -433,11 +434,11 @@ static const int branches[771] = {
     // 118: production_c_str_add_e branches
     107, 
     // 119: mandatory_expr_107 branches
-    196, 108, 
+    200, 108, 
     // 121: optional_repetitive_expr_108 branches
     109, 
     // 122: mandatory_expr_109 branches
-    110, 196, 
+    110, 200, 
     // 124: production_c_str_cmp_e branches
     112, 
     // 125: mandatory_expr_112 branches
@@ -457,11 +458,11 @@ static const int branches[771] = {
     // 136: production_c_str_or_e branches
     120, 
     // 137: mandatory_expr_120 branches
-    119, 121, 
+    115, 121, 
     // 139: optional_repetitive_expr_121 branches
     122, 
     // 140: mandatory_expr_122 branches
-    67, 119, 
+    67, 115, 
     // 142: production_c_str_e branches
     119, 
     // 143: production_c_bool_base_e branches
@@ -513,7 +514,7 @@ static const int branches[771] = {
     // 178: mandatory_expr_149 branches
     150, 18, 
     // 180: mandatory_expr_151 branches
-    152, 243, 153, 
+    152, 247, 153, 
     // 183: production_ident_access branches
     155, 
     // 184: mandatory_expr_155 branches
@@ -525,630 +526,638 @@ static const int branches[771] = {
     // 189: mandatory_expr_158 branches
     159, 160, 161, 
     // 192: optional_expr_160 branches
-    256, 
-    // 193: production_valof_expr branches
+    260, 
+    // 193: production_call_access branches
     163, 
     // 194: mandatory_expr_163 branches
-    164, 35, 260, 
-    // 197: production_num_base_e branches
-    166, 
-    // 198: alternative_expr_166 branches
-    2, 0, 167, 154, 162, 
-    // 203: mandatory_expr_167 branches
-    74, 243, 75, 
-    // 206: production_num_neg_e branches
-    169, 
-    // 207: mandatory_expr_169 branches
-    170, 165, 
-    // 209: optional_expr_170 branches
+    18, 164, 165, 
+    // 197: optional_repetitive_expr_164 branches
+    147, 
+    // 198: optional_expr_165 branches
+    260, 
+    // 199: production_valof_expr branches
+    167, 
+    // 200: mandatory_expr_167 branches
+    168, 35, 264, 
+    // 203: production_num_base_e branches
+    170, 
+    // 204: alternative_expr_170 branches
+    2, 0, 171, 154, 166, 
+    // 209: mandatory_expr_171 branches
+    74, 247, 75, 
+    // 212: production_num_neg_e branches
+    173, 
+    // 213: mandatory_expr_173 branches
+    174, 169, 
+    // 215: optional_expr_174 branches
     42, 
-    // 210: production_num_mult_e branches
-    172, 
-    // 211: mandatory_expr_172 branches
-    168, 173, 
-    // 213: optional_repetitive_expr_173 branches
-    174, 
-    // 214: mandatory_expr_174 branches
-    46, 168, 
-    // 216: production_num_add_e branches
+    // 216: production_num_mult_e branches
     176, 
     // 217: mandatory_expr_176 branches
-    171, 177, 
+    172, 177, 
     // 219: optional_repetitive_expr_177 branches
     178, 
     // 220: mandatory_expr_178 branches
-    50, 171, 
-    // 222: production_num_shf_e branches
+    46, 172, 
+    // 222: production_num_add_e branches
     180, 
     // 223: mandatory_expr_180 branches
     175, 181, 
-    // 225: optional_expr_181 branches
+    // 225: optional_repetitive_expr_181 branches
     182, 
     // 226: mandatory_expr_182 branches
-    53, 175, 
-    // 228: production_num_cmp_e branches
+    50, 175, 
+    // 228: production_num_shf_e branches
     184, 
     // 229: mandatory_expr_184 branches
     179, 185, 
     // 231: optional_expr_185 branches
     186, 
     // 232: mandatory_expr_186 branches
-    57, 179, 
-    // 234: production_num_and_e branches
+    53, 179, 
+    // 234: production_num_cmp_e branches
     188, 
     // 235: mandatory_expr_188 branches
     183, 189, 
-    // 237: optional_repetitive_expr_189 branches
+    // 237: optional_expr_189 branches
     190, 
     // 238: mandatory_expr_190 branches
-    65, 183, 
-    // 240: production_num_or_e branches
+    57, 183, 
+    // 240: production_num_and_e branches
     192, 
     // 241: mandatory_expr_192 branches
     187, 193, 
     // 243: optional_repetitive_expr_193 branches
     194, 
     // 244: mandatory_expr_194 branches
-    67, 187, 
-    // 246: production_num_e branches
-    191, 
-    // 247: production_str_base_e branches
-    197, 
-    // 248: alternative_expr_197 branches
-    10, 154, 162, 
-    // 251: production_str_add_e branches
-    199, 
-    // 252: mandatory_expr_199 branches
-    196, 200, 
-    // 254: optional_repetitive_expr_200 branches
+    65, 187, 
+    // 246: production_num_or_e branches
+    196, 
+    // 247: mandatory_expr_196 branches
+    191, 197, 
+    // 249: optional_repetitive_expr_197 branches
+    198, 
+    // 250: mandatory_expr_198 branches
+    67, 191, 
+    // 252: production_num_e branches
+    195, 
+    // 253: production_str_base_e branches
     201, 
-    // 255: mandatory_expr_201 branches
-    52, 196, 
-    // 257: production_str_cmp_e branches
+    // 254: alternative_expr_201 branches
+    10, 154, 166, 
+    // 257: production_str_add_e branches
     203, 
     // 258: mandatory_expr_203 branches
-    198, 204, 
-    // 260: optional_expr_204 branches
+    200, 204, 
+    // 260: optional_repetitive_expr_204 branches
     205, 
     // 261: mandatory_expr_205 branches
-    57, 198, 
-    // 263: production_str_and_e branches
+    52, 200, 
+    // 263: production_str_cmp_e branches
     207, 
     // 264: mandatory_expr_207 branches
     202, 208, 
-    // 266: optional_repetitive_expr_208 branches
+    // 266: optional_expr_208 branches
     209, 
     // 267: mandatory_expr_209 branches
-    65, 202, 
-    // 269: production_str_or_e branches
+    57, 202, 
+    // 269: production_str_and_e branches
     211, 
     // 270: mandatory_expr_211 branches
-    210, 212, 
+    206, 212, 
     // 272: optional_repetitive_expr_212 branches
     213, 
     // 273: mandatory_expr_213 branches
+    65, 206, 
+    // 275: production_str_or_e branches
+    215, 
+    // 276: mandatory_expr_215 branches
+    210, 216, 
+    // 278: optional_repetitive_expr_216 branches
+    217, 
+    // 279: mandatory_expr_217 branches
     67, 210, 
-    // 275: production_str_e branches
-    210, 
-    // 276: production_bool_base_e branches
-    216, 
-    // 277: alternative_expr_216 branches
-    12, 154, 162, 
-    // 280: production_bool_not_e branches
-    218, 
-    // 281: mandatory_expr_218 branches
-    219, 215, 
-    // 283: optional_expr_219 branches
+    // 281: production_str_e branches
+    214, 
+    // 282: production_bool_base_e branches
+    220, 
+    // 283: alternative_expr_220 branches
+    12, 154, 166, 
+    // 286: production_bool_not_e branches
+    222, 
+    // 287: mandatory_expr_222 branches
+    223, 219, 
+    // 289: optional_expr_223 branches
     45, 
-    // 284: production_bool_and_e branches
-    221, 
-    // 285: mandatory_expr_221 branches
-    217, 222, 
-    // 287: optional_repetitive_expr_222 branches
-    223, 
-    // 288: mandatory_expr_223 branches
-    65, 217, 
-    // 290: production_bool_or_e branches
+    // 290: production_bool_and_e branches
     225, 
     // 291: mandatory_expr_225 branches
-    220, 226, 
+    221, 226, 
     // 293: optional_repetitive_expr_226 branches
     227, 
     // 294: mandatory_expr_227 branches
-    67, 220, 
-    // 296: production_bool_e branches
-    224, 
-    // 297: production_array_inst branches
-    230, 
-    // 298: mandatory_expr_230 branches
-    152, 231, 153, 
-    // 301: alternative_expr_231 branches
-    232, 233, 195, 
-    // 304: production_object_inst branches
-    235, 
-    // 305: mandatory_expr_235 branches
-    74, 236, 75, 
-    // 308: optional_expr_236 branches
-    245, 
-    // 309: production_ptr_e branches
-    238, 
-    // 310: alternative_expr_238 branches
-    239, 16, 
-    // 312: mandatory_expr_239 branches
-    240, 35, 241, 
-    // 315: optional_expr_241 branches
+    65, 221, 
+    // 296: production_bool_or_e branches
+    229, 
+    // 297: mandatory_expr_229 branches
+    224, 230, 
+    // 299: optional_repetitive_expr_230 branches
+    231, 
+    // 300: mandatory_expr_231 branches
+    67, 224, 
+    // 302: production_bool_e branches
+    228, 
+    // 303: production_array_inst branches
+    234, 
+    // 304: mandatory_expr_234 branches
+    152, 235, 153, 
+    // 307: alternative_expr_235 branches
+    236, 237, 199, 
+    // 310: production_object_inst branches
+    239, 
+    // 311: mandatory_expr_239 branches
+    74, 240, 75, 
+    // 314: optional_expr_240 branches
+    249, 
+    // 315: production_ptr_e branches
     242, 
     // 316: alternative_expr_242 branches
-    229, 234, 
-    // 318: production_expr branches
-    244, 
-    // 319: alternative_expr_244 branches
-    195, 214, 228, 237, 
-    // 323: production_expr_list branches
+    243, 16, 
+    // 318: mandatory_expr_243 branches
+    244, 35, 245, 
+    // 321: optional_expr_245 branches
     246, 
-    // 324: mandatory_expr_246 branches
-    243, 247, 
-    // 326: optional_repetitive_expr_247 branches
+    // 322: alternative_expr_246 branches
+    233, 238, 
+    // 324: production_expr branches
     248, 
-    // 327: mandatory_expr_248 branches
-    41, 243, 
-    // 329: production_call_arg branches
+    // 325: alternative_expr_248 branches
+    199, 218, 232, 241, 
+    // 329: production_expr_list branches
     250, 
     // 330: mandatory_expr_250 branches
-    251, 254, 
-    // 332: optional_expr_251 branches
+    247, 251, 
+    // 332: optional_repetitive_expr_251 branches
     252, 
     // 333: mandatory_expr_252 branches
-    18, 253, 
-    // 335: alternative_expr_254 branches
-    255, 243, 
-    // 337: production_call_arg_list branches
-    257, 
-    // 338: mandatory_expr_257 branches
-    249, 258, 
-    // 340: optional_repetitive_expr_258 branches
-    259, 
-    // 341: mandatory_expr_259 branches
-    41, 249, 
-    // 343: production_block branches
+    41, 247, 
+    // 335: production_call_arg branches
+    254, 
+    // 336: mandatory_expr_254 branches
+    255, 258, 
+    // 338: optional_expr_255 branches
+    256, 
+    // 339: mandatory_expr_256 branches
+    18, 257, 
+    // 341: alternative_expr_258 branches
+    259, 247, 
+    // 343: production_call_arg_list branches
     261, 
     // 344: mandatory_expr_261 branches
-    262, 263, 264, 
-    // 347: optional_expr_263 branches
-    540, 
-    // 348: production_optional_block branches
-    266, 
-    // 349: alternative_expr_266 branches
-    260, 267, 
-    // 351: production_argument_decl branches
-    269, 
-    // 352: alternative_expr_269 branches
-    270, 275, 
-    // 354: mandatory_expr_270 branches
-    287, 271, 35, 272, 
-    // 358: optional_expr_272 branches
+    253, 262, 
+    // 346: optional_repetitive_expr_262 branches
+    263, 
+    // 347: mandatory_expr_263 branches
+    41, 253, 
+    // 349: production_block branches
+    265, 
+    // 350: mandatory_expr_265 branches
+    266, 267, 268, 
+    // 353: optional_expr_267 branches
+    544, 
+    // 354: production_optional_block branches
+    270, 
+    // 355: alternative_expr_270 branches
+    264, 271, 
+    // 357: production_argument_decl branches
     273, 
-    // 359: mandatory_expr_273 branches
-    274, 142, 
-    // 361: production_argument_list branches
+    // 358: alternative_expr_273 branches
+    274, 279, 
+    // 360: mandatory_expr_274 branches
+    291, 275, 35, 276, 
+    // 364: optional_expr_276 branches
     277, 
-    // 362: mandatory_expr_277 branches
-    268, 278, 
-    // 364: optional_repetitive_expr_278 branches
-    279, 
-    // 365: mandatory_expr_279 branches
-    280, 268, 
-    // 367: production_arg_declarator branches
-    282, 
-    // 368: mandatory_expr_282 branches
-    74, 283, 75, 
-    // 371: optional_expr_283 branches
-    276, 
-    // 372: production_return_decl branches
-    285, 
-    // 373: mandatory_expr_285 branches
-    286, 37, 
-    // 375: production_ident_list branches
-    288, 
-    // 376: mandatory_expr_288 branches
-    18, 289, 
-    // 378: optional_repetitive_expr_289 branches
-    290, 
-    // 379: mandatory_expr_290 branches
-    41, 18, 
-    // 381: production_extends_clause branches
+    // 365: mandatory_expr_277 branches
+    278, 142, 
+    // 367: production_argument_list branches
+    281, 
+    // 368: mandatory_expr_281 branches
+    272, 282, 
+    // 370: optional_repetitive_expr_282 branches
+    283, 
+    // 371: mandatory_expr_283 branches
+    284, 272, 
+    // 373: production_arg_declarator branches
+    286, 
+    // 374: mandatory_expr_286 branches
+    74, 287, 75, 
+    // 377: optional_expr_287 branches
+    280, 
+    // 378: production_return_decl branches
+    289, 
+    // 379: mandatory_expr_289 branches
+    290, 37, 
+    // 381: production_ident_list branches
     292, 
     // 382: mandatory_expr_292 branches
-    293, 287, 
-    // 384: production_impl_clause branches
-    295, 
-    // 385: mandatory_expr_295 branches
-    296, 287, 
-    // 387: production_visibility branches
-    298, 
-    // 388: alternative_expr_298 branches
-    299, 300, 301, 
-    // 391: production_access_type branches
-    303, 
-    // 392: alternative_expr_303 branches
-    304, 305, 306, 
-    // 395: production_storage_type branches
-    308, 
-    // 396: production_derivation branches
-    310, 
-    // 397: alternative_expr_310 branches
-    311, 312, 
-    // 399: production_implementation branches
-    314, 
-    // 400: production_attrib_flag branches
-    316, 
-    // 401: alternative_expr_316 branches
-    297, 302, 307, 309, 313, 
-    // 406: production_attrib_flags branches
-    318, 
-    // 407: mandatory_expr_318 branches
-    315, 319, 
-    // 409: optional_repetitive_expr_319 branches
-    315, 
-    // 410: production_attrib_decl branches
-    321, 
-    // 411: mandatory_expr_321 branches
-    322, 323, 287, 324, 35, 325, 267, 
-    // 418: optional_expr_322 branches
-    317, 
-    // 419: optional_expr_325 branches
-    326, 
-    // 420: mandatory_expr_326 branches
-    62, 142, 
-    // 422: production_method_flag branches
-    328, 
-    // 423: alternative_expr_328 branches
-    297, 307, 309, 313, 
-    // 427: production_method_flags branches
-    330, 
-    // 428: mandatory_expr_330 branches
-    327, 331, 
-    // 430: optional_repetitive_expr_331 branches
-    327, 
-    // 431: production_method_decl branches
-    333, 
-    // 432: mandatory_expr_333 branches
-    334, 335, 18, 281, 336, 265, 
-    // 438: optional_expr_334 branches
-    329, 
-    // 439: optional_expr_336 branches
-    284, 
-    // 440: production_field branches
-    338, 
-    // 441: alternative_expr_338 branches
-    320, 332, 377, 389, 
-    // 445: production_field_list branches
-    340, 
-    // 446: mandatory_expr_340 branches
-    337, 341, 
-    // 448: optional_repetitive_expr_341 branches
-    337, 
-    // 449: production_class_decl branches
-    343, 
-    // 450: mandatory_expr_343 branches
-    344, 18, 345, 346, 347, 348, 349, 
-    // 457: optional_expr_345 branches
-    291, 
-    // 458: optional_expr_346 branches
+    18, 293, 
+    // 384: optional_repetitive_expr_293 branches
     294, 
-    // 459: optional_expr_348 branches
-    339, 
-    // 460: production_iattrib_decl branches
-    351, 
-    // 461: mandatory_expr_351 branches
-    352, 323, 287, 271, 35, 267, 
-    // 467: optional_expr_352 branches
+    // 385: mandatory_expr_294 branches
+    41, 18, 
+    // 387: production_extends_clause branches
+    296, 
+    // 388: mandatory_expr_296 branches
+    297, 291, 
+    // 390: production_impl_clause branches
+    299, 
+    // 391: mandatory_expr_299 branches
+    300, 291, 
+    // 393: production_visibility branches
     302, 
-    // 468: production_imethod_decl branches
-    354, 
-    // 469: mandatory_expr_354 branches
-    335, 18, 281, 355, 267, 
-    // 474: optional_expr_355 branches
-    284, 
-    // 475: production_ifield branches
-    357, 
-    // 476: alternative_expr_357 branches
-    350, 353, 377, 389, 
-    // 480: production_ifield_list branches
-    359, 
-    // 481: mandatory_expr_359 branches
-    356, 360, 
-    // 483: optional_repetitive_expr_360 branches
-    356, 
-    // 484: production_interface_decl branches
-    362, 
-    // 485: mandatory_expr_362 branches
-    363, 18, 364, 262, 365, 264, 
-    // 491: optional_expr_364 branches
-    291, 
-    // 492: optional_expr_365 branches
+    // 394: alternative_expr_302 branches
+    303, 304, 305, 
+    // 397: production_access_type branches
+    307, 
+    // 398: alternative_expr_307 branches
+    308, 309, 310, 
+    // 401: production_storage_type branches
+    312, 
+    // 402: production_derivation branches
+    314, 
+    // 403: alternative_expr_314 branches
+    315, 316, 
+    // 405: production_implementation branches
+    318, 
+    // 406: production_attrib_flag branches
+    320, 
+    // 407: alternative_expr_320 branches
+    301, 306, 311, 313, 317, 
+    // 412: production_attrib_flags branches
+    322, 
+    // 413: mandatory_expr_322 branches
+    319, 323, 
+    // 415: optional_repetitive_expr_323 branches
+    319, 
+    // 416: production_attrib_decl branches
+    325, 
+    // 417: mandatory_expr_325 branches
+    326, 327, 291, 328, 35, 329, 271, 
+    // 424: optional_expr_326 branches
+    321, 
+    // 425: optional_expr_329 branches
+    330, 
+    // 426: mandatory_expr_330 branches
+    62, 142, 
+    // 428: production_method_flag branches
+    332, 
+    // 429: alternative_expr_332 branches
+    301, 311, 313, 317, 
+    // 433: production_method_flags branches
+    334, 
+    // 434: mandatory_expr_334 branches
+    331, 335, 
+    // 436: optional_repetitive_expr_335 branches
+    331, 
+    // 437: production_method_decl branches
+    337, 
+    // 438: mandatory_expr_337 branches
+    338, 339, 18, 285, 340, 269, 
+    // 444: optional_expr_338 branches
+    333, 
+    // 445: optional_expr_340 branches
+    288, 
+    // 446: production_field branches
+    342, 
+    // 447: alternative_expr_342 branches
+    324, 336, 381, 393, 
+    // 451: production_field_list branches
+    344, 
+    // 452: mandatory_expr_344 branches
+    341, 345, 
+    // 454: optional_repetitive_expr_345 branches
+    341, 
+    // 455: production_class_decl branches
+    347, 
+    // 456: mandatory_expr_347 branches
+    348, 18, 349, 350, 351, 352, 353, 
+    // 463: optional_expr_349 branches
+    295, 
+    // 464: optional_expr_350 branches
+    298, 
+    // 465: optional_expr_352 branches
+    343, 
+    // 466: production_iattrib_decl branches
+    355, 
+    // 467: mandatory_expr_355 branches
+    356, 327, 291, 275, 35, 271, 
+    // 473: optional_expr_356 branches
+    306, 
+    // 474: production_imethod_decl branches
     358, 
-    // 493: production_func_decl branches
-    367, 
-    // 494: mandatory_expr_367 branches
-    368, 369, 18, 281, 284, 265, 
-    // 500: optional_expr_368 branches
-    297, 
-    // 501: production_proc_decl branches
+    // 475: mandatory_expr_358 branches
+    339, 18, 285, 359, 271, 
+    // 480: optional_expr_359 branches
+    288, 
+    // 481: production_ifield branches
+    361, 
+    // 482: alternative_expr_361 branches
+    354, 357, 381, 393, 
+    // 486: production_ifield_list branches
+    363, 
+    // 487: mandatory_expr_363 branches
+    360, 364, 
+    // 489: optional_repetitive_expr_364 branches
+    360, 
+    // 490: production_interface_decl branches
+    366, 
+    // 491: mandatory_expr_366 branches
+    367, 18, 368, 266, 369, 268, 
+    // 497: optional_expr_368 branches
+    295, 
+    // 498: optional_expr_369 branches
+    362, 
+    // 499: production_func_decl branches
     371, 
-    // 502: mandatory_expr_371 branches
-    372, 373, 18, 281, 265, 
-    // 507: optional_expr_372 branches
-    297, 
-    // 508: production_var_decl branches
+    // 500: mandatory_expr_371 branches
+    372, 373, 18, 285, 288, 269, 
+    // 506: optional_expr_372 branches
+    301, 
+    // 507: production_proc_decl branches
     375, 
-    // 509: mandatory_expr_375 branches
-    376, 287, 271, 35, 267, 
-    // 514: production_const_decl branches
-    378, 
-    // 515: mandatory_expr_378 branches
-    379, 287, 62, 142, 267, 
-    // 520: production_enum_item branches
-    381, 
-    // 521: mandatory_expr_381 branches
-    18, 382, 
-    // 523: optional_expr_382 branches
-    383, 
-    // 524: mandatory_expr_383 branches
-    62, 140, 
-    // 526: production_enum_item_list branches
+    // 508: mandatory_expr_375 branches
+    376, 377, 18, 285, 269, 
+    // 513: optional_expr_376 branches
+    301, 
+    // 514: production_var_decl branches
+    379, 
+    // 515: mandatory_expr_379 branches
+    380, 291, 275, 35, 271, 
+    // 520: production_const_decl branches
+    382, 
+    // 521: mandatory_expr_382 branches
+    383, 291, 62, 142, 271, 
+    // 526: production_enum_item branches
     385, 
     // 527: mandatory_expr_385 branches
-    380, 386, 388, 
-    // 530: optional_repetitive_expr_386 branches
+    18, 386, 
+    // 529: optional_expr_386 branches
     387, 
-    // 531: mandatory_expr_387 branches
-    41, 380, 
-    // 533: optional_expr_388 branches
+    // 530: mandatory_expr_387 branches
+    62, 140, 
+    // 532: production_enum_item_list branches
+    389, 
+    // 533: mandatory_expr_389 branches
+    384, 390, 392, 
+    // 536: optional_repetitive_expr_390 branches
+    391, 
+    // 537: mandatory_expr_391 branches
+    41, 384, 
+    // 539: optional_expr_392 branches
     41, 
-    // 534: production_enum_decl branches
-    390, 
-    // 535: mandatory_expr_390 branches
-    391, 18, 262, 384, 264, 
-    // 540: production_let_stmt branches
-    393, 
-    // 541: mandatory_expr_393 branches
-    394, 287, 62, 245, 267, 
-    // 546: production_decl_stmt branches
-    396, 
-    // 547: alternative_expr_396 branches
-    342, 361, 377, 389, 366, 370, 374, 
-    // 554: production_block_decl branches
-    398, 
-    // 555: alternative_expr_398 branches
-    377, 389, 374, 
-    // 558: production_import_path branches
+    // 540: production_enum_decl branches
+    394, 
+    // 541: mandatory_expr_394 branches
+    395, 18, 266, 388, 268, 
+    // 546: production_let_stmt branches
+    397, 
+    // 547: mandatory_expr_397 branches
+    398, 291, 62, 249, 271, 
+    // 552: production_decl_stmt branches
     400, 
-    // 559: mandatory_expr_400 branches
-    18, 401, 
-    // 561: optional_repetitive_expr_401 branches
+    // 553: alternative_expr_400 branches
+    346, 365, 381, 393, 370, 374, 378, 
+    // 560: production_block_decl branches
     402, 
-    // 562: mandatory_expr_402 branches
-    48, 18, 
-    // 564: production_import_list branches
+    // 561: alternative_expr_402 branches
+    381, 393, 378, 
+    // 564: production_import_path branches
     404, 
     // 565: mandatory_expr_404 branches
-    399, 405, 
+    18, 405, 
     // 567: optional_repetitive_expr_405 branches
     406, 
     // 568: mandatory_expr_406 branches
-    41, 399, 
-    // 570: production_import_stmt branches
+    48, 18, 
+    // 570: production_import_list branches
     408, 
     // 571: mandatory_expr_408 branches
-    409, 399, 267, 
-    // 574: production_xref_type branches
-    411, 
-    // 575: alternative_expr_411 branches
-    412, 413, 414, 
-    // 578: production_str_lit_list branches
-    416, 
-    // 579: mandatory_expr_416 branches
-    10, 417, 
-    // 581: optional_repetitive_expr_417 branches
-    418, 
-    // 582: mandatory_expr_418 branches
-    41, 10, 
-    // 584: production_platform_spec branches
+    403, 409, 
+    // 573: optional_repetitive_expr_409 branches
+    410, 
+    // 574: mandatory_expr_410 branches
+    41, 403, 
+    // 576: production_import_stmt branches
+    412, 
+    // 577: mandatory_expr_412 branches
+    413, 403, 271, 
+    // 580: production_xref_type branches
+    415, 
+    // 581: alternative_expr_415 branches
+    416, 417, 418, 
+    // 584: production_str_lit_list branches
     420, 
     // 585: mandatory_expr_420 branches
-    421, 415, 
-    // 587: production_language_spec branches
-    423, 
-    // 588: mandatory_expr_423 branches
-    424, 415, 
-    // 590: production_header_spec branches
-    426, 
-    // 591: mandatory_expr_426 branches
-    427, 415, 
-    // 593: production_function_spec branches
-    429, 
-    // 594: mandatory_expr_429 branches
-    369, 415, 
-    // 596: production_procedure_spec branches
-    431, 
-    // 597: mandatory_expr_431 branches
-    373, 415, 
-    // 599: production_class_spec branches
+    10, 421, 
+    // 587: optional_repetitive_expr_421 branches
+    422, 
+    // 588: mandatory_expr_422 branches
+    41, 10, 
+    // 590: production_platform_spec branches
+    424, 
+    // 591: mandatory_expr_424 branches
+    425, 419, 
+    // 593: production_language_spec branches
+    427, 
+    // 594: mandatory_expr_427 branches
+    428, 419, 
+    // 596: production_header_spec branches
+    430, 
+    // 597: mandatory_expr_430 branches
+    431, 419, 
+    // 599: production_function_spec branches
     433, 
     // 600: mandatory_expr_433 branches
-    344, 415, 
-    // 602: production_alien_spec branches
+    373, 419, 
+    // 602: production_procedure_spec branches
     435, 
-    // 603: alternative_expr_435 branches
-    419, 422, 425, 428, 430, 432, 
-    // 609: production_alien_specs branches
+    // 603: mandatory_expr_435 branches
+    377, 419, 
+    // 605: production_class_spec branches
     437, 
-    // 610: mandatory_expr_437 branches
-    434, 438, 
-    // 612: optional_repetitive_expr_438 branches
+    // 606: mandatory_expr_437 branches
+    348, 419, 
+    // 608: production_alien_spec branches
     439, 
-    // 613: mandatory_expr_439 branches
-    41, 434, 
-    // 615: production_alien_stmt branches
+    // 609: alternative_expr_439 branches
+    423, 426, 429, 432, 434, 436, 
+    // 615: production_alien_specs branches
     441, 
     // 616: mandatory_expr_441 branches
-    442, 410, 18, 443, 267, 
-    // 621: optional_expr_443 branches
-    444, 
-    // 622: mandatory_expr_444 branches
-    41, 436, 
-    // 624: production_global_stmt branches
-    395, 
-    // 625: production_global_stmts branches
-    447, 
-    // 626: mandatory_expr_447 branches
-    395, 448, 
-    // 628: optional_repetitive_expr_448 branches
-    395, 
-    // 629: production_global_intro branches
-    450, 
-    // 630: alternative_expr_450 branches
-    407, 440, 
-    // 632: production_global_spec branches
-    452, 
-    // 633: mandatory_expr_452 branches
-    453, 18, 267, 
-    // 636: alternative_expr_453 branches
-    454, 410, 
-    // 638: production_global_scope branches
+    438, 442, 
+    // 618: optional_repetitive_expr_442 branches
+    443, 
+    // 619: mandatory_expr_443 branches
+    41, 438, 
+    // 621: production_alien_stmt branches
+    445, 
+    // 622: mandatory_expr_445 branches
+    446, 414, 18, 447, 271, 
+    // 627: optional_expr_447 branches
+    448, 
+    // 628: mandatory_expr_448 branches
+    41, 440, 
+    // 630: production_global_stmt branches
+    399, 
+    // 631: production_global_stmts branches
+    451, 
+    // 632: mandatory_expr_451 branches
+    399, 452, 
+    // 634: optional_repetitive_expr_452 branches
+    399, 
+    // 635: production_global_intro branches
+    454, 
+    // 636: alternative_expr_454 branches
+    411, 444, 
+    // 638: production_global_spec branches
     456, 
     // 639: mandatory_expr_456 branches
-    457, 458, 459, 
-    // 642: optional_expr_457 branches
-    451, 
-    // 643: optional_repetitive_expr_458 branches
-    449, 
-    // 644: optional_repetitive_expr_459 branches
-    446, 
-    // 645: production_label_decl branches
-    461, 
-    // 646: mandatory_expr_461 branches
-    18, 271, 
-    // 648: production_call_stmt branches
-    463, 
-    // 649: mandatory_expr_463 branches
-    464, 154, 267, 
-    // 652: production_block_or_stmt branches
-    466, 
-    // 653: alternative_expr_466 branches
-    260, 535, 
-    // 655: production_if_stmt branches
-    468, 
-    // 656: mandatory_expr_468 branches
-    469, 243, 465, 472, 
-    // 660: alternative_expr_469 branches
-    470, 471, 
-    // 662: optional_expr_472 branches
-    473, 
-    // 663: mandatory_expr_473 branches
-    474, 465, 
-    // 665: production_while_stmt branches
-    476, 
-    // 666: mandatory_expr_476 branches
-    477, 243, 465, 
-    // 669: alternative_expr_477 branches
-    478, 479, 
-    // 671: production_repeat_stmt branches
-    481, 
-    // 672: mandatory_expr_481 branches
-    482, 260, 485, 243, 267, 
-    // 677: alternative_expr_482 branches
-    483, 484, 
-    // 679: alternative_expr_485 branches
-    478, 479, 
-    // 681: production_loop_stmt branches
-    487, 
-    // 682: mandatory_expr_487 branches
-    488, 465, 
-    // 684: alternative_expr_488 branches
-    489, 490, 
-    // 686: production_for_stmt branches
-    492, 
-    // 687: mandatory_expr_492 branches
-    493, 18, 62, 243, 494, 243, 484, 465, 
-    // 695: alternative_expr_494 branches
-    495, 496, 
-    // 697: production_loop_control branches
-    498, 
-    // 698: mandatory_expr_498 branches
-    499, 503, 267, 
-    // 701: alternative_expr_499 branches
-    500, 501, 502, 
-    // 704: optional_expr_503 branches
-    18, 
-    // 705: production_loop_type_stmt branches
-    505, 
-    // 706: alternative_expr_505 branches
-    475, 480, 486, 491, 497, 
-    // 711: production_switch_case branches
-    507, 
-    // 712: mandatory_expr_507 branches
-    508, 142, 271, 465, 
-    // 716: production_default_case branches
-    510, 
-    // 717: mandatory_expr_510 branches
-    255, 271, 465, 
-    // 720: production_any_case branches
-    512, 
-    // 721: alternative_expr_512 branches
-    506, 509, 
-    // 723: production_case_list branches
-    514, 
-    // 724: mandatory_expr_514 branches
-    511, 515, 
-    // 726: optional_repetitive_expr_515 branches
-    511, 
-    // 727: production_switch_stmt branches
-    517, 
-    // 728: mandatory_expr_517 branches
-    518, 243, 262, 513, 264, 
-    // 733: production_goto_stmt branches
-    520, 
-    // 734: mandatory_expr_520 branches
-    521, 18, 267, 
-    // 737: alternative_expr_521 branches
-    522, 523, 
-    // 739: production_return_stmt branches
-    525, 
-    // 740: mandatory_expr_525 branches
-    526, 267, 
-    // 742: production_resultis_stmt branches
-    528, 
-    // 743: mandatory_expr_528 branches
-    529, 245, 267, 
-    // 746: production_delete_stmt branches
-    531, 
-    // 747: mandatory_expr_531 branches
-    532, 287, 267, 
-    // 750: production_flow_ctrl_stmt branches
-    534, 
-    // 751: alternative_expr_534 branches
-    467, 504, 516, 519, 524, 527, 462, 530, 
-    // 759: production_stmt branches
-    536, 
-    // 760: alternative_expr_536 branches
-    397, 392, 533, 
-    // 763: production_statement branches
-    538, 
-    // 764: mandatory_expr_538 branches
-    539, 535, 
-    // 766: optional_expr_539 branches
+    457, 18, 271, 
+    // 642: alternative_expr_457 branches
+    458, 414, 
+    // 644: production_global_scope branches
     460, 
-    // 767: production_statement_list branches
+    // 645: mandatory_expr_460 branches
+    461, 462, 463, 
+    // 648: optional_expr_461 branches
+    455, 
+    // 649: optional_repetitive_expr_462 branches
+    453, 
+    // 650: optional_repetitive_expr_463 branches
+    450, 
+    // 651: production_label_decl branches
+    465, 
+    // 652: mandatory_expr_465 branches
+    18, 275, 
+    // 654: production_call_stmt branches
+    467, 
+    // 655: mandatory_expr_467 branches
+    468, 162, 271, 
+    // 658: production_block_or_stmt branches
+    470, 
+    // 659: alternative_expr_470 branches
+    264, 539, 
+    // 661: production_if_stmt branches
+    472, 
+    // 662: mandatory_expr_472 branches
+    473, 247, 469, 476, 
+    // 666: alternative_expr_473 branches
+    474, 475, 
+    // 668: optional_expr_476 branches
+    477, 
+    // 669: mandatory_expr_477 branches
+    478, 469, 
+    // 671: production_while_stmt branches
+    480, 
+    // 672: mandatory_expr_480 branches
+    481, 247, 469, 
+    // 675: alternative_expr_481 branches
+    482, 483, 
+    // 677: production_repeat_stmt branches
+    485, 
+    // 678: mandatory_expr_485 branches
+    486, 264, 489, 247, 271, 
+    // 683: alternative_expr_486 branches
+    487, 488, 
+    // 685: alternative_expr_489 branches
+    482, 483, 
+    // 687: production_loop_stmt branches
+    491, 
+    // 688: mandatory_expr_491 branches
+    492, 469, 
+    // 690: alternative_expr_492 branches
+    493, 494, 
+    // 692: production_for_stmt branches
+    496, 
+    // 693: mandatory_expr_496 branches
+    497, 18, 62, 247, 498, 247, 488, 469, 
+    // 701: alternative_expr_498 branches
+    499, 500, 
+    // 703: production_loop_control branches
+    502, 
+    // 704: mandatory_expr_502 branches
+    503, 507, 271, 
+    // 707: alternative_expr_503 branches
+    504, 505, 506, 
+    // 710: optional_expr_507 branches
+    18, 
+    // 711: production_loop_type_stmt branches
+    509, 
+    // 712: alternative_expr_509 branches
+    479, 484, 490, 495, 501, 
+    // 717: production_switch_case branches
+    511, 
+    // 718: mandatory_expr_511 branches
+    512, 142, 275, 469, 
+    // 722: production_default_case branches
+    514, 
+    // 723: mandatory_expr_514 branches
+    259, 275, 469, 
+    // 726: production_any_case branches
+    516, 
+    // 727: alternative_expr_516 branches
+    510, 513, 
+    // 729: production_case_list branches
+    518, 
+    // 730: mandatory_expr_518 branches
+    515, 519, 
+    // 732: optional_repetitive_expr_519 branches
+    515, 
+    // 733: production_switch_stmt branches
+    521, 
+    // 734: mandatory_expr_521 branches
+    522, 247, 266, 517, 268, 
+    // 739: production_goto_stmt branches
+    524, 
+    // 740: mandatory_expr_524 branches
+    525, 18, 271, 
+    // 743: alternative_expr_525 branches
+    526, 527, 
+    // 745: production_return_stmt branches
+    529, 
+    // 746: mandatory_expr_529 branches
+    530, 271, 
+    // 748: production_resultis_stmt branches
+    532, 
+    // 749: mandatory_expr_532 branches
+    533, 249, 271, 
+    // 752: production_delete_stmt branches
+    535, 
+    // 753: mandatory_expr_535 branches
+    536, 291, 271, 
+    // 756: production_flow_ctrl_stmt branches
+    538, 
+    // 757: alternative_expr_538 branches
+    471, 508, 520, 523, 528, 531, 466, 534, 
+    // 765: production_stmt branches
+    540, 
+    // 766: alternative_expr_540 branches
+    401, 396, 537, 
+    // 769: production_statement branches
+    542, 
+    // 770: mandatory_expr_542 branches
+    543, 539, 
+    // 772: optional_expr_543 branches
+    464, 
+    // 773: production_statement_list branches
+    545, 
+    // 774: mandatory_expr_545 branches
+    541, 546, 
+    // 776: optional_repetitive_expr_546 branches
     541, 
-    // 768: mandatory_expr_541 branches
-    537, 542, 
-    // 770: optional_repetitive_expr_542 branches
-    537, 
 };
 
-static const parsingnode_t parsingTable[543] = {
+static const parsingnode_t parsingTable[547] = {
     // 0: production_int_lit
     { NC_PRODUCTION, NT_INT_LIT, TT_UNDEF, 0, 1, 0 },
     // 1: regex_terminal_1
@@ -1473,767 +1482,775 @@ static const parsingnode_t parsingTable[543] = {
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 192 },
     // 161: string_terminal_161
     { NC_TERMINAL, NT_TERMINAL_RPAREN, TT_STRING, ")", 0, -1 },
-    // 162: production_valof_expr
-    { NC_PRODUCTION, NT_VALOF_EXPR, TT_UNDEF, 0, 1, 193 },
+    // 162: production_call_access
+    { NC_PRODUCTION, NT_CALL_ACCESS, TT_UNDEF, 0, 1, 193 },
     // 163: mandatory_expr_163
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 194 },
-    // 164: string_terminal_164
-    { NC_TERMINAL, NT_TERMINAL_VALOF, TT_STRING, "valof", 0, -1 },
-    // 165: production_num_base_e
-    { NC_PRODUCTION, NT_NUM_BASE_E, TT_UNDEF, 0, 1, 197 },
-    // 166: alternative_expr_166
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 5, 198 },
+    // 164: optional_repetitive_expr_164
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 197 },
+    // 165: optional_expr_165
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 198 },
+    // 166: production_valof_expr
+    { NC_PRODUCTION, NT_VALOF_EXPR, TT_UNDEF, 0, 1, 199 },
     // 167: mandatory_expr_167
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 203 },
-    // 168: production_num_neg_e
-    { NC_PRODUCTION, NT_NUM_NEG_E, TT_UNDEF, 0, 1, 206 },
-    // 169: mandatory_expr_169
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 207 },
-    // 170: optional_expr_170
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 209 },
-    // 171: production_num_mult_e
-    { NC_PRODUCTION, NT_NUM_MULT_E, TT_UNDEF, 0, 1, 210 },
-    // 172: mandatory_expr_172
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 211 },
-    // 173: optional_repetitive_expr_173
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 213 },
-    // 174: mandatory_expr_174
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 214 },
-    // 175: production_num_add_e
-    { NC_PRODUCTION, NT_NUM_ADD_E, TT_UNDEF, 0, 1, 216 },
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 200 },
+    // 168: string_terminal_168
+    { NC_TERMINAL, NT_TERMINAL_VALOF, TT_STRING, "valof", 0, -1 },
+    // 169: production_num_base_e
+    { NC_PRODUCTION, NT_NUM_BASE_E, TT_UNDEF, 0, 1, 203 },
+    // 170: alternative_expr_170
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 5, 204 },
+    // 171: mandatory_expr_171
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 209 },
+    // 172: production_num_neg_e
+    { NC_PRODUCTION, NT_NUM_NEG_E, TT_UNDEF, 0, 1, 212 },
+    // 173: mandatory_expr_173
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 213 },
+    // 174: optional_expr_174
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 215 },
+    // 175: production_num_mult_e
+    { NC_PRODUCTION, NT_NUM_MULT_E, TT_UNDEF, 0, 1, 216 },
     // 176: mandatory_expr_176
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 217 },
     // 177: optional_repetitive_expr_177
     { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 219 },
     // 178: mandatory_expr_178
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 220 },
-    // 179: production_num_shf_e
-    { NC_PRODUCTION, NT_NUM_SHF_E, TT_UNDEF, 0, 1, 222 },
+    // 179: production_num_add_e
+    { NC_PRODUCTION, NT_NUM_ADD_E, TT_UNDEF, 0, 1, 222 },
     // 180: mandatory_expr_180
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 223 },
-    // 181: optional_expr_181
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 225 },
+    // 181: optional_repetitive_expr_181
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 225 },
     // 182: mandatory_expr_182
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 226 },
-    // 183: production_num_cmp_e
-    { NC_PRODUCTION, NT_NUM_CMP_E, TT_UNDEF, 0, 1, 228 },
+    // 183: production_num_shf_e
+    { NC_PRODUCTION, NT_NUM_SHF_E, TT_UNDEF, 0, 1, 228 },
     // 184: mandatory_expr_184
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 229 },
     // 185: optional_expr_185
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 231 },
     // 186: mandatory_expr_186
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 232 },
-    // 187: production_num_and_e
-    { NC_PRODUCTION, NT_NUM_AND_E, TT_UNDEF, 0, 1, 234 },
+    // 187: production_num_cmp_e
+    { NC_PRODUCTION, NT_NUM_CMP_E, TT_UNDEF, 0, 1, 234 },
     // 188: mandatory_expr_188
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 235 },
-    // 189: optional_repetitive_expr_189
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 237 },
+    // 189: optional_expr_189
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 237 },
     // 190: mandatory_expr_190
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 238 },
-    // 191: production_num_or_e
-    { NC_PRODUCTION, NT_NUM_OR_E, TT_UNDEF, 0, 1, 240 },
+    // 191: production_num_and_e
+    { NC_PRODUCTION, NT_NUM_AND_E, TT_UNDEF, 0, 1, 240 },
     // 192: mandatory_expr_192
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 241 },
     // 193: optional_repetitive_expr_193
     { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 243 },
     // 194: mandatory_expr_194
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 244 },
-    // 195: production_num_e
-    { NC_PRODUCTION, NT_NUM_E, TT_UNDEF, 0, 1, 246 },
-    // 196: production_str_base_e
-    { NC_PRODUCTION, NT_STR_BASE_E, TT_UNDEF, 0, 1, 247 },
-    // 197: alternative_expr_197
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 248 },
-    // 198: production_str_add_e
-    { NC_PRODUCTION, NT_STR_ADD_E, TT_UNDEF, 0, 1, 251 },
-    // 199: mandatory_expr_199
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 252 },
-    // 200: optional_repetitive_expr_200
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 254 },
-    // 201: mandatory_expr_201
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 255 },
-    // 202: production_str_cmp_e
-    { NC_PRODUCTION, NT_STR_CMP_E, TT_UNDEF, 0, 1, 257 },
+    // 195: production_num_or_e
+    { NC_PRODUCTION, NT_NUM_OR_E, TT_UNDEF, 0, 1, 246 },
+    // 196: mandatory_expr_196
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 247 },
+    // 197: optional_repetitive_expr_197
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 249 },
+    // 198: mandatory_expr_198
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 250 },
+    // 199: production_num_e
+    { NC_PRODUCTION, NT_NUM_E, TT_UNDEF, 0, 1, 252 },
+    // 200: production_str_base_e
+    { NC_PRODUCTION, NT_STR_BASE_E, TT_UNDEF, 0, 1, 253 },
+    // 201: alternative_expr_201
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 254 },
+    // 202: production_str_add_e
+    { NC_PRODUCTION, NT_STR_ADD_E, TT_UNDEF, 0, 1, 257 },
     // 203: mandatory_expr_203
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 258 },
-    // 204: optional_expr_204
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 260 },
+    // 204: optional_repetitive_expr_204
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 260 },
     // 205: mandatory_expr_205
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 261 },
-    // 206: production_str_and_e
-    { NC_PRODUCTION, NT_STR_AND_E, TT_UNDEF, 0, 1, 263 },
+    // 206: production_str_cmp_e
+    { NC_PRODUCTION, NT_STR_CMP_E, TT_UNDEF, 0, 1, 263 },
     // 207: mandatory_expr_207
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 264 },
-    // 208: optional_repetitive_expr_208
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 266 },
+    // 208: optional_expr_208
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 266 },
     // 209: mandatory_expr_209
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 267 },
-    // 210: production_str_or_e
-    { NC_PRODUCTION, NT_STR_OR_E, TT_UNDEF, 0, 1, 269 },
+    // 210: production_str_and_e
+    { NC_PRODUCTION, NT_STR_AND_E, TT_UNDEF, 0, 1, 269 },
     // 211: mandatory_expr_211
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 270 },
     // 212: optional_repetitive_expr_212
     { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 272 },
     // 213: mandatory_expr_213
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 273 },
-    // 214: production_str_e
-    { NC_PRODUCTION, NT_STR_E, TT_UNDEF, 0, 1, 275 },
-    // 215: production_bool_base_e
-    { NC_PRODUCTION, NT_BOOL_BASE_E, TT_UNDEF, 0, 1, 276 },
-    // 216: alternative_expr_216
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 277 },
-    // 217: production_bool_not_e
-    { NC_PRODUCTION, NT_BOOL_NOT_E, TT_UNDEF, 0, 1, 280 },
-    // 218: mandatory_expr_218
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 281 },
-    // 219: optional_expr_219
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 283 },
-    // 220: production_bool_and_e
-    { NC_PRODUCTION, NT_BOOL_AND_E, TT_UNDEF, 0, 1, 284 },
-    // 221: mandatory_expr_221
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 285 },
-    // 222: optional_repetitive_expr_222
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 287 },
-    // 223: mandatory_expr_223
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 288 },
-    // 224: production_bool_or_e
-    { NC_PRODUCTION, NT_BOOL_OR_E, TT_UNDEF, 0, 1, 290 },
+    // 214: production_str_or_e
+    { NC_PRODUCTION, NT_STR_OR_E, TT_UNDEF, 0, 1, 275 },
+    // 215: mandatory_expr_215
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 276 },
+    // 216: optional_repetitive_expr_216
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 278 },
+    // 217: mandatory_expr_217
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 279 },
+    // 218: production_str_e
+    { NC_PRODUCTION, NT_STR_E, TT_UNDEF, 0, 1, 281 },
+    // 219: production_bool_base_e
+    { NC_PRODUCTION, NT_BOOL_BASE_E, TT_UNDEF, 0, 1, 282 },
+    // 220: alternative_expr_220
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 283 },
+    // 221: production_bool_not_e
+    { NC_PRODUCTION, NT_BOOL_NOT_E, TT_UNDEF, 0, 1, 286 },
+    // 222: mandatory_expr_222
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 287 },
+    // 223: optional_expr_223
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 289 },
+    // 224: production_bool_and_e
+    { NC_PRODUCTION, NT_BOOL_AND_E, TT_UNDEF, 0, 1, 290 },
     // 225: mandatory_expr_225
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 291 },
     // 226: optional_repetitive_expr_226
     { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 293 },
     // 227: mandatory_expr_227
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 294 },
-    // 228: production_bool_e
-    { NC_PRODUCTION, NT_BOOL_E, TT_UNDEF, 0, 1, 296 },
-    // 229: production_array_inst
-    { NC_PRODUCTION, NT_ARRAY_INST, TT_UNDEF, 0, 1, 297 },
-    // 230: mandatory_expr_230
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 298 },
-    // 231: alternative_expr_231
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 301 },
-    // 232: string_terminal_232
+    // 228: production_bool_or_e
+    { NC_PRODUCTION, NT_BOOL_OR_E, TT_UNDEF, 0, 1, 296 },
+    // 229: mandatory_expr_229
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 297 },
+    // 230: optional_repetitive_expr_230
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 299 },
+    // 231: mandatory_expr_231
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 300 },
+    // 232: production_bool_e
+    { NC_PRODUCTION, NT_BOOL_E, TT_UNDEF, 0, 1, 302 },
+    // 233: production_array_inst
+    { NC_PRODUCTION, NT_ARRAY_INST, TT_UNDEF, 0, 1, 303 },
+    // 234: mandatory_expr_234
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 304 },
+    // 235: alternative_expr_235
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 307 },
+    // 236: string_terminal_236
     { NC_TERMINAL, NT_TERMINAL_DYNAMIC, TT_STRING, "dynamic", 0, -1 },
-    // 233: string_terminal_233
+    // 237: string_terminal_237
     { NC_TERMINAL, NT_TERMINAL_ASSOC, TT_STRING, "assoc", 0, -1 },
-    // 234: production_object_inst
-    { NC_PRODUCTION, NT_OBJECT_INST, TT_UNDEF, 0, 1, 304 },
-    // 235: mandatory_expr_235
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 305 },
-    // 236: optional_expr_236
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 308 },
-    // 237: production_ptr_e
-    { NC_PRODUCTION, NT_PTR_E, TT_UNDEF, 0, 1, 309 },
-    // 238: alternative_expr_238
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 310 },
+    // 238: production_object_inst
+    { NC_PRODUCTION, NT_OBJECT_INST, TT_UNDEF, 0, 1, 310 },
     // 239: mandatory_expr_239
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 312 },
-    // 240: string_terminal_240
-    { NC_TERMINAL, NT_TERMINAL_NEW, TT_STRING, "new", 0, -1 },
-    // 241: optional_expr_241
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 315 },
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 311 },
+    // 240: optional_expr_240
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 314 },
+    // 241: production_ptr_e
+    { NC_PRODUCTION, NT_PTR_E, TT_UNDEF, 0, 1, 315 },
     // 242: alternative_expr_242
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 316 },
-    // 243: production_expr
-    { NC_PRODUCTION, NT_EXPR, TT_UNDEF, 0, 1, 318 },
-    // 244: alternative_expr_244
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 4, 319 },
-    // 245: production_expr_list
-    { NC_PRODUCTION, NT_EXPR_LIST, TT_UNDEF, 0, 1, 323 },
-    // 246: mandatory_expr_246
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 324 },
-    // 247: optional_repetitive_expr_247
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 326 },
-    // 248: mandatory_expr_248
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 327 },
-    // 249: production_call_arg
-    { NC_PRODUCTION, NT_CALL_ARG, TT_UNDEF, 0, 1, 329 },
+    // 243: mandatory_expr_243
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 318 },
+    // 244: string_terminal_244
+    { NC_TERMINAL, NT_TERMINAL_NEW, TT_STRING, "new", 0, -1 },
+    // 245: optional_expr_245
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 321 },
+    // 246: alternative_expr_246
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 322 },
+    // 247: production_expr
+    { NC_PRODUCTION, NT_EXPR, TT_UNDEF, 0, 1, 324 },
+    // 248: alternative_expr_248
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 4, 325 },
+    // 249: production_expr_list
+    { NC_PRODUCTION, NT_EXPR_LIST, TT_UNDEF, 0, 1, 329 },
     // 250: mandatory_expr_250
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 330 },
-    // 251: optional_expr_251
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 332 },
+    // 251: optional_repetitive_expr_251
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 332 },
     // 252: mandatory_expr_252
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 333 },
-    // 253: string_terminal_253
-    { NC_TERMINAL, NT_TERMINAL_253, TT_STRING, "=>", 0, -1 },
-    // 254: alternative_expr_254
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 335 },
-    // 255: string_terminal_255
+    // 253: production_call_arg
+    { NC_PRODUCTION, NT_CALL_ARG, TT_UNDEF, 0, 1, 335 },
+    // 254: mandatory_expr_254
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 336 },
+    // 255: optional_expr_255
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 338 },
+    // 256: mandatory_expr_256
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 339 },
+    // 257: string_terminal_257
+    { NC_TERMINAL, NT_TERMINAL_257, TT_STRING, "=>", 0, -1 },
+    // 258: alternative_expr_258
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 341 },
+    // 259: string_terminal_259
     { NC_TERMINAL, NT_TERMINAL_DEFAULT, TT_STRING, "default", 0, -1 },
-    // 256: production_call_arg_list
-    { NC_PRODUCTION, NT_CALL_ARG_LIST, TT_UNDEF, 0, 1, 337 },
-    // 257: mandatory_expr_257
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 338 },
-    // 258: optional_repetitive_expr_258
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 340 },
-    // 259: mandatory_expr_259
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 341 },
-    // 260: production_block
-    { NC_PRODUCTION, NT_BLOCK, TT_UNDEF, 0, 1, 343 },
+    // 260: production_call_arg_list
+    { NC_PRODUCTION, NT_CALL_ARG_LIST, TT_UNDEF, 0, 1, 343 },
     // 261: mandatory_expr_261
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 344 },
-    // 262: string_terminal_262
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 344 },
+    // 262: optional_repetitive_expr_262
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 346 },
+    // 263: mandatory_expr_263
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 347 },
+    // 264: production_block
+    { NC_PRODUCTION, NT_BLOCK, TT_UNDEF, 0, 1, 349 },
+    // 265: mandatory_expr_265
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 350 },
+    // 266: string_terminal_266
     { NC_TERMINAL, NT_TERMINAL_LBRACE, TT_STRING, "{", 0, -1 },
-    // 263: optional_expr_263
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 347 },
-    // 264: string_terminal_264
+    // 267: optional_expr_267
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 353 },
+    // 268: string_terminal_268
     { NC_TERMINAL, NT_TERMINAL_RBRACE, TT_STRING, "}", 0, -1 },
-    // 265: production_optional_block
-    { NC_PRODUCTION, NT_OPTIONAL_BLOCK, TT_UNDEF, 0, 1, 348 },
-    // 266: alternative_expr_266
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 349 },
-    // 267: string_terminal_267
-    { NC_TERMINAL, NT_TERMINAL_SEMIC, TT_STRING, ";", 0, -1 },
-    // 268: production_argument_decl
-    { NC_PRODUCTION, NT_ARGUMENT_DECL, TT_UNDEF, 0, 1, 351 },
-    // 269: alternative_expr_269
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 352 },
-    // 270: mandatory_expr_270
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 4, 354 },
+    // 269: production_optional_block
+    { NC_PRODUCTION, NT_OPTIONAL_BLOCK, TT_UNDEF, 0, 1, 354 },
+    // 270: alternative_expr_270
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 355 },
     // 271: string_terminal_271
-    { NC_TERMINAL, NT_TERMINAL_COLON, TT_STRING, ":", 0, -1 },
-    // 272: optional_expr_272
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 358 },
-    // 273: mandatory_expr_273
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 359 },
-    // 274: string_terminal_274
-    { NC_TERMINAL, NT_TERMINAL_EQ, TT_STRING, "=", 0, -1 },
-    // 275: string_terminal_275
-    { NC_TERMINAL, NT_TERMINAL_ELLIPSIS, TT_STRING, "...", 0, -1 },
-    // 276: production_argument_list
-    { NC_PRODUCTION, NT_ARGUMENT_LIST, TT_UNDEF, 0, 1, 361 },
-    // 277: mandatory_expr_277
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 362 },
-    // 278: optional_repetitive_expr_278
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 364 },
-    // 279: mandatory_expr_279
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 365 },
-    // 280: string_terminal_280
     { NC_TERMINAL, NT_TERMINAL_SEMIC, TT_STRING, ";", 0, -1 },
-    // 281: production_arg_declarator
-    { NC_PRODUCTION, NT_ARG_DECLARATOR, TT_UNDEF, 0, 1, 367 },
-    // 282: mandatory_expr_282
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 368 },
-    // 283: optional_expr_283
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 371 },
-    // 284: production_return_decl
-    { NC_PRODUCTION, NT_RETURN_DECL, TT_UNDEF, 0, 1, 372 },
-    // 285: mandatory_expr_285
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 373 },
-    // 286: string_terminal_286
-    { NC_TERMINAL, NT_TERMINAL_RETURNING, TT_STRING, "returning", 0, -1 },
-    // 287: production_ident_list
-    { NC_PRODUCTION, NT_IDENT_LIST, TT_UNDEF, 0, 1, 375 },
-    // 288: mandatory_expr_288
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 376 },
-    // 289: optional_repetitive_expr_289
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 378 },
-    // 290: mandatory_expr_290
+    // 272: production_argument_decl
+    { NC_PRODUCTION, NT_ARGUMENT_DECL, TT_UNDEF, 0, 1, 357 },
+    // 273: alternative_expr_273
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 358 },
+    // 274: mandatory_expr_274
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 4, 360 },
+    // 275: string_terminal_275
+    { NC_TERMINAL, NT_TERMINAL_COLON, TT_STRING, ":", 0, -1 },
+    // 276: optional_expr_276
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 364 },
+    // 277: mandatory_expr_277
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 365 },
+    // 278: string_terminal_278
+    { NC_TERMINAL, NT_TERMINAL_EQ, TT_STRING, "=", 0, -1 },
+    // 279: string_terminal_279
+    { NC_TERMINAL, NT_TERMINAL_ELLIPSIS, TT_STRING, "...", 0, -1 },
+    // 280: production_argument_list
+    { NC_PRODUCTION, NT_ARGUMENT_LIST, TT_UNDEF, 0, 1, 367 },
+    // 281: mandatory_expr_281
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 368 },
+    // 282: optional_repetitive_expr_282
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 370 },
+    // 283: mandatory_expr_283
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 371 },
+    // 284: string_terminal_284
+    { NC_TERMINAL, NT_TERMINAL_SEMIC, TT_STRING, ";", 0, -1 },
+    // 285: production_arg_declarator
+    { NC_PRODUCTION, NT_ARG_DECLARATOR, TT_UNDEF, 0, 1, 373 },
+    // 286: mandatory_expr_286
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 374 },
+    // 287: optional_expr_287
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 377 },
+    // 288: production_return_decl
+    { NC_PRODUCTION, NT_RETURN_DECL, TT_UNDEF, 0, 1, 378 },
+    // 289: mandatory_expr_289
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 379 },
-    // 291: production_extends_clause
-    { NC_PRODUCTION, NT_EXTENDS_CLAUSE, TT_UNDEF, 0, 1, 381 },
+    // 290: string_terminal_290
+    { NC_TERMINAL, NT_TERMINAL_RETURNING, TT_STRING, "returning", 0, -1 },
+    // 291: production_ident_list
+    { NC_PRODUCTION, NT_IDENT_LIST, TT_UNDEF, 0, 1, 381 },
     // 292: mandatory_expr_292
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 382 },
-    // 293: string_terminal_293
-    { NC_TERMINAL, NT_TERMINAL_EXTENDS, TT_STRING, "extends", 0, -1 },
-    // 294: production_impl_clause
-    { NC_PRODUCTION, NT_IMPL_CLAUSE, TT_UNDEF, 0, 1, 384 },
-    // 295: mandatory_expr_295
+    // 293: optional_repetitive_expr_293
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 384 },
+    // 294: mandatory_expr_294
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 385 },
-    // 296: string_terminal_296
-    { NC_TERMINAL, NT_TERMINAL_IMPLEMENTS, TT_STRING, "implements", 0, -1 },
-    // 297: production_visibility
-    { NC_PRODUCTION, NT_VISIBILITY, TT_UNDEF, 0, 1, 387 },
-    // 298: alternative_expr_298
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 388 },
-    // 299: string_terminal_299
-    { NC_TERMINAL, NT_TERMINAL_PRIVATE, TT_STRING, "private", 0, -1 },
+    // 295: production_extends_clause
+    { NC_PRODUCTION, NT_EXTENDS_CLAUSE, TT_UNDEF, 0, 1, 387 },
+    // 296: mandatory_expr_296
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 388 },
+    // 297: string_terminal_297
+    { NC_TERMINAL, NT_TERMINAL_EXTENDS, TT_STRING, "extends", 0, -1 },
+    // 298: production_impl_clause
+    { NC_PRODUCTION, NT_IMPL_CLAUSE, TT_UNDEF, 0, 1, 390 },
+    // 299: mandatory_expr_299
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 391 },
     // 300: string_terminal_300
-    { NC_TERMINAL, NT_TERMINAL_PROTECTED, TT_STRING, "protected", 0, -1 },
-    // 301: string_terminal_301
-    { NC_TERMINAL, NT_TERMINAL_PUBLIC, TT_STRING, "public", 0, -1 },
-    // 302: production_access_type
-    { NC_PRODUCTION, NT_ACCESS_TYPE, TT_UNDEF, 0, 1, 391 },
-    // 303: alternative_expr_303
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 392 },
+    { NC_TERMINAL, NT_TERMINAL_IMPLEMENTS, TT_STRING, "implements", 0, -1 },
+    // 301: production_visibility
+    { NC_PRODUCTION, NT_VISIBILITY, TT_UNDEF, 0, 1, 393 },
+    // 302: alternative_expr_302
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 394 },
+    // 303: string_terminal_303
+    { NC_TERMINAL, NT_TERMINAL_PRIVATE, TT_STRING, "private", 0, -1 },
     // 304: string_terminal_304
-    { NC_TERMINAL, NT_TERMINAL_READONLY, TT_STRING, "readonly", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_PROTECTED, TT_STRING, "protected", 0, -1 },
     // 305: string_terminal_305
-    { NC_TERMINAL, NT_TERMINAL_READWRITE, TT_STRING, "readwrite", 0, -1 },
-    // 306: string_terminal_306
-    { NC_TERMINAL, NT_TERMINAL_WRITEONLY, TT_STRING, "writeonly", 0, -1 },
-    // 307: production_storage_type
-    { NC_PRODUCTION, NT_STORAGE_TYPE, TT_UNDEF, 0, 1, 395 },
+    { NC_TERMINAL, NT_TERMINAL_PUBLIC, TT_STRING, "public", 0, -1 },
+    // 306: production_access_type
+    { NC_PRODUCTION, NT_ACCESS_TYPE, TT_UNDEF, 0, 1, 397 },
+    // 307: alternative_expr_307
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 398 },
     // 308: string_terminal_308
-    { NC_TERMINAL, NT_TERMINAL_STATIC, TT_STRING, "static", 0, -1 },
-    // 309: production_derivation
-    { NC_PRODUCTION, NT_DERIVATION, TT_UNDEF, 0, 1, 396 },
-    // 310: alternative_expr_310
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 397 },
-    // 311: string_terminal_311
-    { NC_TERMINAL, NT_TERMINAL_OVERRIDE, TT_STRING, "override", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_READONLY, TT_STRING, "readonly", 0, -1 },
+    // 309: string_terminal_309
+    { NC_TERMINAL, NT_TERMINAL_READWRITE, TT_STRING, "readwrite", 0, -1 },
+    // 310: string_terminal_310
+    { NC_TERMINAL, NT_TERMINAL_WRITEONLY, TT_STRING, "writeonly", 0, -1 },
+    // 311: production_storage_type
+    { NC_PRODUCTION, NT_STORAGE_TYPE, TT_UNDEF, 0, 1, 401 },
     // 312: string_terminal_312
+    { NC_TERMINAL, NT_TERMINAL_STATIC, TT_STRING, "static", 0, -1 },
+    // 313: production_derivation
+    { NC_PRODUCTION, NT_DERIVATION, TT_UNDEF, 0, 1, 402 },
+    // 314: alternative_expr_314
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 403 },
+    // 315: string_terminal_315
+    { NC_TERMINAL, NT_TERMINAL_OVERRIDE, TT_STRING, "override", 0, -1 },
+    // 316: string_terminal_316
     { NC_TERMINAL, NT_TERMINAL_FINAL, TT_STRING, "final", 0, -1 },
-    // 313: production_implementation
-    { NC_PRODUCTION, NT_IMPLEMENTATION, TT_UNDEF, 0, 1, 399 },
-    // 314: string_terminal_314
+    // 317: production_implementation
+    { NC_PRODUCTION, NT_IMPLEMENTATION, TT_UNDEF, 0, 1, 405 },
+    // 318: string_terminal_318
     { NC_TERMINAL, NT_TERMINAL_IMPLEMENTATION, TT_STRING, "implementation", 0, -1 },
-    // 315: production_attrib_flag
-    { NC_PRODUCTION, NT_ATTRIB_FLAG, TT_UNDEF, 0, 1, 400 },
-    // 316: alternative_expr_316
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 5, 401 },
-    // 317: production_attrib_flags
-    { NC_PRODUCTION, NT_ATTRIB_FLAGS, TT_UNDEF, 0, 1, 406 },
-    // 318: mandatory_expr_318
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 407 },
-    // 319: optional_repetitive_expr_319
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 409 },
-    // 320: production_attrib_decl
-    { NC_PRODUCTION, NT_ATTRIB_DECL, TT_UNDEF, 0, 1, 410 },
-    // 321: mandatory_expr_321
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 7, 411 },
-    // 322: optional_expr_322
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 418 },
-    // 323: string_terminal_323
+    // 319: production_attrib_flag
+    { NC_PRODUCTION, NT_ATTRIB_FLAG, TT_UNDEF, 0, 1, 406 },
+    // 320: alternative_expr_320
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 5, 407 },
+    // 321: production_attrib_flags
+    { NC_PRODUCTION, NT_ATTRIB_FLAGS, TT_UNDEF, 0, 1, 412 },
+    // 322: mandatory_expr_322
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 413 },
+    // 323: optional_repetitive_expr_323
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 415 },
+    // 324: production_attrib_decl
+    { NC_PRODUCTION, NT_ATTRIB_DECL, TT_UNDEF, 0, 1, 416 },
+    // 325: mandatory_expr_325
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 7, 417 },
+    // 326: optional_expr_326
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 424 },
+    // 327: string_terminal_327
     { NC_TERMINAL, NT_TERMINAL_ATTRIBUTE, TT_STRING, "attribute", 0, -1 },
-    // 324: string_terminal_324
+    // 328: string_terminal_328
     { NC_TERMINAL, NT_TERMINAL_COLON, TT_STRING, ":", 0, -1 },
-    // 325: optional_expr_325
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 419 },
-    // 326: mandatory_expr_326
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 420 },
-    // 327: production_method_flag
-    { NC_PRODUCTION, NT_METHOD_FLAG, TT_UNDEF, 0, 1, 422 },
-    // 328: alternative_expr_328
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 4, 423 },
-    // 329: production_method_flags
-    { NC_PRODUCTION, NT_METHOD_FLAGS, TT_UNDEF, 0, 1, 427 },
+    // 329: optional_expr_329
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 425 },
     // 330: mandatory_expr_330
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 428 },
-    // 331: optional_repetitive_expr_331
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 430 },
-    // 332: production_method_decl
-    { NC_PRODUCTION, NT_METHOD_DECL, TT_UNDEF, 0, 1, 431 },
-    // 333: mandatory_expr_333
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 6, 432 },
-    // 334: optional_expr_334
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 438 },
-    // 335: string_terminal_335
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 426 },
+    // 331: production_method_flag
+    { NC_PRODUCTION, NT_METHOD_FLAG, TT_UNDEF, 0, 1, 428 },
+    // 332: alternative_expr_332
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 4, 429 },
+    // 333: production_method_flags
+    { NC_PRODUCTION, NT_METHOD_FLAGS, TT_UNDEF, 0, 1, 433 },
+    // 334: mandatory_expr_334
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 434 },
+    // 335: optional_repetitive_expr_335
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 436 },
+    // 336: production_method_decl
+    { NC_PRODUCTION, NT_METHOD_DECL, TT_UNDEF, 0, 1, 437 },
+    // 337: mandatory_expr_337
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 6, 438 },
+    // 338: optional_expr_338
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 444 },
+    // 339: string_terminal_339
     { NC_TERMINAL, NT_TERMINAL_METHOD, TT_STRING, "method", 0, -1 },
-    // 336: optional_expr_336
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 439 },
-    // 337: production_field
-    { NC_PRODUCTION, NT_FIELD, TT_UNDEF, 0, 1, 440 },
-    // 338: alternative_expr_338
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 4, 441 },
-    // 339: production_field_list
-    { NC_PRODUCTION, NT_FIELD_LIST, TT_UNDEF, 0, 1, 445 },
-    // 340: mandatory_expr_340
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 446 },
-    // 341: optional_repetitive_expr_341
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 448 },
-    // 342: production_class_decl
-    { NC_PRODUCTION, NT_CLASS_DECL, TT_UNDEF, 0, 1, 449 },
-    // 343: mandatory_expr_343
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 7, 450 },
-    // 344: string_terminal_344
+    // 340: optional_expr_340
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 445 },
+    // 341: production_field
+    { NC_PRODUCTION, NT_FIELD, TT_UNDEF, 0, 1, 446 },
+    // 342: alternative_expr_342
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 4, 447 },
+    // 343: production_field_list
+    { NC_PRODUCTION, NT_FIELD_LIST, TT_UNDEF, 0, 1, 451 },
+    // 344: mandatory_expr_344
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 452 },
+    // 345: optional_repetitive_expr_345
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 454 },
+    // 346: production_class_decl
+    { NC_PRODUCTION, NT_CLASS_DECL, TT_UNDEF, 0, 1, 455 },
+    // 347: mandatory_expr_347
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 7, 456 },
+    // 348: string_terminal_348
     { NC_TERMINAL, NT_TERMINAL_CLASS, TT_STRING, "class", 0, -1 },
-    // 345: optional_expr_345
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 457 },
-    // 346: optional_expr_346
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 458 },
-    // 347: string_terminal_347
+    // 349: optional_expr_349
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 463 },
+    // 350: optional_expr_350
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 464 },
+    // 351: string_terminal_351
     { NC_TERMINAL, NT_TERMINAL_LBRACE, TT_STRING, "{", 0, -1 },
-    // 348: optional_expr_348
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 459 },
-    // 349: string_terminal_349
-    { NC_TERMINAL, NT_TERMINAL_RBRACE, TT_STRING, "}", 0, -1 },
-    // 350: production_iattrib_decl
-    { NC_PRODUCTION, NT_IATTRIB_DECL, TT_UNDEF, 0, 1, 460 },
-    // 351: mandatory_expr_351
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 6, 461 },
     // 352: optional_expr_352
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 467 },
-    // 353: production_imethod_decl
-    { NC_PRODUCTION, NT_IMETHOD_DECL, TT_UNDEF, 0, 1, 468 },
-    // 354: mandatory_expr_354
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 469 },
-    // 355: optional_expr_355
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 474 },
-    // 356: production_ifield
-    { NC_PRODUCTION, NT_IFIELD, TT_UNDEF, 0, 1, 475 },
-    // 357: alternative_expr_357
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 4, 476 },
-    // 358: production_ifield_list
-    { NC_PRODUCTION, NT_IFIELD_LIST, TT_UNDEF, 0, 1, 480 },
-    // 359: mandatory_expr_359
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 481 },
-    // 360: optional_repetitive_expr_360
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 483 },
-    // 361: production_interface_decl
-    { NC_PRODUCTION, NT_INTERFACE_DECL, TT_UNDEF, 0, 1, 484 },
-    // 362: mandatory_expr_362
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 6, 485 },
-    // 363: string_terminal_363
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 465 },
+    // 353: string_terminal_353
+    { NC_TERMINAL, NT_TERMINAL_RBRACE, TT_STRING, "}", 0, -1 },
+    // 354: production_iattrib_decl
+    { NC_PRODUCTION, NT_IATTRIB_DECL, TT_UNDEF, 0, 1, 466 },
+    // 355: mandatory_expr_355
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 6, 467 },
+    // 356: optional_expr_356
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 473 },
+    // 357: production_imethod_decl
+    { NC_PRODUCTION, NT_IMETHOD_DECL, TT_UNDEF, 0, 1, 474 },
+    // 358: mandatory_expr_358
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 475 },
+    // 359: optional_expr_359
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 480 },
+    // 360: production_ifield
+    { NC_PRODUCTION, NT_IFIELD, TT_UNDEF, 0, 1, 481 },
+    // 361: alternative_expr_361
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 4, 482 },
+    // 362: production_ifield_list
+    { NC_PRODUCTION, NT_IFIELD_LIST, TT_UNDEF, 0, 1, 486 },
+    // 363: mandatory_expr_363
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 487 },
+    // 364: optional_repetitive_expr_364
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 489 },
+    // 365: production_interface_decl
+    { NC_PRODUCTION, NT_INTERFACE_DECL, TT_UNDEF, 0, 1, 490 },
+    // 366: mandatory_expr_366
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 6, 491 },
+    // 367: string_terminal_367
     { NC_TERMINAL, NT_TERMINAL_INTERFACE, TT_STRING, "interface", 0, -1 },
-    // 364: optional_expr_364
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 491 },
-    // 365: optional_expr_365
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 492 },
-    // 366: production_func_decl
-    { NC_PRODUCTION, NT_FUNC_DECL, TT_UNDEF, 0, 1, 493 },
-    // 367: mandatory_expr_367
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 6, 494 },
     // 368: optional_expr_368
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 500 },
-    // 369: string_terminal_369
-    { NC_TERMINAL, NT_TERMINAL_FUNCTION, TT_STRING, "function", 0, -1 },
-    // 370: production_proc_decl
-    { NC_PRODUCTION, NT_PROC_DECL, TT_UNDEF, 0, 1, 501 },
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 497 },
+    // 369: optional_expr_369
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 498 },
+    // 370: production_func_decl
+    { NC_PRODUCTION, NT_FUNC_DECL, TT_UNDEF, 0, 1, 499 },
     // 371: mandatory_expr_371
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 502 },
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 6, 500 },
     // 372: optional_expr_372
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 507 },
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 506 },
     // 373: string_terminal_373
-    { NC_TERMINAL, NT_TERMINAL_PROCEDURE, TT_STRING, "procedure", 0, -1 },
-    // 374: production_var_decl
-    { NC_PRODUCTION, NT_VAR_DECL, TT_UNDEF, 0, 1, 508 },
+    { NC_TERMINAL, NT_TERMINAL_FUNCTION, TT_STRING, "function", 0, -1 },
+    // 374: production_proc_decl
+    { NC_PRODUCTION, NT_PROC_DECL, TT_UNDEF, 0, 1, 507 },
     // 375: mandatory_expr_375
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 509 },
-    // 376: string_terminal_376
-    { NC_TERMINAL, NT_TERMINAL_VAR, TT_STRING, "var", 0, -1 },
-    // 377: production_const_decl
-    { NC_PRODUCTION, NT_CONST_DECL, TT_UNDEF, 0, 1, 514 },
-    // 378: mandatory_expr_378
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 508 },
+    // 376: optional_expr_376
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 513 },
+    // 377: string_terminal_377
+    { NC_TERMINAL, NT_TERMINAL_PROCEDURE, TT_STRING, "procedure", 0, -1 },
+    // 378: production_var_decl
+    { NC_PRODUCTION, NT_VAR_DECL, TT_UNDEF, 0, 1, 514 },
+    // 379: mandatory_expr_379
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 515 },
-    // 379: string_terminal_379
+    // 380: string_terminal_380
+    { NC_TERMINAL, NT_TERMINAL_VAR, TT_STRING, "var", 0, -1 },
+    // 381: production_const_decl
+    { NC_PRODUCTION, NT_CONST_DECL, TT_UNDEF, 0, 1, 520 },
+    // 382: mandatory_expr_382
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 521 },
+    // 383: string_terminal_383
     { NC_TERMINAL, NT_TERMINAL_CONST, TT_STRING, "const", 0, -1 },
-    // 380: production_enum_item
-    { NC_PRODUCTION, NT_ENUM_ITEM, TT_UNDEF, 0, 1, 520 },
-    // 381: mandatory_expr_381
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 521 },
-    // 382: optional_expr_382
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 523 },
-    // 383: mandatory_expr_383
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 524 },
-    // 384: production_enum_item_list
-    { NC_PRODUCTION, NT_ENUM_ITEM_LIST, TT_UNDEF, 0, 1, 526 },
+    // 384: production_enum_item
+    { NC_PRODUCTION, NT_ENUM_ITEM, TT_UNDEF, 0, 1, 526 },
     // 385: mandatory_expr_385
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 527 },
-    // 386: optional_repetitive_expr_386
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 530 },
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 527 },
+    // 386: optional_expr_386
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 529 },
     // 387: mandatory_expr_387
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 531 },
-    // 388: optional_expr_388
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 533 },
-    // 389: production_enum_decl
-    { NC_PRODUCTION, NT_ENUM_DECL, TT_UNDEF, 0, 1, 534 },
-    // 390: mandatory_expr_390
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 535 },
-    // 391: string_terminal_391
-    { NC_TERMINAL, NT_TERMINAL_ENUM, TT_STRING, "enum", 0, -1 },
-    // 392: production_let_stmt
-    { NC_PRODUCTION, NT_LET_STMT, TT_UNDEF, 0, 1, 540 },
-    // 393: mandatory_expr_393
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 530 },
+    // 388: production_enum_item_list
+    { NC_PRODUCTION, NT_ENUM_ITEM_LIST, TT_UNDEF, 0, 1, 532 },
+    // 389: mandatory_expr_389
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 533 },
+    // 390: optional_repetitive_expr_390
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 536 },
+    // 391: mandatory_expr_391
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 537 },
+    // 392: optional_expr_392
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 539 },
+    // 393: production_enum_decl
+    { NC_PRODUCTION, NT_ENUM_DECL, TT_UNDEF, 0, 1, 540 },
+    // 394: mandatory_expr_394
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 541 },
-    // 394: string_terminal_394
+    // 395: string_terminal_395
+    { NC_TERMINAL, NT_TERMINAL_ENUM, TT_STRING, "enum", 0, -1 },
+    // 396: production_let_stmt
+    { NC_PRODUCTION, NT_LET_STMT, TT_UNDEF, 0, 1, 546 },
+    // 397: mandatory_expr_397
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 547 },
+    // 398: string_terminal_398
     { NC_TERMINAL, NT_TERMINAL_LET, TT_STRING, "let", 0, -1 },
-    // 395: production_decl_stmt
-    { NC_PRODUCTION, NT_DECL_STMT, TT_UNDEF, 0, 1, 546 },
-    // 396: alternative_expr_396
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 7, 547 },
-    // 397: production_block_decl
-    { NC_PRODUCTION, NT_BLOCK_DECL, TT_UNDEF, 0, 1, 554 },
-    // 398: alternative_expr_398
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 555 },
-    // 399: production_import_path
-    { NC_PRODUCTION, NT_IMPORT_PATH, TT_UNDEF, 0, 1, 558 },
-    // 400: mandatory_expr_400
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 559 },
-    // 401: optional_repetitive_expr_401
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 561 },
-    // 402: mandatory_expr_402
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 562 },
-    // 403: production_import_list
-    { NC_PRODUCTION, NT_IMPORT_LIST, TT_UNDEF, 0, 1, 564 },
+    // 399: production_decl_stmt
+    { NC_PRODUCTION, NT_DECL_STMT, TT_UNDEF, 0, 1, 552 },
+    // 400: alternative_expr_400
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 7, 553 },
+    // 401: production_block_decl
+    { NC_PRODUCTION, NT_BLOCK_DECL, TT_UNDEF, 0, 1, 560 },
+    // 402: alternative_expr_402
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 561 },
+    // 403: production_import_path
+    { NC_PRODUCTION, NT_IMPORT_PATH, TT_UNDEF, 0, 1, 564 },
     // 404: mandatory_expr_404
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 565 },
     // 405: optional_repetitive_expr_405
     { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 567 },
     // 406: mandatory_expr_406
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 568 },
-    // 407: production_import_stmt
-    { NC_PRODUCTION, NT_IMPORT_STMT, TT_UNDEF, 0, 1, 570 },
+    // 407: production_import_list
+    { NC_PRODUCTION, NT_IMPORT_LIST, TT_UNDEF, 0, 1, 570 },
     // 408: mandatory_expr_408
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 571 },
-    // 409: string_terminal_409
-    { NC_TERMINAL, NT_TERMINAL_IMPORT, TT_STRING, "import", 0, -1 },
-    // 410: production_xref_type
-    { NC_PRODUCTION, NT_XREF_TYPE, TT_UNDEF, 0, 1, 574 },
-    // 411: alternative_expr_411
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 575 },
-    // 412: string_terminal_412
-    { NC_TERMINAL, NT_TERMINAL_MODULE, TT_STRING, "module", 0, -1 },
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 571 },
+    // 409: optional_repetitive_expr_409
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 573 },
+    // 410: mandatory_expr_410
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 574 },
+    // 411: production_import_stmt
+    { NC_PRODUCTION, NT_IMPORT_STMT, TT_UNDEF, 0, 1, 576 },
+    // 412: mandatory_expr_412
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 577 },
     // 413: string_terminal_413
+    { NC_TERMINAL, NT_TERMINAL_IMPORT, TT_STRING, "import", 0, -1 },
+    // 414: production_xref_type
+    { NC_PRODUCTION, NT_XREF_TYPE, TT_UNDEF, 0, 1, 580 },
+    // 415: alternative_expr_415
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 581 },
+    // 416: string_terminal_416
+    { NC_TERMINAL, NT_TERMINAL_MODULE, TT_STRING, "module", 0, -1 },
+    // 417: string_terminal_417
     { NC_TERMINAL, NT_TERMINAL_PACKAGE, TT_STRING, "package", 0, -1 },
-    // 414: string_terminal_414
+    // 418: string_terminal_418
     { NC_TERMINAL, NT_TERMINAL_LIBRARY, TT_STRING, "library", 0, -1 },
-    // 415: production_str_lit_list
-    { NC_PRODUCTION, NT_STR_LIT_LIST, TT_UNDEF, 0, 1, 578 },
-    // 416: mandatory_expr_416
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 579 },
-    // 417: optional_repetitive_expr_417
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 581 },
-    // 418: mandatory_expr_418
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 582 },
-    // 419: production_platform_spec
-    { NC_PRODUCTION, NT_PLATFORM_SPEC, TT_UNDEF, 0, 1, 584 },
+    // 419: production_str_lit_list
+    { NC_PRODUCTION, NT_STR_LIT_LIST, TT_UNDEF, 0, 1, 584 },
     // 420: mandatory_expr_420
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 585 },
-    // 421: string_terminal_421
-    { NC_TERMINAL, NT_TERMINAL_PLATFORM, TT_STRING, "platform", 0, -1 },
-    // 422: production_language_spec
-    { NC_PRODUCTION, NT_LANGUAGE_SPEC, TT_UNDEF, 0, 1, 587 },
-    // 423: mandatory_expr_423
+    // 421: optional_repetitive_expr_421
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 587 },
+    // 422: mandatory_expr_422
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 588 },
-    // 424: string_terminal_424
-    { NC_TERMINAL, NT_TERMINAL_LANGUAGE, TT_STRING, "language", 0, -1 },
-    // 425: production_header_spec
-    { NC_PRODUCTION, NT_HEADER_SPEC, TT_UNDEF, 0, 1, 590 },
-    // 426: mandatory_expr_426
+    // 423: production_platform_spec
+    { NC_PRODUCTION, NT_PLATFORM_SPEC, TT_UNDEF, 0, 1, 590 },
+    // 424: mandatory_expr_424
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 591 },
-    // 427: string_terminal_427
-    { NC_TERMINAL, NT_TERMINAL_HEADER, TT_STRING, "header", 0, -1 },
-    // 428: production_function_spec
-    { NC_PRODUCTION, NT_FUNCTION_SPEC, TT_UNDEF, 0, 1, 593 },
-    // 429: mandatory_expr_429
+    // 425: string_terminal_425
+    { NC_TERMINAL, NT_TERMINAL_PLATFORM, TT_STRING, "platform", 0, -1 },
+    // 426: production_language_spec
+    { NC_PRODUCTION, NT_LANGUAGE_SPEC, TT_UNDEF, 0, 1, 593 },
+    // 427: mandatory_expr_427
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 594 },
-    // 430: production_procedure_spec
-    { NC_PRODUCTION, NT_PROCEDURE_SPEC, TT_UNDEF, 0, 1, 596 },
-    // 431: mandatory_expr_431
+    // 428: string_terminal_428
+    { NC_TERMINAL, NT_TERMINAL_LANGUAGE, TT_STRING, "language", 0, -1 },
+    // 429: production_header_spec
+    { NC_PRODUCTION, NT_HEADER_SPEC, TT_UNDEF, 0, 1, 596 },
+    // 430: mandatory_expr_430
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 597 },
-    // 432: production_class_spec
-    { NC_PRODUCTION, NT_CLASS_SPEC, TT_UNDEF, 0, 1, 599 },
+    // 431: string_terminal_431
+    { NC_TERMINAL, NT_TERMINAL_HEADER, TT_STRING, "header", 0, -1 },
+    // 432: production_function_spec
+    { NC_PRODUCTION, NT_FUNCTION_SPEC, TT_UNDEF, 0, 1, 599 },
     // 433: mandatory_expr_433
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 600 },
-    // 434: production_alien_spec
-    { NC_PRODUCTION, NT_ALIEN_SPEC, TT_UNDEF, 0, 1, 602 },
-    // 435: alternative_expr_435
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 6, 603 },
-    // 436: production_alien_specs
-    { NC_PRODUCTION, NT_ALIEN_SPECS, TT_UNDEF, 0, 1, 609 },
+    // 434: production_procedure_spec
+    { NC_PRODUCTION, NT_PROCEDURE_SPEC, TT_UNDEF, 0, 1, 602 },
+    // 435: mandatory_expr_435
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 603 },
+    // 436: production_class_spec
+    { NC_PRODUCTION, NT_CLASS_SPEC, TT_UNDEF, 0, 1, 605 },
     // 437: mandatory_expr_437
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 610 },
-    // 438: optional_repetitive_expr_438
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 612 },
-    // 439: mandatory_expr_439
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 613 },
-    // 440: production_alien_stmt
-    { NC_PRODUCTION, NT_ALIEN_STMT, TT_UNDEF, 0, 1, 615 },
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 606 },
+    // 438: production_alien_spec
+    { NC_PRODUCTION, NT_ALIEN_SPEC, TT_UNDEF, 0, 1, 608 },
+    // 439: alternative_expr_439
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 6, 609 },
+    // 440: production_alien_specs
+    { NC_PRODUCTION, NT_ALIEN_SPECS, TT_UNDEF, 0, 1, 615 },
     // 441: mandatory_expr_441
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 616 },
-    // 442: string_terminal_442
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 616 },
+    // 442: optional_repetitive_expr_442
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 618 },
+    // 443: mandatory_expr_443
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 619 },
+    // 444: production_alien_stmt
+    { NC_PRODUCTION, NT_ALIEN_STMT, TT_UNDEF, 0, 1, 621 },
+    // 445: mandatory_expr_445
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 622 },
+    // 446: string_terminal_446
     { NC_TERMINAL, NT_TERMINAL_ALIEN, TT_STRING, "alien", 0, -1 },
-    // 443: optional_expr_443
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 621 },
-    // 444: mandatory_expr_444
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 622 },
-    // 445: production_global_stmt
-    { NC_PRODUCTION, NT_GLOBAL_STMT, TT_UNDEF, 0, 1, 624 },
-    // 446: production_global_stmts
-    { NC_PRODUCTION, NT_GLOBAL_STMTS, TT_UNDEF, 0, 1, 625 },
-    // 447: mandatory_expr_447
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 626 },
-    // 448: optional_repetitive_expr_448
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 628 },
-    // 449: production_global_intro
-    { NC_PRODUCTION, NT_GLOBAL_INTRO, TT_UNDEF, 0, 1, 629 },
-    // 450: alternative_expr_450
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 630 },
-    // 451: production_global_spec
-    { NC_PRODUCTION, NT_GLOBAL_SPEC, TT_UNDEF, 0, 1, 632 },
-    // 452: mandatory_expr_452
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 633 },
-    // 453: alternative_expr_453
+    // 447: optional_expr_447
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 627 },
+    // 448: mandatory_expr_448
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 628 },
+    // 449: production_global_stmt
+    { NC_PRODUCTION, NT_GLOBAL_STMT, TT_UNDEF, 0, 1, 630 },
+    // 450: production_global_stmts
+    { NC_PRODUCTION, NT_GLOBAL_STMTS, TT_UNDEF, 0, 1, 631 },
+    // 451: mandatory_expr_451
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 632 },
+    // 452: optional_repetitive_expr_452
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 634 },
+    // 453: production_global_intro
+    { NC_PRODUCTION, NT_GLOBAL_INTRO, TT_UNDEF, 0, 1, 635 },
+    // 454: alternative_expr_454
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 636 },
-    // 454: string_terminal_454
-    { NC_TERMINAL, NT_TERMINAL_PROGRAM, TT_STRING, "program", 0, -1 },
-    // 455: production_global_scope
-    { NC_PRODUCTION, NT_GLOBAL_SCOPE, TT_UNDEF, 0, 1, 638 },
+    // 455: production_global_spec
+    { NC_PRODUCTION, NT_GLOBAL_SPEC, TT_UNDEF, 0, 1, 638 },
     // 456: mandatory_expr_456
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 639 },
-    // 457: optional_expr_457
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 642 },
-    // 458: optional_repetitive_expr_458
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 643 },
-    // 459: optional_repetitive_expr_459
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 644 },
-    // 460: production_label_decl
-    { NC_PRODUCTION, NT_LABEL_DECL, TT_UNDEF, 0, 1, 645 },
-    // 461: mandatory_expr_461
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 646 },
-    // 462: production_call_stmt
-    { NC_PRODUCTION, NT_CALL_STMT, TT_UNDEF, 0, 1, 648 },
-    // 463: mandatory_expr_463
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 649 },
-    // 464: string_terminal_464
+    // 457: alternative_expr_457
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 642 },
+    // 458: string_terminal_458
+    { NC_TERMINAL, NT_TERMINAL_PROGRAM, TT_STRING, "program", 0, -1 },
+    // 459: production_global_scope
+    { NC_PRODUCTION, NT_GLOBAL_SCOPE, TT_UNDEF, 0, 1, 644 },
+    // 460: mandatory_expr_460
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 645 },
+    // 461: optional_expr_461
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 648 },
+    // 462: optional_repetitive_expr_462
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 649 },
+    // 463: optional_repetitive_expr_463
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 650 },
+    // 464: production_label_decl
+    { NC_PRODUCTION, NT_LABEL_DECL, TT_UNDEF, 0, 1, 651 },
+    // 465: mandatory_expr_465
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 652 },
+    // 466: production_call_stmt
+    { NC_PRODUCTION, NT_CALL_STMT, TT_UNDEF, 0, 1, 654 },
+    // 467: mandatory_expr_467
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 655 },
+    // 468: string_terminal_468
     { NC_TERMINAL, NT_TERMINAL_CALL, TT_STRING, "call", 0, -1 },
-    // 465: production_block_or_stmt
-    { NC_PRODUCTION, NT_BLOCK_OR_STMT, TT_UNDEF, 0, 1, 652 },
-    // 466: alternative_expr_466
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 653 },
-    // 467: production_if_stmt
-    { NC_PRODUCTION, NT_IF_STMT, TT_UNDEF, 0, 1, 655 },
-    // 468: mandatory_expr_468
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 4, 656 },
-    // 469: alternative_expr_469
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 660 },
-    // 470: string_terminal_470
-    { NC_TERMINAL, NT_TERMINAL_IF, TT_STRING, "if", 0, -1 },
-    // 471: string_terminal_471
-    { NC_TERMINAL, NT_TERMINAL_UNLESS, TT_STRING, "unless", 0, -1 },
-    // 472: optional_expr_472
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 662 },
-    // 473: mandatory_expr_473
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 663 },
+    // 469: production_block_or_stmt
+    { NC_PRODUCTION, NT_BLOCK_OR_STMT, TT_UNDEF, 0, 1, 658 },
+    // 470: alternative_expr_470
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 659 },
+    // 471: production_if_stmt
+    { NC_PRODUCTION, NT_IF_STMT, TT_UNDEF, 0, 1, 661 },
+    // 472: mandatory_expr_472
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 4, 662 },
+    // 473: alternative_expr_473
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 666 },
     // 474: string_terminal_474
-    { NC_TERMINAL, NT_TERMINAL_ELSE, TT_STRING, "else", 0, -1 },
-    // 475: production_while_stmt
-    { NC_PRODUCTION, NT_WHILE_STMT, TT_UNDEF, 0, 1, 665 },
-    // 476: mandatory_expr_476
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 666 },
-    // 477: alternative_expr_477
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 669 },
+    { NC_TERMINAL, NT_TERMINAL_IF, TT_STRING, "if", 0, -1 },
+    // 475: string_terminal_475
+    { NC_TERMINAL, NT_TERMINAL_UNLESS, TT_STRING, "unless", 0, -1 },
+    // 476: optional_expr_476
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 668 },
+    // 477: mandatory_expr_477
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 669 },
     // 478: string_terminal_478
+    { NC_TERMINAL, NT_TERMINAL_ELSE, TT_STRING, "else", 0, -1 },
+    // 479: production_while_stmt
+    { NC_PRODUCTION, NT_WHILE_STMT, TT_UNDEF, 0, 1, 671 },
+    // 480: mandatory_expr_480
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 672 },
+    // 481: alternative_expr_481
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 675 },
+    // 482: string_terminal_482
     { NC_TERMINAL, NT_TERMINAL_WHILE, TT_STRING, "while", 0, -1 },
-    // 479: string_terminal_479
-    { NC_TERMINAL, NT_TERMINAL_UNTIL, TT_STRING, "until", 0, -1 },
-    // 480: production_repeat_stmt
-    { NC_PRODUCTION, NT_REPEAT_STMT, TT_UNDEF, 0, 1, 671 },
-    // 481: mandatory_expr_481
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 672 },
-    // 482: alternative_expr_482
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 677 },
     // 483: string_terminal_483
+    { NC_TERMINAL, NT_TERMINAL_UNTIL, TT_STRING, "until", 0, -1 },
+    // 484: production_repeat_stmt
+    { NC_PRODUCTION, NT_REPEAT_STMT, TT_UNDEF, 0, 1, 677 },
+    // 485: mandatory_expr_485
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 678 },
+    // 486: alternative_expr_486
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 683 },
+    // 487: string_terminal_487
     { NC_TERMINAL, NT_TERMINAL_REPEAT, TT_STRING, "repeat", 0, -1 },
-    // 484: string_terminal_484
+    // 488: string_terminal_488
     { NC_TERMINAL, NT_TERMINAL_DO, TT_STRING, "do", 0, -1 },
-    // 485: alternative_expr_485
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 679 },
-    // 486: production_loop_stmt
-    { NC_PRODUCTION, NT_LOOP_STMT, TT_UNDEF, 0, 1, 681 },
-    // 487: mandatory_expr_487
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 682 },
-    // 488: alternative_expr_488
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 684 },
-    // 489: string_terminal_489
-    { NC_TERMINAL, NT_TERMINAL_LOOP, TT_STRING, "loop", 0, -1 },
-    // 490: string_terminal_490
-    { NC_TERMINAL, NT_TERMINAL_FOREVER, TT_STRING, "forever", 0, -1 },
-    // 491: production_for_stmt
-    { NC_PRODUCTION, NT_FOR_STMT, TT_UNDEF, 0, 1, 686 },
-    // 492: mandatory_expr_492
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 8, 687 },
+    // 489: alternative_expr_489
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 685 },
+    // 490: production_loop_stmt
+    { NC_PRODUCTION, NT_LOOP_STMT, TT_UNDEF, 0, 1, 687 },
+    // 491: mandatory_expr_491
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 688 },
+    // 492: alternative_expr_492
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 690 },
     // 493: string_terminal_493
+    { NC_TERMINAL, NT_TERMINAL_LOOP, TT_STRING, "loop", 0, -1 },
+    // 494: string_terminal_494
+    { NC_TERMINAL, NT_TERMINAL_FOREVER, TT_STRING, "forever", 0, -1 },
+    // 495: production_for_stmt
+    { NC_PRODUCTION, NT_FOR_STMT, TT_UNDEF, 0, 1, 692 },
+    // 496: mandatory_expr_496
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 8, 693 },
+    // 497: string_terminal_497
     { NC_TERMINAL, NT_TERMINAL_FOR, TT_STRING, "for", 0, -1 },
-    // 494: alternative_expr_494
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 695 },
-    // 495: string_terminal_495
+    // 498: alternative_expr_498
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 701 },
+    // 499: string_terminal_499
     { NC_TERMINAL, NT_TERMINAL_TO, TT_STRING, "to", 0, -1 },
-    // 496: string_terminal_496
-    { NC_TERMINAL, NT_TERMINAL_DOWNTO, TT_STRING, "downto", 0, -1 },
-    // 497: production_loop_control
-    { NC_PRODUCTION, NT_LOOP_CONTROL, TT_UNDEF, 0, 1, 697 },
-    // 498: mandatory_expr_498
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 698 },
-    // 499: alternative_expr_499
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 701 },
     // 500: string_terminal_500
+    { NC_TERMINAL, NT_TERMINAL_DOWNTO, TT_STRING, "downto", 0, -1 },
+    // 501: production_loop_control
+    { NC_PRODUCTION, NT_LOOP_CONTROL, TT_UNDEF, 0, 1, 703 },
+    // 502: mandatory_expr_502
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 704 },
+    // 503: alternative_expr_503
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 707 },
+    // 504: string_terminal_504
     { NC_TERMINAL, NT_TERMINAL_BREAK, TT_STRING, "break", 0, -1 },
-    // 501: string_terminal_501
+    // 505: string_terminal_505
     { NC_TERMINAL, NT_TERMINAL_CONTINUE, TT_STRING, "continue", 0, -1 },
-    // 502: string_terminal_502
+    // 506: string_terminal_506
     { NC_TERMINAL, NT_TERMINAL_AGAIN, TT_STRING, "again", 0, -1 },
-    // 503: optional_expr_503
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 704 },
-    // 504: production_loop_type_stmt
-    { NC_PRODUCTION, NT_LOOP_TYPE_STMT, TT_UNDEF, 0, 1, 705 },
-    // 505: alternative_expr_505
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 5, 706 },
-    // 506: production_switch_case
-    { NC_PRODUCTION, NT_SWITCH_CASE, TT_UNDEF, 0, 1, 711 },
-    // 507: mandatory_expr_507
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 4, 712 },
-    // 508: string_terminal_508
+    // 507: optional_expr_507
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 710 },
+    // 508: production_loop_type_stmt
+    { NC_PRODUCTION, NT_LOOP_TYPE_STMT, TT_UNDEF, 0, 1, 711 },
+    // 509: alternative_expr_509
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 5, 712 },
+    // 510: production_switch_case
+    { NC_PRODUCTION, NT_SWITCH_CASE, TT_UNDEF, 0, 1, 717 },
+    // 511: mandatory_expr_511
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 4, 718 },
+    // 512: string_terminal_512
     { NC_TERMINAL, NT_TERMINAL_CASE, TT_STRING, "case", 0, -1 },
-    // 509: production_default_case
-    { NC_PRODUCTION, NT_DEFAULT_CASE, TT_UNDEF, 0, 1, 716 },
-    // 510: mandatory_expr_510
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 717 },
-    // 511: production_any_case
-    { NC_PRODUCTION, NT_ANY_CASE, TT_UNDEF, 0, 1, 720 },
-    // 512: alternative_expr_512
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 721 },
-    // 513: production_case_list
-    { NC_PRODUCTION, NT_CASE_LIST, TT_UNDEF, 0, 1, 723 },
+    // 513: production_default_case
+    { NC_PRODUCTION, NT_DEFAULT_CASE, TT_UNDEF, 0, 1, 722 },
     // 514: mandatory_expr_514
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 724 },
-    // 515: optional_repetitive_expr_515
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 726 },
-    // 516: production_switch_stmt
-    { NC_PRODUCTION, NT_SWITCH_STMT, TT_UNDEF, 0, 1, 727 },
-    // 517: mandatory_expr_517
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 728 },
-    // 518: string_terminal_518
-    { NC_TERMINAL, NT_TERMINAL_SWITCH, TT_STRING, "switch", 0, -1 },
-    // 519: production_goto_stmt
-    { NC_PRODUCTION, NT_GOTO_STMT, TT_UNDEF, 0, 1, 733 },
-    // 520: mandatory_expr_520
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 734 },
-    // 521: alternative_expr_521
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 737 },
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 723 },
+    // 515: production_any_case
+    { NC_PRODUCTION, NT_ANY_CASE, TT_UNDEF, 0, 1, 726 },
+    // 516: alternative_expr_516
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 727 },
+    // 517: production_case_list
+    { NC_PRODUCTION, NT_CASE_LIST, TT_UNDEF, 0, 1, 729 },
+    // 518: mandatory_expr_518
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 730 },
+    // 519: optional_repetitive_expr_519
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 732 },
+    // 520: production_switch_stmt
+    { NC_PRODUCTION, NT_SWITCH_STMT, TT_UNDEF, 0, 1, 733 },
+    // 521: mandatory_expr_521
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 734 },
     // 522: string_terminal_522
-    { NC_TERMINAL, NT_TERMINAL_GOTO, TT_STRING, "goto", 0, -1 },
-    // 523: string_terminal_523
-    { NC_TERMINAL, NT_TERMINAL_GOSUB, TT_STRING, "gosub", 0, -1 },
-    // 524: production_return_stmt
-    { NC_PRODUCTION, NT_RETURN_STMT, TT_UNDEF, 0, 1, 739 },
-    // 525: mandatory_expr_525
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 740 },
+    { NC_TERMINAL, NT_TERMINAL_SWITCH, TT_STRING, "switch", 0, -1 },
+    // 523: production_goto_stmt
+    { NC_PRODUCTION, NT_GOTO_STMT, TT_UNDEF, 0, 1, 739 },
+    // 524: mandatory_expr_524
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 740 },
+    // 525: alternative_expr_525
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 743 },
     // 526: string_terminal_526
+    { NC_TERMINAL, NT_TERMINAL_GOTO, TT_STRING, "goto", 0, -1 },
+    // 527: string_terminal_527
+    { NC_TERMINAL, NT_TERMINAL_GOSUB, TT_STRING, "gosub", 0, -1 },
+    // 528: production_return_stmt
+    { NC_PRODUCTION, NT_RETURN_STMT, TT_UNDEF, 0, 1, 745 },
+    // 529: mandatory_expr_529
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 746 },
+    // 530: string_terminal_530
     { NC_TERMINAL, NT_TERMINAL_RETURN, TT_STRING, "return", 0, -1 },
-    // 527: production_resultis_stmt
-    { NC_PRODUCTION, NT_RESULTIS_STMT, TT_UNDEF, 0, 1, 742 },
-    // 528: mandatory_expr_528
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 743 },
-    // 529: string_terminal_529
+    // 531: production_resultis_stmt
+    { NC_PRODUCTION, NT_RESULTIS_STMT, TT_UNDEF, 0, 1, 748 },
+    // 532: mandatory_expr_532
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 749 },
+    // 533: string_terminal_533
     { NC_TERMINAL, NT_TERMINAL_RESULTIS, TT_STRING, "resultis", 0, -1 },
-    // 530: production_delete_stmt
-    { NC_PRODUCTION, NT_DELETE_STMT, TT_UNDEF, 0, 1, 746 },
-    // 531: mandatory_expr_531
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 747 },
-    // 532: string_terminal_532
+    // 534: production_delete_stmt
+    { NC_PRODUCTION, NT_DELETE_STMT, TT_UNDEF, 0, 1, 752 },
+    // 535: mandatory_expr_535
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 753 },
+    // 536: string_terminal_536
     { NC_TERMINAL, NT_TERMINAL_DELETE, TT_STRING, "delete", 0, -1 },
-    // 533: production_flow_ctrl_stmt
-    { NC_PRODUCTION, NT_FLOW_CTRL_STMT, TT_UNDEF, 0, 1, 750 },
-    // 534: alternative_expr_534
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 8, 751 },
-    // 535: production_stmt
-    { NC_PRODUCTION, NT_STMT, TT_UNDEF, 0, 1, 759 },
-    // 536: alternative_expr_536
-    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 760 },
-    // 537: production_statement
-    { NC_PRODUCTION, NT_STATEMENT, TT_UNDEF, 0, 1, 763 },
-    // 538: mandatory_expr_538
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 764 },
-    // 539: optional_expr_539
-    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 766 },
-    // 540: production_statement_list
-    { NC_PRODUCTION, NT_STATEMENT_LIST, TT_UNDEF, 0, 1, 767 },
-    // 541: mandatory_expr_541
-    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 768 },
-    // 542: optional_repetitive_expr_542
-    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 770 },
+    // 537: production_flow_ctrl_stmt
+    { NC_PRODUCTION, NT_FLOW_CTRL_STMT, TT_UNDEF, 0, 1, 756 },
+    // 538: alternative_expr_538
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 8, 757 },
+    // 539: production_stmt
+    { NC_PRODUCTION, NT_STMT, TT_UNDEF, 0, 1, 765 },
+    // 540: alternative_expr_540
+    { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 766 },
+    // 541: production_statement
+    { NC_PRODUCTION, NT_STATEMENT, TT_UNDEF, 0, 1, 769 },
+    // 542: mandatory_expr_542
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 770 },
+    // 543: optional_expr_543
+    { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 772 },
+    // 544: production_statement_list
+    { NC_PRODUCTION, NT_STATEMENT_LIST, TT_UNDEF, 0, 1, 773 },
+    // 545: mandatory_expr_545
+    { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 774 },
+    // 546: optional_repetitive_expr_546
+    { NC_OPTIONAL_REPETITIVE, _NT_GENERIC, TT_UNDEF, 0, 1, 776 },
 };
 
