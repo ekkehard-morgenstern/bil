@@ -23,58 +23,56 @@ typedef enum _nodetype_t {
     NT_INT_LIT,
     NT_TERMINAL_1,
     NT_REAL_LIT,
-    NT_TERMINAL_4,
+    NT_TERMINAL_DOT,
     NT_TERMINAL_7,
-    NT_TERMINAL_9,
+    NT_TERMINAL_MINUS,
     NT_STR_LIT,
     NT_TERMINAL_11,
     NT_BOOL_LIT,
-    NT_TERMINAL_14,
-    NT_TERMINAL_15,
+    NT_TERMINAL_TRUE,
+    NT_TERMINAL_FALSE,
     NT_PTR_LIT,
-    NT_TERMINAL_17,
+    NT_TERMINAL_NIL,
     NT_IDENTIFIER,
     NT_TERMINAL_19,
     NT_BASE_TYPE,
-    NT_TERMINAL_22,
-    NT_TERMINAL_23,
-    NT_TERMINAL_24,
-    NT_TERMINAL_25,
-    NT_TERMINAL_26,
+    NT_TERMINAL_INT,
+    NT_TERMINAL_REAL,
+    NT_TERMINAL_STRING,
+    NT_TERMINAL_BYTE,
+    NT_TERMINAL_BOOL,
     NT_OBJECT_POINTER,
-    NT_TERMINAL_29,
+    NT_TERMINAL_XOR,
     NT_CELL_TYPE,
     NT_CELL_POINTER,
-    NT_TERMINAL_34,
+    NT_TERMINAL_STAR,
     NT_TYPE,
     NT_TYPE_LIST,
-    NT_TERMINAL_41,
+    NT_TERMINAL_COMMA,
     NT_NEG_OP,
-    NT_TERMINAL_44,
-    NT_TERMINAL_45,
+    NT_TERMINAL_NOT,
     NT_MULT_OP,
-    NT_TERMINAL_48,
-    NT_TERMINAL_49,
+    NT_TERMINAL_SLASH,
+    NT_TERMINAL_MOD,
     NT_ADD_OP,
-    NT_TERMINAL_52,
+    NT_TERMINAL_PLUS,
     NT_SHF_OP,
-    NT_TERMINAL_55,
-    NT_TERMINAL_56,
+    NT_TERMINAL_SHL,
+    NT_TERMINAL_SHR,
     NT_CMP_OP,
-    NT_TERMINAL_59,
-    NT_TERMINAL_60,
-    NT_TERMINAL_61,
-    NT_TERMINAL_62,
-    NT_TERMINAL_63,
-    NT_TERMINAL_64,
+    NT_TERMINAL_NE,
+    NT_TERMINAL_LE,
+    NT_TERMINAL_GE,
+    NT_TERMINAL_EQ,
+    NT_TERMINAL_LT,
+    NT_TERMINAL_GT,
     NT_AND_OP,
-    NT_TERMINAL_66,
+    NT_TERMINAL_AND,
     NT_OR_OP,
-    NT_TERMINAL_69,
-    NT_TERMINAL_70,
+    NT_TERMINAL_OR,
     NT_C_NUM_BASE_E,
-    NT_TERMINAL_74,
-    NT_TERMINAL_75,
+    NT_TERMINAL_LPAREN,
+    NT_TERMINAL_RPAREN,
     NT_C_NUM_NEG_E,
     NT_C_NUM_MULT_E,
     NT_C_NUM_ADD_E,
@@ -85,30 +83,25 @@ typedef enum _nodetype_t {
     NT_C_NUM_E,
     NT_C_STR_BASE_E,
     NT_C_STR_ADD_E,
-    NT_TERMINAL_110,
     NT_C_STR_CMP_E,
     NT_C_STR_AND_E,
     NT_C_STR_OR_E,
     NT_C_STR_E,
     NT_C_BOOL_BASE_E,
     NT_C_BOOL_NOT_E,
-    NT_TERMINAL_129,
     NT_C_BOOL_AND_E,
     NT_C_BOOL_OR_E,
     NT_C_BOOL_E,
     NT_C_PTR_E,
     NT_CONST_EXPR,
     NT_C_EXPR_LIST,
-    NT_TERMINAL_146,
     NT_ACCESS_OP,
     NT_TERMINAL_150,
-    NT_TERMINAL_152,
-    NT_TERMINAL_153,
+    NT_TERMINAL_LBRACK,
+    NT_TERMINAL_RBRACK,
     NT_IDENT_ACCESS,
-    NT_TERMINAL_159,
-    NT_TERMINAL_161,
     NT_VALOF_EXPR,
-    NT_TERMINAL_164,
+    NT_TERMINAL_VALOF,
     NT_NUM_BASE_E,
     NT_NUM_NEG_E,
     NT_NUM_MULT_E,
@@ -130,158 +123,153 @@ typedef enum _nodetype_t {
     NT_BOOL_OR_E,
     NT_BOOL_E,
     NT_ARRAY_INST,
-    NT_TERMINAL_232,
-    NT_TERMINAL_233,
+    NT_TERMINAL_DYNAMIC,
+    NT_TERMINAL_ASSOC,
     NT_OBJECT_INST,
     NT_PTR_E,
-    NT_TERMINAL_240,
+    NT_TERMINAL_NEW,
     NT_EXPR,
     NT_EXPR_LIST,
     NT_CALL_ARG,
     NT_TERMINAL_253,
-    NT_TERMINAL_255,
+    NT_TERMINAL_DEFAULT,
     NT_CALL_ARG_LIST,
     NT_BLOCK,
-    NT_TERMINAL_262,
-    NT_TERMINAL_264,
+    NT_TERMINAL_LBRACE,
+    NT_TERMINAL_RBRACE,
     NT_OPTIONAL_BLOCK,
-    NT_TERMINAL_267,
+    NT_TERMINAL_SEMIC,
     NT_ARGUMENT_DECL,
-    NT_TERMINAL_271,
-    NT_TERMINAL_274,
-    NT_TERMINAL_275,
+    NT_TERMINAL_COLON,
+    NT_TERMINAL_ELLIPSIS,
     NT_ARGUMENT_LIST,
-    NT_TERMINAL_280,
     NT_ARG_DECLARATOR,
     NT_RETURN_DECL,
-    NT_TERMINAL_286,
+    NT_TERMINAL_RETURNING,
     NT_IDENT_LIST,
     NT_EXTENDS_CLAUSE,
-    NT_TERMINAL_293,
+    NT_TERMINAL_EXTENDS,
     NT_IMPL_CLAUSE,
-    NT_TERMINAL_296,
+    NT_TERMINAL_IMPLEMENTS,
     NT_VISIBILITY,
-    NT_TERMINAL_299,
-    NT_TERMINAL_300,
-    NT_TERMINAL_301,
+    NT_TERMINAL_PRIVATE,
+    NT_TERMINAL_PROTECTED,
+    NT_TERMINAL_PUBLIC,
     NT_ACCESS_TYPE,
-    NT_TERMINAL_304,
-    NT_TERMINAL_305,
-    NT_TERMINAL_306,
+    NT_TERMINAL_READONLY,
+    NT_TERMINAL_READWRITE,
+    NT_TERMINAL_WRITEONLY,
     NT_STORAGE_TYPE,
-    NT_TERMINAL_308,
+    NT_TERMINAL_STATIC,
     NT_DERIVATION,
-    NT_TERMINAL_311,
-    NT_TERMINAL_312,
+    NT_TERMINAL_OVERRIDE,
+    NT_TERMINAL_FINAL,
     NT_IMPLEMENTATION,
-    NT_TERMINAL_314,
+    NT_TERMINAL_IMPLEMENTATION,
     NT_ATTRIB_FLAG,
     NT_ATTRIB_FLAGS,
     NT_ATTRIB_DECL,
-    NT_TERMINAL_323,
-    NT_TERMINAL_324,
+    NT_TERMINAL_ATTRIBUTE,
     NT_METHOD_FLAG,
     NT_METHOD_FLAGS,
     NT_METHOD_DECL,
-    NT_TERMINAL_335,
+    NT_TERMINAL_METHOD,
     NT_FIELD,
     NT_FIELD_LIST,
     NT_CLASS_DECL,
-    NT_TERMINAL_344,
-    NT_TERMINAL_347,
-    NT_TERMINAL_349,
+    NT_TERMINAL_CLASS,
     NT_IATTRIB_DECL,
     NT_IMETHOD_DECL,
     NT_IFIELD,
     NT_IFIELD_LIST,
     NT_INTERFACE_DECL,
-    NT_TERMINAL_363,
+    NT_TERMINAL_INTERFACE,
     NT_FUNC_DECL,
-    NT_TERMINAL_369,
+    NT_TERMINAL_FUNCTION,
     NT_PROC_DECL,
-    NT_TERMINAL_373,
+    NT_TERMINAL_PROCEDURE,
     NT_VAR_DECL,
-    NT_TERMINAL_376,
+    NT_TERMINAL_VAR,
     NT_CONST_DECL,
-    NT_TERMINAL_379,
+    NT_TERMINAL_CONST,
     NT_ENUM_ITEM,
     NT_ENUM_ITEM_LIST,
     NT_ENUM_DECL,
-    NT_TERMINAL_391,
+    NT_TERMINAL_ENUM,
     NT_LET_STMT,
-    NT_TERMINAL_394,
+    NT_TERMINAL_LET,
     NT_DECL_STMT,
     NT_BLOCK_DECL,
     NT_IMPORT_PATH,
     NT_IMPORT_LIST,
     NT_IMPORT_STMT,
-    NT_TERMINAL_409,
+    NT_TERMINAL_IMPORT,
     NT_XREF_TYPE,
-    NT_TERMINAL_412,
-    NT_TERMINAL_413,
-    NT_TERMINAL_414,
+    NT_TERMINAL_MODULE,
+    NT_TERMINAL_PACKAGE,
+    NT_TERMINAL_LIBRARY,
     NT_STR_LIT_LIST,
     NT_PLATFORM_SPEC,
-    NT_TERMINAL_421,
+    NT_TERMINAL_PLATFORM,
     NT_LANGUAGE_SPEC,
-    NT_TERMINAL_424,
+    NT_TERMINAL_LANGUAGE,
     NT_HEADER_SPEC,
-    NT_TERMINAL_427,
+    NT_TERMINAL_HEADER,
     NT_FUNCTION_SPEC,
     NT_PROCEDURE_SPEC,
     NT_CLASS_SPEC,
     NT_ALIEN_SPEC,
     NT_ALIEN_SPECS,
     NT_ALIEN_STMT,
-    NT_TERMINAL_442,
+    NT_TERMINAL_ALIEN,
     NT_GLOBAL_STMT,
     NT_GLOBAL_STMTS,
     NT_GLOBAL_INTRO,
     NT_GLOBAL_SPEC,
-    NT_TERMINAL_454,
+    NT_TERMINAL_PROGRAM,
     NT_GLOBAL_SCOPE,
     NT_LABEL_DECL,
     NT_CALL_STMT,
-    NT_TERMINAL_464,
+    NT_TERMINAL_CALL,
     NT_BLOCK_OR_STMT,
     NT_IF_STMT,
-    NT_TERMINAL_470,
-    NT_TERMINAL_471,
-    NT_TERMINAL_474,
+    NT_TERMINAL_IF,
+    NT_TERMINAL_UNLESS,
+    NT_TERMINAL_ELSE,
     NT_WHILE_STMT,
-    NT_TERMINAL_478,
-    NT_TERMINAL_479,
+    NT_TERMINAL_WHILE,
+    NT_TERMINAL_UNTIL,
     NT_REPEAT_STMT,
-    NT_TERMINAL_483,
-    NT_TERMINAL_484,
+    NT_TERMINAL_REPEAT,
+    NT_TERMINAL_DO,
     NT_LOOP_STMT,
-    NT_TERMINAL_489,
-    NT_TERMINAL_490,
+    NT_TERMINAL_LOOP,
+    NT_TERMINAL_FOREVER,
     NT_FOR_STMT,
-    NT_TERMINAL_493,
-    NT_TERMINAL_495,
-    NT_TERMINAL_496,
+    NT_TERMINAL_FOR,
+    NT_TERMINAL_TO,
+    NT_TERMINAL_DOWNTO,
     NT_LOOP_CONTROL,
-    NT_TERMINAL_500,
-    NT_TERMINAL_501,
-    NT_TERMINAL_502,
+    NT_TERMINAL_BREAK,
+    NT_TERMINAL_CONTINUE,
+    NT_TERMINAL_AGAIN,
     NT_LOOP_TYPE_STMT,
     NT_SWITCH_CASE,
-    NT_TERMINAL_508,
+    NT_TERMINAL_CASE,
     NT_DEFAULT_CASE,
     NT_ANY_CASE,
     NT_CASE_LIST,
     NT_SWITCH_STMT,
-    NT_TERMINAL_518,
+    NT_TERMINAL_SWITCH,
     NT_GOTO_STMT,
-    NT_TERMINAL_522,
-    NT_TERMINAL_523,
+    NT_TERMINAL_GOTO,
+    NT_TERMINAL_GOSUB,
     NT_RETURN_STMT,
-    NT_TERMINAL_526,
+    NT_TERMINAL_RETURN,
     NT_RESULTIS_STMT,
-    NT_TERMINAL_529,
+    NT_TERMINAL_RESULTIS,
     NT_DELETE_STMT,
-    NT_TERMINAL_532,
+    NT_TERMINAL_DELETE,
     NT_FLOW_CTRL_STMT,
     NT_STMT,
     NT_STATEMENT,
@@ -1170,7 +1158,7 @@ static const parsingnode_t parsingTable[543] = {
     // 3: mandatory_expr_3
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 4, 2 },
     // 4: string_terminal_4
-    { NC_TERMINAL, NT_TERMINAL_4, TT_STRING, ".", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_DOT, TT_STRING, ".", 0, -1 },
     // 5: optional_expr_5
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 6 },
     // 6: mandatory_expr_6
@@ -1180,7 +1168,7 @@ static const parsingnode_t parsingTable[543] = {
     // 8: optional_expr_8
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 10 },
     // 9: string_terminal_9
-    { NC_TERMINAL, NT_TERMINAL_9, TT_STRING, "-", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_MINUS, TT_STRING, "-", 0, -1 },
     // 10: production_str_lit
     { NC_PRODUCTION, NT_STR_LIT, TT_UNDEF, 0, 1, 11 },
     // 11: regex_terminal_11
@@ -1190,13 +1178,13 @@ static const parsingnode_t parsingTable[543] = {
     // 13: alternative_expr_13
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 13 },
     // 14: string_terminal_14
-    { NC_TERMINAL, NT_TERMINAL_14, TT_STRING, "true", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_TRUE, TT_STRING, "true", 0, -1 },
     // 15: string_terminal_15
-    { NC_TERMINAL, NT_TERMINAL_15, TT_STRING, "false", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_FALSE, TT_STRING, "false", 0, -1 },
     // 16: production_ptr_lit
     { NC_PRODUCTION, NT_PTR_LIT, TT_UNDEF, 0, 1, 15 },
     // 17: string_terminal_17
-    { NC_TERMINAL, NT_TERMINAL_17, TT_STRING, "nil", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_NIL, TT_STRING, "nil", 0, -1 },
     // 18: production_identifier
     { NC_PRODUCTION, NT_IDENTIFIER, TT_UNDEF, 0, 1, 16 },
     // 19: regex_terminal_19
@@ -1206,21 +1194,21 @@ static const parsingnode_t parsingTable[543] = {
     // 21: alternative_expr_21
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 5, 18 },
     // 22: string_terminal_22
-    { NC_TERMINAL, NT_TERMINAL_22, TT_STRING, "int", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_INT, TT_STRING, "int", 0, -1 },
     // 23: string_terminal_23
-    { NC_TERMINAL, NT_TERMINAL_23, TT_STRING, "real", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_REAL, TT_STRING, "real", 0, -1 },
     // 24: string_terminal_24
-    { NC_TERMINAL, NT_TERMINAL_24, TT_STRING, "string", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_STRING, TT_STRING, "string", 0, -1 },
     // 25: string_terminal_25
-    { NC_TERMINAL, NT_TERMINAL_25, TT_STRING, "byte", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_BYTE, TT_STRING, "byte", 0, -1 },
     // 26: string_terminal_26
-    { NC_TERMINAL, NT_TERMINAL_26, TT_STRING, "bool", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_BOOL, TT_STRING, "bool", 0, -1 },
     // 27: production_object_pointer
     { NC_PRODUCTION, NT_OBJECT_POINTER, TT_UNDEF, 0, 1, 23 },
     // 28: mandatory_expr_28
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 24 },
     // 29: string_terminal_29
-    { NC_TERMINAL, NT_TERMINAL_29, TT_STRING, "^", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_XOR, TT_STRING, "^", 0, -1 },
     // 30: production_cell_type
     { NC_PRODUCTION, NT_CELL_TYPE, TT_UNDEF, 0, 1, 26 },
     // 31: alternative_expr_31
@@ -1230,7 +1218,7 @@ static const parsingnode_t parsingTable[543] = {
     // 33: mandatory_expr_33
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 30 },
     // 34: string_terminal_34
-    { NC_TERMINAL, NT_TERMINAL_34, TT_STRING, "*", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_STAR, TT_STRING, "*", 0, -1 },
     // 35: production_type
     { NC_PRODUCTION, NT_TYPE, TT_UNDEF, 0, 1, 32 },
     // 36: alternative_expr_36
@@ -1244,65 +1232,65 @@ static const parsingnode_t parsingTable[543] = {
     // 40: mandatory_expr_40
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 40 },
     // 41: string_terminal_41
-    { NC_TERMINAL, NT_TERMINAL_41, TT_STRING, ",", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_COMMA, TT_STRING, ",", 0, -1 },
     // 42: production_neg_op
     { NC_PRODUCTION, NT_NEG_OP, TT_UNDEF, 0, 1, 42 },
     // 43: alternative_expr_43
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 43 },
     // 44: string_terminal_44
-    { NC_TERMINAL, NT_TERMINAL_44, TT_STRING, "-", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_MINUS, TT_STRING, "-", 0, -1 },
     // 45: string_terminal_45
-    { NC_TERMINAL, NT_TERMINAL_45, TT_STRING, "not", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_NOT, TT_STRING, "not", 0, -1 },
     // 46: production_mult_op
     { NC_PRODUCTION, NT_MULT_OP, TT_UNDEF, 0, 1, 45 },
     // 47: alternative_expr_47
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 46 },
     // 48: string_terminal_48
-    { NC_TERMINAL, NT_TERMINAL_48, TT_STRING, "/", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_SLASH, TT_STRING, "/", 0, -1 },
     // 49: string_terminal_49
-    { NC_TERMINAL, NT_TERMINAL_49, TT_STRING, "mod", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_MOD, TT_STRING, "mod", 0, -1 },
     // 50: production_add_op
     { NC_PRODUCTION, NT_ADD_OP, TT_UNDEF, 0, 1, 49 },
     // 51: alternative_expr_51
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 50 },
     // 52: string_terminal_52
-    { NC_TERMINAL, NT_TERMINAL_52, TT_STRING, "+", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_PLUS, TT_STRING, "+", 0, -1 },
     // 53: production_shf_op
     { NC_PRODUCTION, NT_SHF_OP, TT_UNDEF, 0, 1, 52 },
     // 54: alternative_expr_54
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 53 },
     // 55: string_terminal_55
-    { NC_TERMINAL, NT_TERMINAL_55, TT_STRING, "shl", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_SHL, TT_STRING, "shl", 0, -1 },
     // 56: string_terminal_56
-    { NC_TERMINAL, NT_TERMINAL_56, TT_STRING, "shr", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_SHR, TT_STRING, "shr", 0, -1 },
     // 57: production_cmp_op
     { NC_PRODUCTION, NT_CMP_OP, TT_UNDEF, 0, 1, 55 },
     // 58: alternative_expr_58
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 6, 56 },
     // 59: string_terminal_59
-    { NC_TERMINAL, NT_TERMINAL_59, TT_STRING, "<>", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_NE, TT_STRING, "<>", 0, -1 },
     // 60: string_terminal_60
-    { NC_TERMINAL, NT_TERMINAL_60, TT_STRING, "<=", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_LE, TT_STRING, "<=", 0, -1 },
     // 61: string_terminal_61
-    { NC_TERMINAL, NT_TERMINAL_61, TT_STRING, ">=", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_GE, TT_STRING, ">=", 0, -1 },
     // 62: string_terminal_62
-    { NC_TERMINAL, NT_TERMINAL_62, TT_STRING, "=", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_EQ, TT_STRING, "=", 0, -1 },
     // 63: string_terminal_63
-    { NC_TERMINAL, NT_TERMINAL_63, TT_STRING, "<", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_LT, TT_STRING, "<", 0, -1 },
     // 64: string_terminal_64
-    { NC_TERMINAL, NT_TERMINAL_64, TT_STRING, ">", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_GT, TT_STRING, ">", 0, -1 },
     // 65: production_and_op
     { NC_PRODUCTION, NT_AND_OP, TT_UNDEF, 0, 1, 62 },
     // 66: string_terminal_66
-    { NC_TERMINAL, NT_TERMINAL_66, TT_STRING, "and", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_AND, TT_STRING, "and", 0, -1 },
     // 67: production_or_op
     { NC_PRODUCTION, NT_OR_OP, TT_UNDEF, 0, 1, 63 },
     // 68: alternative_expr_68
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 64 },
     // 69: string_terminal_69
-    { NC_TERMINAL, NT_TERMINAL_69, TT_STRING, "or", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_OR, TT_STRING, "or", 0, -1 },
     // 70: string_terminal_70
-    { NC_TERMINAL, NT_TERMINAL_70, TT_STRING, "xor", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_XOR, TT_STRING, "xor", 0, -1 },
     // 71: production_c_num_base_e
     { NC_PRODUCTION, NT_C_NUM_BASE_E, TT_UNDEF, 0, 1, 66 },
     // 72: alternative_expr_72
@@ -1310,9 +1298,9 @@ static const parsingnode_t parsingTable[543] = {
     // 73: mandatory_expr_73
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 71 },
     // 74: string_terminal_74
-    { NC_TERMINAL, NT_TERMINAL_74, TT_STRING, "(", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_LPAREN, TT_STRING, "(", 0, -1 },
     // 75: string_terminal_75
-    { NC_TERMINAL, NT_TERMINAL_75, TT_STRING, ")", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_RPAREN, TT_STRING, ")", 0, -1 },
     // 76: production_c_num_neg_e
     { NC_PRODUCTION, NT_C_NUM_NEG_E, TT_UNDEF, 0, 1, 74 },
     // 77: mandatory_expr_77
@@ -1382,7 +1370,7 @@ static const parsingnode_t parsingTable[543] = {
     // 109: mandatory_expr_109
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 122 },
     // 110: string_terminal_110
-    { NC_TERMINAL, NT_TERMINAL_110, TT_STRING, "+", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_PLUS, TT_STRING, "+", 0, -1 },
     // 111: production_c_str_cmp_e
     { NC_PRODUCTION, NT_C_STR_CMP_E, TT_UNDEF, 0, 1, 124 },
     // 112: mandatory_expr_112
@@ -1420,7 +1408,7 @@ static const parsingnode_t parsingTable[543] = {
     // 128: optional_expr_128
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 149 },
     // 129: string_terminal_129
-    { NC_TERMINAL, NT_TERMINAL_129, TT_STRING, "not", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_NOT, TT_STRING, "not", 0, -1 },
     // 130: production_c_bool_and_e
     { NC_PRODUCTION, NT_C_BOOL_AND_E, TT_UNDEF, 0, 1, 150 },
     // 131: mandatory_expr_131
@@ -1454,7 +1442,7 @@ static const parsingnode_t parsingTable[543] = {
     // 145: mandatory_expr_145
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 173 },
     // 146: string_terminal_146
-    { NC_TERMINAL, NT_TERMINAL_146, TT_STRING, ",", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_COMMA, TT_STRING, ",", 0, -1 },
     // 147: production_access_op
     { NC_PRODUCTION, NT_ACCESS_OP, TT_UNDEF, 0, 1, 175 },
     // 148: alternative_expr_148
@@ -1466,9 +1454,9 @@ static const parsingnode_t parsingTable[543] = {
     // 151: mandatory_expr_151
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 180 },
     // 152: string_terminal_152
-    { NC_TERMINAL, NT_TERMINAL_152, TT_STRING, "[", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_LBRACK, TT_STRING, "[", 0, -1 },
     // 153: string_terminal_153
-    { NC_TERMINAL, NT_TERMINAL_153, TT_STRING, "]", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_RBRACK, TT_STRING, "]", 0, -1 },
     // 154: production_ident_access
     { NC_PRODUCTION, NT_IDENT_ACCESS, TT_UNDEF, 0, 1, 183 },
     // 155: mandatory_expr_155
@@ -1480,17 +1468,17 @@ static const parsingnode_t parsingTable[543] = {
     // 158: mandatory_expr_158
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 189 },
     // 159: string_terminal_159
-    { NC_TERMINAL, NT_TERMINAL_159, TT_STRING, "(", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_LPAREN, TT_STRING, "(", 0, -1 },
     // 160: optional_expr_160
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 192 },
     // 161: string_terminal_161
-    { NC_TERMINAL, NT_TERMINAL_161, TT_STRING, ")", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_RPAREN, TT_STRING, ")", 0, -1 },
     // 162: production_valof_expr
     { NC_PRODUCTION, NT_VALOF_EXPR, TT_UNDEF, 0, 1, 193 },
     // 163: mandatory_expr_163
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 194 },
     // 164: string_terminal_164
-    { NC_TERMINAL, NT_TERMINAL_164, TT_STRING, "valof", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_VALOF, TT_STRING, "valof", 0, -1 },
     // 165: production_num_base_e
     { NC_PRODUCTION, NT_NUM_BASE_E, TT_UNDEF, 0, 1, 197 },
     // 166: alternative_expr_166
@@ -1626,9 +1614,9 @@ static const parsingnode_t parsingTable[543] = {
     // 231: alternative_expr_231
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 301 },
     // 232: string_terminal_232
-    { NC_TERMINAL, NT_TERMINAL_232, TT_STRING, "dynamic", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_DYNAMIC, TT_STRING, "dynamic", 0, -1 },
     // 233: string_terminal_233
-    { NC_TERMINAL, NT_TERMINAL_233, TT_STRING, "assoc", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_ASSOC, TT_STRING, "assoc", 0, -1 },
     // 234: production_object_inst
     { NC_PRODUCTION, NT_OBJECT_INST, TT_UNDEF, 0, 1, 304 },
     // 235: mandatory_expr_235
@@ -1642,7 +1630,7 @@ static const parsingnode_t parsingTable[543] = {
     // 239: mandatory_expr_239
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 312 },
     // 240: string_terminal_240
-    { NC_TERMINAL, NT_TERMINAL_240, TT_STRING, "new", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_NEW, TT_STRING, "new", 0, -1 },
     // 241: optional_expr_241
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 315 },
     // 242: alternative_expr_242
@@ -1672,7 +1660,7 @@ static const parsingnode_t parsingTable[543] = {
     // 254: alternative_expr_254
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 335 },
     // 255: string_terminal_255
-    { NC_TERMINAL, NT_TERMINAL_255, TT_STRING, "default", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_DEFAULT, TT_STRING, "default", 0, -1 },
     // 256: production_call_arg_list
     { NC_PRODUCTION, NT_CALL_ARG_LIST, TT_UNDEF, 0, 1, 337 },
     // 257: mandatory_expr_257
@@ -1686,17 +1674,17 @@ static const parsingnode_t parsingTable[543] = {
     // 261: mandatory_expr_261
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 344 },
     // 262: string_terminal_262
-    { NC_TERMINAL, NT_TERMINAL_262, TT_STRING, "{", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_LBRACE, TT_STRING, "{", 0, -1 },
     // 263: optional_expr_263
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 347 },
     // 264: string_terminal_264
-    { NC_TERMINAL, NT_TERMINAL_264, TT_STRING, "}", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_RBRACE, TT_STRING, "}", 0, -1 },
     // 265: production_optional_block
     { NC_PRODUCTION, NT_OPTIONAL_BLOCK, TT_UNDEF, 0, 1, 348 },
     // 266: alternative_expr_266
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 349 },
     // 267: string_terminal_267
-    { NC_TERMINAL, NT_TERMINAL_267, TT_STRING, ";", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_SEMIC, TT_STRING, ";", 0, -1 },
     // 268: production_argument_decl
     { NC_PRODUCTION, NT_ARGUMENT_DECL, TT_UNDEF, 0, 1, 351 },
     // 269: alternative_expr_269
@@ -1704,15 +1692,15 @@ static const parsingnode_t parsingTable[543] = {
     // 270: mandatory_expr_270
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 4, 354 },
     // 271: string_terminal_271
-    { NC_TERMINAL, NT_TERMINAL_271, TT_STRING, ":", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_COLON, TT_STRING, ":", 0, -1 },
     // 272: optional_expr_272
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 358 },
     // 273: mandatory_expr_273
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 359 },
     // 274: string_terminal_274
-    { NC_TERMINAL, NT_TERMINAL_274, TT_STRING, "=", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_EQ, TT_STRING, "=", 0, -1 },
     // 275: string_terminal_275
-    { NC_TERMINAL, NT_TERMINAL_275, TT_STRING, "...", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_ELLIPSIS, TT_STRING, "...", 0, -1 },
     // 276: production_argument_list
     { NC_PRODUCTION, NT_ARGUMENT_LIST, TT_UNDEF, 0, 1, 361 },
     // 277: mandatory_expr_277
@@ -1722,7 +1710,7 @@ static const parsingnode_t parsingTable[543] = {
     // 279: mandatory_expr_279
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 365 },
     // 280: string_terminal_280
-    { NC_TERMINAL, NT_TERMINAL_280, TT_STRING, ";", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_SEMIC, TT_STRING, ";", 0, -1 },
     // 281: production_arg_declarator
     { NC_PRODUCTION, NT_ARG_DECLARATOR, TT_UNDEF, 0, 1, 367 },
     // 282: mandatory_expr_282
@@ -1734,7 +1722,7 @@ static const parsingnode_t parsingTable[543] = {
     // 285: mandatory_expr_285
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 373 },
     // 286: string_terminal_286
-    { NC_TERMINAL, NT_TERMINAL_286, TT_STRING, "returning", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_RETURNING, TT_STRING, "returning", 0, -1 },
     // 287: production_ident_list
     { NC_PRODUCTION, NT_IDENT_LIST, TT_UNDEF, 0, 1, 375 },
     // 288: mandatory_expr_288
@@ -1748,49 +1736,49 @@ static const parsingnode_t parsingTable[543] = {
     // 292: mandatory_expr_292
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 382 },
     // 293: string_terminal_293
-    { NC_TERMINAL, NT_TERMINAL_293, TT_STRING, "extends", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_EXTENDS, TT_STRING, "extends", 0, -1 },
     // 294: production_impl_clause
     { NC_PRODUCTION, NT_IMPL_CLAUSE, TT_UNDEF, 0, 1, 384 },
     // 295: mandatory_expr_295
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 385 },
     // 296: string_terminal_296
-    { NC_TERMINAL, NT_TERMINAL_296, TT_STRING, "implements", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_IMPLEMENTS, TT_STRING, "implements", 0, -1 },
     // 297: production_visibility
     { NC_PRODUCTION, NT_VISIBILITY, TT_UNDEF, 0, 1, 387 },
     // 298: alternative_expr_298
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 388 },
     // 299: string_terminal_299
-    { NC_TERMINAL, NT_TERMINAL_299, TT_STRING, "private", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_PRIVATE, TT_STRING, "private", 0, -1 },
     // 300: string_terminal_300
-    { NC_TERMINAL, NT_TERMINAL_300, TT_STRING, "protected", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_PROTECTED, TT_STRING, "protected", 0, -1 },
     // 301: string_terminal_301
-    { NC_TERMINAL, NT_TERMINAL_301, TT_STRING, "public", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_PUBLIC, TT_STRING, "public", 0, -1 },
     // 302: production_access_type
     { NC_PRODUCTION, NT_ACCESS_TYPE, TT_UNDEF, 0, 1, 391 },
     // 303: alternative_expr_303
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 392 },
     // 304: string_terminal_304
-    { NC_TERMINAL, NT_TERMINAL_304, TT_STRING, "readonly", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_READONLY, TT_STRING, "readonly", 0, -1 },
     // 305: string_terminal_305
-    { NC_TERMINAL, NT_TERMINAL_305, TT_STRING, "readwrite", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_READWRITE, TT_STRING, "readwrite", 0, -1 },
     // 306: string_terminal_306
-    { NC_TERMINAL, NT_TERMINAL_306, TT_STRING, "writeonly", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_WRITEONLY, TT_STRING, "writeonly", 0, -1 },
     // 307: production_storage_type
     { NC_PRODUCTION, NT_STORAGE_TYPE, TT_UNDEF, 0, 1, 395 },
     // 308: string_terminal_308
-    { NC_TERMINAL, NT_TERMINAL_308, TT_STRING, "static", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_STATIC, TT_STRING, "static", 0, -1 },
     // 309: production_derivation
     { NC_PRODUCTION, NT_DERIVATION, TT_UNDEF, 0, 1, 396 },
     // 310: alternative_expr_310
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 397 },
     // 311: string_terminal_311
-    { NC_TERMINAL, NT_TERMINAL_311, TT_STRING, "override", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_OVERRIDE, TT_STRING, "override", 0, -1 },
     // 312: string_terminal_312
-    { NC_TERMINAL, NT_TERMINAL_312, TT_STRING, "final", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_FINAL, TT_STRING, "final", 0, -1 },
     // 313: production_implementation
     { NC_PRODUCTION, NT_IMPLEMENTATION, TT_UNDEF, 0, 1, 399 },
     // 314: string_terminal_314
-    { NC_TERMINAL, NT_TERMINAL_314, TT_STRING, "implementation", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_IMPLEMENTATION, TT_STRING, "implementation", 0, -1 },
     // 315: production_attrib_flag
     { NC_PRODUCTION, NT_ATTRIB_FLAG, TT_UNDEF, 0, 1, 400 },
     // 316: alternative_expr_316
@@ -1808,9 +1796,9 @@ static const parsingnode_t parsingTable[543] = {
     // 322: optional_expr_322
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 418 },
     // 323: string_terminal_323
-    { NC_TERMINAL, NT_TERMINAL_323, TT_STRING, "attribute", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_ATTRIBUTE, TT_STRING, "attribute", 0, -1 },
     // 324: string_terminal_324
-    { NC_TERMINAL, NT_TERMINAL_324, TT_STRING, ":", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_COLON, TT_STRING, ":", 0, -1 },
     // 325: optional_expr_325
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 419 },
     // 326: mandatory_expr_326
@@ -1832,7 +1820,7 @@ static const parsingnode_t parsingTable[543] = {
     // 334: optional_expr_334
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 438 },
     // 335: string_terminal_335
-    { NC_TERMINAL, NT_TERMINAL_335, TT_STRING, "method", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_METHOD, TT_STRING, "method", 0, -1 },
     // 336: optional_expr_336
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 439 },
     // 337: production_field
@@ -1850,17 +1838,17 @@ static const parsingnode_t parsingTable[543] = {
     // 343: mandatory_expr_343
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 7, 450 },
     // 344: string_terminal_344
-    { NC_TERMINAL, NT_TERMINAL_344, TT_STRING, "class", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_CLASS, TT_STRING, "class", 0, -1 },
     // 345: optional_expr_345
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 457 },
     // 346: optional_expr_346
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 458 },
     // 347: string_terminal_347
-    { NC_TERMINAL, NT_TERMINAL_347, TT_STRING, "{", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_LBRACE, TT_STRING, "{", 0, -1 },
     // 348: optional_expr_348
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 459 },
     // 349: string_terminal_349
-    { NC_TERMINAL, NT_TERMINAL_349, TT_STRING, "}", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_RBRACE, TT_STRING, "}", 0, -1 },
     // 350: production_iattrib_decl
     { NC_PRODUCTION, NT_IATTRIB_DECL, TT_UNDEF, 0, 1, 460 },
     // 351: mandatory_expr_351
@@ -1888,7 +1876,7 @@ static const parsingnode_t parsingTable[543] = {
     // 362: mandatory_expr_362
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 6, 485 },
     // 363: string_terminal_363
-    { NC_TERMINAL, NT_TERMINAL_363, TT_STRING, "interface", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_INTERFACE, TT_STRING, "interface", 0, -1 },
     // 364: optional_expr_364
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 491 },
     // 365: optional_expr_365
@@ -1900,7 +1888,7 @@ static const parsingnode_t parsingTable[543] = {
     // 368: optional_expr_368
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 500 },
     // 369: string_terminal_369
-    { NC_TERMINAL, NT_TERMINAL_369, TT_STRING, "function", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_FUNCTION, TT_STRING, "function", 0, -1 },
     // 370: production_proc_decl
     { NC_PRODUCTION, NT_PROC_DECL, TT_UNDEF, 0, 1, 501 },
     // 371: mandatory_expr_371
@@ -1908,19 +1896,19 @@ static const parsingnode_t parsingTable[543] = {
     // 372: optional_expr_372
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 507 },
     // 373: string_terminal_373
-    { NC_TERMINAL, NT_TERMINAL_373, TT_STRING, "procedure", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_PROCEDURE, TT_STRING, "procedure", 0, -1 },
     // 374: production_var_decl
     { NC_PRODUCTION, NT_VAR_DECL, TT_UNDEF, 0, 1, 508 },
     // 375: mandatory_expr_375
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 509 },
     // 376: string_terminal_376
-    { NC_TERMINAL, NT_TERMINAL_376, TT_STRING, "var", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_VAR, TT_STRING, "var", 0, -1 },
     // 377: production_const_decl
     { NC_PRODUCTION, NT_CONST_DECL, TT_UNDEF, 0, 1, 514 },
     // 378: mandatory_expr_378
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 515 },
     // 379: string_terminal_379
-    { NC_TERMINAL, NT_TERMINAL_379, TT_STRING, "const", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_CONST, TT_STRING, "const", 0, -1 },
     // 380: production_enum_item
     { NC_PRODUCTION, NT_ENUM_ITEM, TT_UNDEF, 0, 1, 520 },
     // 381: mandatory_expr_381
@@ -1944,13 +1932,13 @@ static const parsingnode_t parsingTable[543] = {
     // 390: mandatory_expr_390
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 535 },
     // 391: string_terminal_391
-    { NC_TERMINAL, NT_TERMINAL_391, TT_STRING, "enum", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_ENUM, TT_STRING, "enum", 0, -1 },
     // 392: production_let_stmt
     { NC_PRODUCTION, NT_LET_STMT, TT_UNDEF, 0, 1, 540 },
     // 393: mandatory_expr_393
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 541 },
     // 394: string_terminal_394
-    { NC_TERMINAL, NT_TERMINAL_394, TT_STRING, "let", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_LET, TT_STRING, "let", 0, -1 },
     // 395: production_decl_stmt
     { NC_PRODUCTION, NT_DECL_STMT, TT_UNDEF, 0, 1, 546 },
     // 396: alternative_expr_396
@@ -1980,17 +1968,17 @@ static const parsingnode_t parsingTable[543] = {
     // 408: mandatory_expr_408
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 571 },
     // 409: string_terminal_409
-    { NC_TERMINAL, NT_TERMINAL_409, TT_STRING, "import", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_IMPORT, TT_STRING, "import", 0, -1 },
     // 410: production_xref_type
     { NC_PRODUCTION, NT_XREF_TYPE, TT_UNDEF, 0, 1, 574 },
     // 411: alternative_expr_411
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 575 },
     // 412: string_terminal_412
-    { NC_TERMINAL, NT_TERMINAL_412, TT_STRING, "module", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_MODULE, TT_STRING, "module", 0, -1 },
     // 413: string_terminal_413
-    { NC_TERMINAL, NT_TERMINAL_413, TT_STRING, "package", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_PACKAGE, TT_STRING, "package", 0, -1 },
     // 414: string_terminal_414
-    { NC_TERMINAL, NT_TERMINAL_414, TT_STRING, "library", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_LIBRARY, TT_STRING, "library", 0, -1 },
     // 415: production_str_lit_list
     { NC_PRODUCTION, NT_STR_LIT_LIST, TT_UNDEF, 0, 1, 578 },
     // 416: mandatory_expr_416
@@ -2004,19 +1992,19 @@ static const parsingnode_t parsingTable[543] = {
     // 420: mandatory_expr_420
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 585 },
     // 421: string_terminal_421
-    { NC_TERMINAL, NT_TERMINAL_421, TT_STRING, "platform", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_PLATFORM, TT_STRING, "platform", 0, -1 },
     // 422: production_language_spec
     { NC_PRODUCTION, NT_LANGUAGE_SPEC, TT_UNDEF, 0, 1, 587 },
     // 423: mandatory_expr_423
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 588 },
     // 424: string_terminal_424
-    { NC_TERMINAL, NT_TERMINAL_424, TT_STRING, "language", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_LANGUAGE, TT_STRING, "language", 0, -1 },
     // 425: production_header_spec
     { NC_PRODUCTION, NT_HEADER_SPEC, TT_UNDEF, 0, 1, 590 },
     // 426: mandatory_expr_426
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 591 },
     // 427: string_terminal_427
-    { NC_TERMINAL, NT_TERMINAL_427, TT_STRING, "header", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_HEADER, TT_STRING, "header", 0, -1 },
     // 428: production_function_spec
     { NC_PRODUCTION, NT_FUNCTION_SPEC, TT_UNDEF, 0, 1, 593 },
     // 429: mandatory_expr_429
@@ -2046,7 +2034,7 @@ static const parsingnode_t parsingTable[543] = {
     // 441: mandatory_expr_441
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 616 },
     // 442: string_terminal_442
-    { NC_TERMINAL, NT_TERMINAL_442, TT_STRING, "alien", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_ALIEN, TT_STRING, "alien", 0, -1 },
     // 443: optional_expr_443
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 621 },
     // 444: mandatory_expr_444
@@ -2070,7 +2058,7 @@ static const parsingnode_t parsingTable[543] = {
     // 453: alternative_expr_453
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 636 },
     // 454: string_terminal_454
-    { NC_TERMINAL, NT_TERMINAL_454, TT_STRING, "program", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_PROGRAM, TT_STRING, "program", 0, -1 },
     // 455: production_global_scope
     { NC_PRODUCTION, NT_GLOBAL_SCOPE, TT_UNDEF, 0, 1, 638 },
     // 456: mandatory_expr_456
@@ -2090,7 +2078,7 @@ static const parsingnode_t parsingTable[543] = {
     // 463: mandatory_expr_463
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 649 },
     // 464: string_terminal_464
-    { NC_TERMINAL, NT_TERMINAL_464, TT_STRING, "call", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_CALL, TT_STRING, "call", 0, -1 },
     // 465: production_block_or_stmt
     { NC_PRODUCTION, NT_BLOCK_OR_STMT, TT_UNDEF, 0, 1, 652 },
     // 466: alternative_expr_466
@@ -2102,15 +2090,15 @@ static const parsingnode_t parsingTable[543] = {
     // 469: alternative_expr_469
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 660 },
     // 470: string_terminal_470
-    { NC_TERMINAL, NT_TERMINAL_470, TT_STRING, "if", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_IF, TT_STRING, "if", 0, -1 },
     // 471: string_terminal_471
-    { NC_TERMINAL, NT_TERMINAL_471, TT_STRING, "unless", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_UNLESS, TT_STRING, "unless", 0, -1 },
     // 472: optional_expr_472
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 662 },
     // 473: mandatory_expr_473
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 663 },
     // 474: string_terminal_474
-    { NC_TERMINAL, NT_TERMINAL_474, TT_STRING, "else", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_ELSE, TT_STRING, "else", 0, -1 },
     // 475: production_while_stmt
     { NC_PRODUCTION, NT_WHILE_STMT, TT_UNDEF, 0, 1, 665 },
     // 476: mandatory_expr_476
@@ -2118,9 +2106,9 @@ static const parsingnode_t parsingTable[543] = {
     // 477: alternative_expr_477
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 669 },
     // 478: string_terminal_478
-    { NC_TERMINAL, NT_TERMINAL_478, TT_STRING, "while", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_WHILE, TT_STRING, "while", 0, -1 },
     // 479: string_terminal_479
-    { NC_TERMINAL, NT_TERMINAL_479, TT_STRING, "until", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_UNTIL, TT_STRING, "until", 0, -1 },
     // 480: production_repeat_stmt
     { NC_PRODUCTION, NT_REPEAT_STMT, TT_UNDEF, 0, 1, 671 },
     // 481: mandatory_expr_481
@@ -2128,9 +2116,9 @@ static const parsingnode_t parsingTable[543] = {
     // 482: alternative_expr_482
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 677 },
     // 483: string_terminal_483
-    { NC_TERMINAL, NT_TERMINAL_483, TT_STRING, "repeat", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_REPEAT, TT_STRING, "repeat", 0, -1 },
     // 484: string_terminal_484
-    { NC_TERMINAL, NT_TERMINAL_484, TT_STRING, "do", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_DO, TT_STRING, "do", 0, -1 },
     // 485: alternative_expr_485
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 679 },
     // 486: production_loop_stmt
@@ -2140,21 +2128,21 @@ static const parsingnode_t parsingTable[543] = {
     // 488: alternative_expr_488
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 684 },
     // 489: string_terminal_489
-    { NC_TERMINAL, NT_TERMINAL_489, TT_STRING, "loop", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_LOOP, TT_STRING, "loop", 0, -1 },
     // 490: string_terminal_490
-    { NC_TERMINAL, NT_TERMINAL_490, TT_STRING, "forever", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_FOREVER, TT_STRING, "forever", 0, -1 },
     // 491: production_for_stmt
     { NC_PRODUCTION, NT_FOR_STMT, TT_UNDEF, 0, 1, 686 },
     // 492: mandatory_expr_492
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 8, 687 },
     // 493: string_terminal_493
-    { NC_TERMINAL, NT_TERMINAL_493, TT_STRING, "for", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_FOR, TT_STRING, "for", 0, -1 },
     // 494: alternative_expr_494
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 695 },
     // 495: string_terminal_495
-    { NC_TERMINAL, NT_TERMINAL_495, TT_STRING, "to", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_TO, TT_STRING, "to", 0, -1 },
     // 496: string_terminal_496
-    { NC_TERMINAL, NT_TERMINAL_496, TT_STRING, "downto", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_DOWNTO, TT_STRING, "downto", 0, -1 },
     // 497: production_loop_control
     { NC_PRODUCTION, NT_LOOP_CONTROL, TT_UNDEF, 0, 1, 697 },
     // 498: mandatory_expr_498
@@ -2162,11 +2150,11 @@ static const parsingnode_t parsingTable[543] = {
     // 499: alternative_expr_499
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 3, 701 },
     // 500: string_terminal_500
-    { NC_TERMINAL, NT_TERMINAL_500, TT_STRING, "break", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_BREAK, TT_STRING, "break", 0, -1 },
     // 501: string_terminal_501
-    { NC_TERMINAL, NT_TERMINAL_501, TT_STRING, "continue", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_CONTINUE, TT_STRING, "continue", 0, -1 },
     // 502: string_terminal_502
-    { NC_TERMINAL, NT_TERMINAL_502, TT_STRING, "again", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_AGAIN, TT_STRING, "again", 0, -1 },
     // 503: optional_expr_503
     { NC_OPTIONAL, _NT_GENERIC, TT_UNDEF, 0, 1, 704 },
     // 504: production_loop_type_stmt
@@ -2178,7 +2166,7 @@ static const parsingnode_t parsingTable[543] = {
     // 507: mandatory_expr_507
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 4, 712 },
     // 508: string_terminal_508
-    { NC_TERMINAL, NT_TERMINAL_508, TT_STRING, "case", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_CASE, TT_STRING, "case", 0, -1 },
     // 509: production_default_case
     { NC_PRODUCTION, NT_DEFAULT_CASE, TT_UNDEF, 0, 1, 716 },
     // 510: mandatory_expr_510
@@ -2198,7 +2186,7 @@ static const parsingnode_t parsingTable[543] = {
     // 517: mandatory_expr_517
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 5, 728 },
     // 518: string_terminal_518
-    { NC_TERMINAL, NT_TERMINAL_518, TT_STRING, "switch", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_SWITCH, TT_STRING, "switch", 0, -1 },
     // 519: production_goto_stmt
     { NC_PRODUCTION, NT_GOTO_STMT, TT_UNDEF, 0, 1, 733 },
     // 520: mandatory_expr_520
@@ -2206,27 +2194,27 @@ static const parsingnode_t parsingTable[543] = {
     // 521: alternative_expr_521
     { NC_ALTERNATIVE, _NT_GENERIC, TT_UNDEF, 0, 2, 737 },
     // 522: string_terminal_522
-    { NC_TERMINAL, NT_TERMINAL_522, TT_STRING, "goto", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_GOTO, TT_STRING, "goto", 0, -1 },
     // 523: string_terminal_523
-    { NC_TERMINAL, NT_TERMINAL_523, TT_STRING, "gosub", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_GOSUB, TT_STRING, "gosub", 0, -1 },
     // 524: production_return_stmt
     { NC_PRODUCTION, NT_RETURN_STMT, TT_UNDEF, 0, 1, 739 },
     // 525: mandatory_expr_525
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 2, 740 },
     // 526: string_terminal_526
-    { NC_TERMINAL, NT_TERMINAL_526, TT_STRING, "return", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_RETURN, TT_STRING, "return", 0, -1 },
     // 527: production_resultis_stmt
     { NC_PRODUCTION, NT_RESULTIS_STMT, TT_UNDEF, 0, 1, 742 },
     // 528: mandatory_expr_528
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 743 },
     // 529: string_terminal_529
-    { NC_TERMINAL, NT_TERMINAL_529, TT_STRING, "resultis", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_RESULTIS, TT_STRING, "resultis", 0, -1 },
     // 530: production_delete_stmt
     { NC_PRODUCTION, NT_DELETE_STMT, TT_UNDEF, 0, 1, 746 },
     // 531: mandatory_expr_531
     { NC_MANDATORY, _NT_GENERIC, TT_UNDEF, 0, 3, 747 },
     // 532: string_terminal_532
-    { NC_TERMINAL, NT_TERMINAL_532, TT_STRING, "delete", 0, -1 },
+    { NC_TERMINAL, NT_TERMINAL_DELETE, TT_STRING, "delete", 0, -1 },
     // 533: production_flow_ctrl_stmt
     { NC_PRODUCTION, NT_FLOW_CTRL_STMT, TT_UNDEF, 0, 1, 750 },
     // 534: alternative_expr_534

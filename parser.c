@@ -269,8 +269,8 @@ static treenode_t* parse_node( const parsingnode_t* node, const char** pTextPos 
                     } else {
                         if ( strncmp( textPos, node->text, symLen ) != 0 ) return 0;
                     }
-printf( "TT_STRING matched '%s'\n", node->text );                    
-                    result    = create_node( node->nodeType, node->text );
+// printf( "TT_STRING matched '%s'\n", node->text );                    
+                    result    = create_node( node->nodeType, 0 );
                     textPos  += symLen;
                     *pTextPos = textPos;
                     return result;
@@ -283,7 +283,7 @@ printf( "TT_STRING matched '%s'\n", node->text );
                         buf = (char*) xmalloc( len );
                         memcpy( buf, textPos + matches[0].rm_so, len-1U );
                         buf[len-1U] = '\0';
-printf( "TT_REGEX '%s' matched '%s'\n", node->text, buf );
+// printf( "TT_REGEX '%s' matched '%s'\n", node->text, buf );
                         result = create_node( node->nodeType, buf );
                         free( buf );
                         textPos += len - 1U;
@@ -297,7 +297,10 @@ printf( "TT_REGEX '%s' matched '%s'\n", node->text, buf );
             break;
         case NC_PRODUCTION:
             if ( node->numBranches != 1U ) fatal( textPos, "bad parsing node (type C)" );
-            return parse_node( &parsingTable[branches[node->branches]], pTextPos );           
+            result = parse_node( &parsingTable[branches[node->branches]], pTextPos );
+            if ( result == 0 ) return 0;
+            if ( result->nodetype == _NT_GENERIC ) result->nodetype = node->nodeType;
+            return result;
         case NC_MANDATORY:
             result = create_node( node->nodeType, 0 );
             for ( i=0; i < node->numBranches; ++i ) {
@@ -307,6 +310,7 @@ printf( "TT_REGEX '%s' matched '%s'\n", node->text, buf );
                     delete_node( result ); 
                     return 0; 
                 }
+                if ( temp == 0 ) continue;
                 add_branch( result, temp );
             }
             *pTextPos = textPos;
