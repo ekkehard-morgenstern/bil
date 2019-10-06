@@ -255,6 +255,14 @@ static size_t ident_extent( const char* pos ) {
     return (size_t)( end - start );
 }
 
+static bool passed_a_terminal_match( const parsingnode_t* node, size_t i ) {
+    for ( size_t j=0; j < i; ++j ) {
+        const parsingnode_t* branch = &parsingTable[branches[node->branches+j]];
+        if ( branch->nodeClass == NC_TERMINAL ) return true;
+    }
+    return false;
+}
+
 static treenode_t* parse_node( const parsingnode_t* node, const char** pTextPos ) {
     treenode_t* temp; treenode_t* result = 0; size_t i, identLen, symLen, len; const char* textPos = *pTextPos;
     regex_cacheitem_t* cachedRegEx; regmatch_t matches[1]; int rv; char* buf;
@@ -309,8 +317,11 @@ printf( "TT_REGEX '%s' matched '%s'\n", node->text, buf );
                 const parsingnode_t* branch = &parsingTable[branches[node->branches+i]];
                 temp = parse_node( branch, &textPos );
                 if ( temp == 0 && branch->nodeClass != NC_OPTIONAL && branch->nodeClass != NC_OPTIONAL_REPETITIVE ) { 
-                    delete_node( result ); 
-                    return 0; 
+                    if ( !passed_a_terminal_match( node, i ) ) {
+                        delete_node( result ); 
+                        return 0;
+                    }
+                    fatal( textPos, "syntax error" );
                 }
                 if ( temp == 0 ) continue;
                 add_branch( result, temp );
