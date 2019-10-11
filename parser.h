@@ -30,9 +30,12 @@
 #endif
 
 // node type aliases
+#define NT_INTLIT       NT_TERMINAL_1
+#define NT_EXPMARKER    NT_TERMINAL_7
+#define NT_STRLIT       NT_TERMINAL_11
 #define NT_IDENTIFIER   NT_TERMINAL_19
-
-
+#define NT_PTRARROW     NT_TERMINAL_150
+#define NT_NAMEARROW    NT_TERMINAL_257
 
 
 typedef struct _treenode_t {
