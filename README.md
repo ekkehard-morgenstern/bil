@@ -6,7 +6,7 @@ This is a Basic Implementation Language (called BIL), that should have a small f
 
 The project is still in a very early stage, so don't expect it to be usable yet. I will add stuff as time progresses.
 
-It's based on elements from programming languages like C, Pascal, BASIC, BCPL and PHP. 
+It's based on elements from programming languages like C, Pascal, BASIC, BCPL and PHP.
 
 The syntax analyzer should already be working correctly, but I haven't tested it with many input files yet.
 
@@ -17,5 +17,3 @@ Building BIL makes use of my EBNF compiler, which can be found on my Github page
 To test the syntax analyzer, all you have to do currently is to type "./testparser test1.bil" or other input file.
 
 There might still be bugs in the analyzer, so if you notice any, please notify me. I also trust that my EBNF compiler generates the parsing table without error. If that isn't the case, please notify me.
-
-
