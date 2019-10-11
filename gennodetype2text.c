@@ -26,7 +26,7 @@
 #include <stdio.h>
 
 int main( int argc, char** argv ) {
-    FILE* fp = fopen( "parsingtable.c", "rt" );
+    FILE* fp = fopen( "parsingtable.h", "rt" );
     if ( fp == 0 ) return EXIT_FAILURE;
     char buf[512]; bool indecl = false;
     printf( "%s",

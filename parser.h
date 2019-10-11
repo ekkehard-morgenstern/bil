@@ -25,6 +25,16 @@
 
 #include <stddef.h>
 
+#ifndef PARSINGTABLE_H
+#include "parsingtable.h"
+#endif
+
+// node type aliases
+#define NT_IDENTIFIER   NT_TERMINAL_19
+
+
+
+
 typedef struct _treenode_t {
     int                     nodetype;
     char*                   text;

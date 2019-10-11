@@ -44,8 +44,9 @@ CFLAGS+= -Wall
 all: testparser
 	echo ok >all
 
-parsingtable.c:	bil.ebnf
+parsingtable.c:	bil.ebnf separateparsingtable
 	$(EBNFCOMP) <bil.ebnf >parsingtable.c
+	./separateparsingtable
 
 TESTPARSER_MODULES=testparser.o parser.o
 
@@ -60,5 +61,8 @@ nodetype2text.c: parsingtable.c gennodetype2text
 	./gennodetype2text >nodetype2text.c
 
 gennodetype2text: gennodetype2text.o
+	$(CC) $(CFLAGS) -o $@ $<
+
+separateparsingtable: separateparsingtable.o
 	$(CC) $(CFLAGS) -o $@ $<
 
