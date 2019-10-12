@@ -23,7 +23,9 @@
 #ifndef USERMEMORY_H
 #define USERMEMORY_H    1
 
-#include <stddef.h>
+#ifndef HANDLESPACE_H
+#include "handlespace.h"
+#endif
 
 #define CHUNKMAX    (SIZE_MAX>>2U)
 #define FREEBIT     (CHUNKMAX+1U)
@@ -58,9 +60,9 @@ void initUserMemory( size_t initialSize );
         size specified is incorrect.
     */
 
-void* allocUserMemory( size_t requestSize );
+objref_t allocUserMemory( size_t requestSize );
     /*
-        This function allocates the memory for allocHandle(). The pointer returned
+        This function allocates the memory for allocHandle(). The offset returned
         will point to the first usable byte of the memory block, and the memory block
         is guaranteed to be at least requestSize bytes wide.
 
@@ -77,7 +79,7 @@ void* allocUserMemory( size_t requestSize );
         If memory cannot be allocated for some reason, the program will terminate.
     */
 
-void freeUserMemory( void* block );
+void freeUserMemory( objref_t block );
     /*
         This function marks memory allocated by allocUserMemory() as free. The memory
         is not collected immediately, nor is it collected when it is locked.
@@ -87,7 +89,7 @@ void freeUserMemory( void* block );
         If the block address specified is incorrect, the behavior may be undefined.
     */
 
-void* lockUserMemory( void* block );
+void* lockUserMemory( objref_t block );
     /*
         This function marks a memory block as locked for reading/editing, and inhibits
         collection or moving of the block address for that time period.
@@ -97,7 +99,7 @@ void* lockUserMemory( void* block );
         If the block address specified is incorrect, the behavior may be undefined.
     */
 
-void unlockUserMemory( void* block );
+void unlockUserMemory( objref_t block );
     /*
         This function clears the lock mark on a memory block.
 
@@ -106,7 +108,7 @@ void unlockUserMemory( void* block );
         If the block address specified is incorrect, the behavior may be undefined.
     */
 
-size_t sizeofUserMemory( void* block );
+size_t sizeofUserMemory( objref_t block );
     /*
         Returns the actual size of the specified memory block, in bytes.
 

@@ -25,10 +25,10 @@
 
 #include <stddef.h>
 
-typedef void* objref_t;
+typedef size_t objref_t;
 
     /*
-        An object reference is a pointer to a region of memory in an allocation space.
+        An object reference is an offset into a region of memory in an allocation space.
         The memory block being pointed to is preceded by the length of the block (size_t).
         This length field also contains a bit which indicates whether the block is still in use
         and another bit to indicate whether the block is currently being locked for access.
