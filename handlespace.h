@@ -37,7 +37,8 @@ typedef void* objref_t;
 
 typedef struct _handlespace_t {
     objref_t*   objrefs;
-    size_t      numObjRefs;
+    unsigned    numObjRefs;
+    unsigned    usedObjRefs;
 } handlespace_t;
 
 extern handlespace_t theHandleSpace;
@@ -50,6 +51,8 @@ typedef unsigned handle_t;
         to be invalidated. There is only one handle space per process. Changes to the handle
         space must be atomic, in a way that the running application does not notice it.
     */
+
+void initHandleSpace( unsigned initialMaxHandles );
 
 handle_t allocHandle( size_t requestSize );
 void     freeHandle( handle_t handle );
