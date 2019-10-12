@@ -21,6 +21,7 @@
         Mail: Ekkehard Morgenstern, Mozartstr. 1, D-76744 Woerth am Rhein, Germany, Europe */
 
 #include "handlespace.h"
+#include "usermemory.h"
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
@@ -79,25 +80,47 @@ handle_t allocHandle( size_t requestSize ) {
         }
     }
     // the handle is allocated; now get a chunk of user memory
+    theHandleSpace.objrefs[hnd] = allocUserMemory( requestSize );
+    // return the handle
+    return hnd;
+}
 
+static void validateHandle( handle_t handle ) {
+    if ( handle >= theHandleSpace.usedObjRefs ) {
+        fprintf( stderr, "? handle out of range: %u\n", handle );
+        exit( EXIT_FAILURE );
+    }
+    if ( theHandleSpace.objrefs[handle] == 0 ) {
+        fprintf( stderr, "? handle %u not allocated\n", handle );
+        exit( EXIT_FAILURE );
+    }
 }
 
 void freeHandle( handle_t handle ) {
-
+    validateHandle( handle );
+    freeUserMemory( theHandleSpace.objrefs[handle] );
+    theHandleSpace.objrefs[handle] = 0;
 }
 
 size_t handleSize( handle_t handle ) {
-
+    validateHandle( handle );
+    return sizeofUserMemory( theHandleSpace.objrefs[handle] );
 }
 
 void* lockHandle( handle_t handle ) {
-
+    validateHandle( handle );
+    return lockUserMemory( theHandleSpace.objrefs[handle] );
 }
 
 void unlockHandle( handle_t handle ) {
-
+    validateHandle( handle );
+    unlockUserMemory( theHandleSpace.objrefs[handle] );
 }
 
-size_t memoryUsage( void ) {
+memusage_t memoryUsage( void ) {
+    memusage_t out;
+    memset( &out, 0, sizeof(out) );
 
+    return out;
 }
+

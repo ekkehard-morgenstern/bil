@@ -21,3 +21,27 @@
         Mail: Ekkehard Morgenstern, Mozartstr. 1, D-76744 Woerth am Rhein, Germany, Europe */
 
 #include "usermemory.h"
+
+void initUserMemory( size_t initialSize ) {
+
+}
+
+void* allocUserMemory( size_t requestSize ) {
+
+}
+
+void freeUserMemory( void* block ) {
+
+}
+
+void* lockUserMemory( void* block ) {
+
+}
+
+void unlockUserMemory( void* block ) {
+
+}
+
+size_t sizeofUserMemory( void* block ) {
+    
+}

@@ -51,8 +51,66 @@ extern usermemory_t theUserMemory;
 
 
 void initUserMemory( size_t initialSize );
+    /*
+        This function initializes user memory to some initial size. This size
+        cannot be smaller than a preset number of bytes, nor can it be larger than
+        some preset maximum size (CHUNKMAX). The program will fail if the
+        size specified is incorrect.
+    */
 
 void* allocUserMemory( size_t requestSize );
+    /*
+        This function allocates the memory for allocHandle(). The pointer returned
+        will point to the first usable byte of the memory block, and the memory block
+        is guaranteed to be at least requestSize bytes wide.
 
+        When user memory is exhausted, a garbage collection is performed first, before
+        an attempt is made to resize user memory. 
+
+        Do not call this function directly, since it could inhibit garbage collection
+        if handled the wrong way.
+
+        If there is one lock on the memory, user memory cannot be resized. Thus, locks
+        should be held only briefly to interact with a block of memory and never held
+        for a continued period of time.
+
+        If memory cannot be allocated for some reason, the program will terminate.
+    */
+
+void freeUserMemory( void* block );
+    /*
+        This function marks memory allocated by allocUserMemory() as free. The memory
+        is not collected immediately, nor is it collected when it is locked.
+
+        Calling this function on a locked memory block leads to program termination.
+
+        If the block address specified is incorrect, the behavior is undefined.
+    */
+
+void* lockUserMemory( void* block );
+    /*
+        This function marks a memory block as locked for reading/editing, and inhibits
+        collection or moving of the block address for that time period.
+
+        If the block is already locked, the program will terminate with an error message.
+
+        If the block address specified is incorrect, the behavior is undefined.
+    */
+
+void unlockUserMemory( void* block );
+    /*
+        This function clears the lock mark on a memory block.
+
+        The program will terminate if the memory block wasn't locked.
+
+        If the block address specified is incorrect, the behavior is undefined.
+    */
+
+size_t sizeofUserMemory( void* block );
+    /*
+        Returns the actual size of the specified memory block, in bytes.
+
+        If the block address specified is incorrect, the behavior is undefined.
+    */
 
 #endif
