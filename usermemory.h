@@ -84,7 +84,7 @@ void freeUserMemory( void* block );
 
         Calling this function on a locked memory block leads to program termination.
 
-        If the block address specified is incorrect, the behavior is undefined.
+        If the block address specified is incorrect, the behavior may be undefined.
     */
 
 void* lockUserMemory( void* block );
@@ -94,7 +94,7 @@ void* lockUserMemory( void* block );
 
         If the block is already locked, the program will terminate with an error message.
 
-        If the block address specified is incorrect, the behavior is undefined.
+        If the block address specified is incorrect, the behavior may be undefined.
     */
 
 void unlockUserMemory( void* block );
@@ -103,14 +103,14 @@ void unlockUserMemory( void* block );
 
         The program will terminate if the memory block wasn't locked.
 
-        If the block address specified is incorrect, the behavior is undefined.
+        If the block address specified is incorrect, the behavior may be undefined.
     */
 
 size_t sizeofUserMemory( void* block );
     /*
         Returns the actual size of the specified memory block, in bytes.
 
-        If the block address specified is incorrect, the behavior is undefined.
+        If the block address specified is incorrect, the behavior may be undefined.
     */
 
 #endif

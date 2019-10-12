@@ -21,6 +21,13 @@
         Mail: Ekkehard Morgenstern, Mozartstr. 1, D-76744 Woerth am Rhein, Germany, Europe */
 
 #include "usermemory.h"
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <limits.h>
+#include <stdio.h>
+
+usermemory_t theUserMemory;
 
 void initUserMemory( size_t initialSize ) {
 
@@ -30,18 +37,68 @@ void* allocUserMemory( size_t requestSize ) {
 
 }
 
-void freeUserMemory( void* block ) {
+static char* validateUserMemory( void* block ) {
+    char* blk = (char*) block;
+    if ( blk == 0 || blk < ((char*)sizeof(size_t)) || blk - sizeof(size_t) < theUserMemory.memory || 
+        blk >= theUserMemory.memory + theUserMemory.memUsed ) {
+        fprintf( stderr, "? illegal user memory address: %p\n", block );
+        exit( EXIT_FAILURE );
+    }
+    return blk;
+}
 
+void freeUserMemory( void* block ) {
+    char*  blk  = validateUserMemory( block );
+    size_t size = *( (size_t*)( blk - sizeof(size_t) ) );
+    if ( size & FREEBIT ) {
+        fprintf( stderr, "? block %p already freed\n", block );
+        exit( EXIT_FAILURE );
+    }
+    if ( size & LOCKBIT ) {
+        fprintf( stderr, "? block %p still locked\n", block );
+        exit( EXIT_FAILURE );
+    }
+    size |= FREEBIT;
+    *( (size_t*)( blk - sizeof(size_t) ) ) = size;
 }
 
 void* lockUserMemory( void* block ) {
-
+    char*  blk  = validateUserMemory( block );
+    size_t size = *( (size_t*)( blk - sizeof(size_t) ) );
+    if ( size & FREEBIT ) {
+        fprintf( stderr, "? block %p not allocated\n", block );
+        exit( EXIT_FAILURE );
+    }
+    if ( size & LOCKBIT ) {
+        fprintf( stderr, "? block %p already locked\n", block );
+        exit( EXIT_FAILURE );
+    }
+    size |= LOCKBIT;
+    *( (size_t*)( blk - sizeof(size_t) ) ) = size;
+    return block;
 }
 
 void unlockUserMemory( void* block ) {
-
+    char*  blk  = validateUserMemory( block );
+    size_t size = *( (size_t*)( blk - sizeof(size_t) ) );
+    if ( size & FREEBIT ) {
+        fprintf( stderr, "? block %p not allocated\n", block );
+        exit( EXIT_FAILURE );
+    }
+    if ( ( size & LOCKBIT ) == 0 ) {
+        fprintf( stderr, "? block %p not locked\n", block );
+        exit( EXIT_FAILURE );
+    }
+    size &= ~LOCKBIT;
+    *( (size_t*)( blk - sizeof(size_t) ) ) = size;
 }
 
 size_t sizeofUserMemory( void* block ) {
-    
+    char*  blk  = validateUserMemory( block );
+    size_t size = *( (size_t*)( blk - sizeof(size_t) ) );
+    if ( size & FREEBIT ) {
+        fprintf( stderr, "? block %p not allocated\n", block );
+        exit( EXIT_FAILURE );
+    }
+    return size & CHUNKMAX;
 }
