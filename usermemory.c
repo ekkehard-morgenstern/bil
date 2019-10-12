@@ -22,6 +22,7 @@
 
 #include "usermemory.h"
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <limits.h>
@@ -29,16 +30,179 @@
 
 usermemory_t theUserMemory;
 
+static void badBlockOffset( objref_t block ) {
+    fprintf( stderr, "? illegal user memory block: %#zx\n", (objref_t) block );
+    exit( EXIT_FAILURE );
+}
+
+static inline char* validateUserMemory( objref_t block ) {
+    if ( block < sizeof(size_t) || block >= theUserMemory.memUsed ) badBlockOffset( block );
+    return theUserMemory.memory + block;
+}
+
+static inline size_t getBlockSize( char* blk ) {
+    return *( (size_t*)( blk - sizeof(size_t) ) );
+}
+
+static inline void setBlockSize( char* blk, size_t size ) {
+    *( (size_t*)( blk - sizeof(size_t) ) ) = size;
+}
+
+static inline bool isUserMemoryLocked( objref_t block ) {
+    char*  blk  = validateUserMemory( block );
+    size_t size = getBlockSize( blk );
+    return size & LOCKBIT ? true : false;
+}
+
+static inline bool isUserMemoryFreed( objref_t block ) {
+    char*  blk  = validateUserMemory( block );
+    size_t size = getBlockSize( blk );
+    return size & FREEBIT ? true : false;
+}
+
 void initUserMemory( size_t initialSize ) {
+    if ( initialSize < 65536U ) {
+        fprintf( stderr, "? initial user memory size too small: %zu\n", initialSize );
+        exit( EXIT_FAILURE );
+    }
+    theUserMemory.memory = (char*) calloc( initialSize, sizeof(char) );
+    if ( theUserMemory.memory == 0 ) {
+        fprintf( stderr, "? failed to allocate user memory of %zu bytes: %m\n", initialSize );
+        exit( EXIT_FAILURE );
+    }
+    theUserMemory.memSize = initialSize;
+    theUserMemory.memUsed = 0;
+}
+
+/*
+
+temporary solution!
+
+*/
+
+static bool canChangeUserMemory( void ) {
+    // memory cannot be changed if there is a locked memory block inside it
+    bool ok = true;
+    for ( size_t i=0; i < theHandleSpace.usedObjRefs; ++i ) {
+        objref_t ref = theHandleSpace.objrefs[i];
+        if ( ref == 0 ) continue;   // skip freed blocks
+        if ( isUserMemoryLocked( ref ) ) {
+            fprintf( stderr, "? locked memory block at %#zu\n", ref );
+            ok = false;
+        }
+    }
+    return ok;
+}
+
+typedef struct _blockinfo_t {
+    handle_t handle;
+    objref_t block;
+} blockinfo_t;
+
+typedef struct _blocklist_t {
+    blockinfo_t*    info;
+    size_t          count;
+} blocklist_t;
+
+static void oom( void ) {
+    fprintf( stderr, "? out of memory\n" );
+    exit( EXIT_FAILURE );
+}
+
+static int compare_blockinfo( const void* a, const void* b ) {
+    const blockinfo_t* infoA = (const blockinfo_t*) a;
+    const blockinfo_t* infoB = (const blockinfo_t*) b;
+    if ( infoA->block < infoB->block ) return -1;
+    if ( infoA->block > infoB->block ) return  1;
+    return 0;
+}
+
+static blocklist_t getBlockList( bool freeBit ) {
+    handle_t numBlocks = 0;
+    for ( handle_t i=0; i < theHandleSpace.usedObjRefs; ++i ) {
+        if ( isUserMemoryFreed( theHandleSpace.objrefs[i] ) == freeBit ) numBlocks++;
+    }
+    blocklist_t list;
+    if ( numBlocks == 0 ) {
+        list.info  = 0;
+        list.count = 0;
+        return list;
+    }
+    list.info = (blockinfo_t*) calloc( numBlocks, sizeof(blockinfo_t) );
+    if ( list.info == 0 ) oom();
+    numBlocks = 0;
+    for ( handle_t i=0; i < theHandleSpace.usedObjRefs; ++i ) {
+        if ( isUserMemoryFreed( theHandleSpace.objrefs[i] ) == freeBit ) {
+            blockinfo_t info;
+            info.block  = theHandleSpace.objrefs[i];
+            info.handle = i;
+            list.info[numBlocks++] = info;
+        }
+    }
+    list.count = numBlocks;
+    if ( list.count >= 2U ) {
+        qsort( list.info, list.count, sizeof(blockinfo_t), compare_blockinfo );
+    }
+    return list;
+}
+
+static blocklist_t getFreeBlocks( void ) {
+    return getBlockList( true );
+}
+
+static blocklist_t getAllocatedBlocks( void ) {
+    return getBlockList( false );
+}
+
+typedef struct _memregion_t {
+    unsigned listIndexStart;
+    unsigned listIndexEnd;
+} memregion_t;
+
+typedef struct _memlist_t {
+    memregion_t* regions;
+    size_t       numRegions;
+} memlist_t;
+
+// static memlist_t getContiguousRegions( )
+
+static void compactUserMemory( void ) {
+    if ( !canChangeUserMemory() ) {
+        fprintf( stderr, "? cannot compact user memory, there are locked memory blocks inside\n" );
+        exit( EXIT_FAILURE );
+    }
+    blocklist_t freeBlocks = getFreeBlocks();
+    if ( freeBlocks.count == 0 ) return;    // compaction impossible
+    blocklist_t allocatedBlocks = getAllocatedBlocks();
+    if ( allocatedBlocks.count == 0 ) return; // compaction impossible
+
 
 }
 
-static void collectUserMemory( void ) {
-
-}
-
-static void resizeUserMemory( void ) {
-
+static void growUserMemory( void ) {
+    // canChangeUserMemory() has been called already in compactUserMemory()
+    size_t maxSize = SIZE_MAX / 2U;
+    size_t newSize;
+    if ( theUserMemory.memSize < maxSize ) {
+        newSize = maxSize * 2U;
+    } else {
+        newSize = SIZE_MAX;
+        if ( theUserMemory.memSize == newSize ) {
+            fprintf( stderr, "? cannot grow user memory, it's too big\n" );
+            exit( EXIT_FAILURE );
+        }
+    }
+    char* newMem = calloc( newSize, sizeof(char) );
+    if ( newMem == 0 ) {
+        fprintf( stderr, "? failed to allocate user memory of %zu bytes: %m\n", newSize );
+        exit( EXIT_FAILURE );
+    }
+    if ( theUserMemory.memUsed ) {
+        memcpy( newMem, theUserMemory.memory, theUserMemory.memUsed );
+    }
+    free( theUserMemory.memory );
+    theUserMemory.memory  = newMem;
+    theUserMemory.memSize = newSize;
 }
 
 objref_t allocUserMemory( size_t requestSize ) {
@@ -53,10 +217,10 @@ objref_t allocUserMemory( size_t requestSize ) {
     }
     if ( alignedSize > theUserMemory.memSize - theUserMemory.memUsed ) {
         // request does not meet remaining space: attempt to garbage collect first
-        collectUserMemory();        
+        compactUserMemory();        
         if ( alignedSize > theUserMemory.memSize - theUserMemory.memUsed ) {
             // didn't work: resize it
-            resizeUserMemory();
+            growUserMemory();
             if ( alignedSize > theUserMemory.memSize - theUserMemory.memUsed ) {
                 fprintf( stderr, "? internal error: not enough space for allocation of %zu bytes.\n", alignedSize );
                 exit( EXIT_FAILURE );
@@ -68,24 +232,6 @@ objref_t allocUserMemory( size_t requestSize ) {
     blk += sizeField;
     *( (size_t*)( blk - sizeof(size_t) ) ) = alignedSize;
     return (objref_t)( blk - theUserMemory.memory );
-}
-
-static void badBlockOffset( objref_t block ) {
-    fprintf( stderr, "? illegal user memory block: %#zx\n", (objref_t) block );
-    exit( EXIT_FAILURE );
-}
-
-static inline char* validateUserMemory( objref_t block ) {
-    if ( block >= theUserMemory.memUsed ) badBlockOffset( block );
-    return theUserMemory.memory + block;
-}
-
-static inline size_t getBlockSize( char* blk ) {
-    return *( (size_t*)( blk - sizeof(size_t) ) );
-}
-
-static inline void setBlockSize( char* blk, size_t size ) {
-    *( (size_t*)( blk - sizeof(size_t) ) ) = size;
 }
 
 void freeUserMemory( objref_t block ) {
@@ -143,3 +289,4 @@ size_t sizeofUserMemory( objref_t block ) {
     }
     return size & CHUNKMAX;
 }
+
