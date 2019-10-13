@@ -155,8 +155,10 @@ static blocklist_t getAllocatedBlocks( void ) {
 }
 
 typedef struct _memregion_t {
-    unsigned listIndexStart;
-    unsigned listIndexEnd;
+    size_t offsetStart;
+    size_t offsetEnd;           // points one byte past the end of the region
+    size_t listIndexStart;
+    size_t listIndexEnd;
 } memregion_t;
 
 typedef struct _memlist_t {
@@ -164,7 +166,54 @@ typedef struct _memlist_t {
     size_t       numRegions;
 } memlist_t;
 
-// static memlist_t getContiguousRegions( )
+static memlist_t getContiguousRegions( const blocklist_t* list ) {
+    memregion_t current; memlist_t regions;
+    size_t sizeField = sizeof(size_t) < CHUNKALIGN ? CHUNKALIGN : sizeof(size_t);
+    for ( size_t j=0; j <= 1U; ++j ) {
+        current.offsetStart    = 0;
+        current.offsetEnd      = 0;
+        current.listIndexStart = 0;
+        current.listIndexEnd   = 0;
+        if ( j == 1U ) {
+            regions.regions    = (memregion_t*) calloc( regions.numRegions, sizeof(memregion_t) );
+            if ( regions.regions == 0 ) oom();
+        } else {
+            regions.regions    = 0;
+            regions.numRegions = 0;
+        }
+        bool haveStart = false; 
+        for ( size_t i=0; i < list->count; ++i ) {
+           size_t newStart = list->info[i].block - sizeField;
+           size_t newEnd   = current.offsetStart + sizeField + sizeofUserMemory( list->info[i].block );
+            if ( !haveStart ) {
+                haveStart = true;
+                current.offsetStart    = newStart;
+                current.offsetEnd      = newEnd;
+                current.listIndexStart = i;
+                current.listIndexEnd   = i;
+            } else if ( newStart == current.offsetEnd ) {  // contiguous
+                current.offsetEnd      = newEnd;
+                current.listIndexEnd   = i;
+            } else { // a gap has occurred
+                if ( j == 1U ) {
+                    regions.regions[regions.numRegions++] = current;
+                } else {
+                    regions.numRegions++;
+                }
+                haveStart = false;
+                --i;
+            }
+            if ( i == list->count-1U ) {
+                if ( j == 1U ) {
+                    regions.regions[regions.numRegions++] = current;
+                } else {
+                    regions.numRegions++;
+                }
+            } 
+        } // i
+    } // j
+    return regions;
+}
 
 static void compactUserMemory( void ) {
     if ( !canChangeUserMemory() ) {
@@ -287,6 +336,7 @@ size_t sizeofUserMemory( objref_t block ) {
         fprintf( stderr, "? block %#zx not allocated\n", block );
         exit( EXIT_FAILURE );
     }
-    return size & CHUNKMAX;
+    size_t sizeField = sizeof(size_t) < CHUNKALIGN ? CHUNKALIGN : sizeof(size_t);
+    return ( size & CHUNKMAX ) - sizeField;
 }
 
