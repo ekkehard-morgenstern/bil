@@ -21,12 +21,28 @@
         Mail: Ekkehard Morgenstern, Mozartstr. 1, D-76744 Woerth am Rhein, Germany, Europe */
 
 #include "usermemory.h"
-#include <stdlib.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <string.h>
-#include <limits.h>
-#include <stdio.h>
+
+typedef struct _blockinfo_t {
+    handle_t handle;
+    objref_t block;
+} blockinfo_t;
+
+typedef struct _blocklist_t {
+    blockinfo_t*    info;
+    size_t          count;
+} blocklist_t;
+
+typedef struct _memregion_t {
+    size_t offsetStart;
+    size_t offsetEnd;           // points one byte past the end of the region
+    size_t listIndexStart;
+    size_t listIndexEnd;
+} memregion_t;
+
+typedef struct _memlist_t {
+    memregion_t* regions;
+    size_t       numRegions;
+} memlist_t;
 
 usermemory_t theUserMemory;
 
@@ -36,16 +52,16 @@ static void badBlockOffset( objref_t block ) {
 }
 
 static inline char* validateUserMemory( objref_t block ) {
-    if ( block < sizeof(size_t) || block >= theUserMemory.memUsed ) badBlockOffset( block );
+    if ( block < sizeof(memhdr_t) || block >= theUserMemory.memUsed ) badBlockOffset( block );
     return theUserMemory.memory + block;
 }
 
 static inline size_t getBlockSize( char* blk ) {
-    return *( (size_t*)( blk - sizeof(size_t) ) );
+    return ((memhdr_t*)( blk - sizeof(memhdr_t) ))->size;
 }
 
 static inline void setBlockSize( char* blk, size_t size ) {
-    *( (size_t*)( blk - sizeof(size_t) ) ) = size;
+    ((memhdr_t*)( blk - sizeof(memhdr_t) ))->size = size;
 }
 
 static inline bool isUserMemoryLocked( objref_t block ) {
@@ -72,6 +88,8 @@ void initUserMemory( size_t initialSize ) {
     }
     theUserMemory.memSize = initialSize;
     theUserMemory.memUsed = 0;
+    initBasedList( &theUserMemory.allocList );
+    initBasedList( &theUserMemory.freeList  );
 }
 
 /*
@@ -94,16 +112,6 @@ static bool canChangeUserMemory( void ) {
     return ok;
 }
 
-typedef struct _blockinfo_t {
-    handle_t handle;
-    objref_t block;
-} blockinfo_t;
-
-typedef struct _blocklist_t {
-    blockinfo_t*    info;
-    size_t          count;
-} blocklist_t;
-
 static void oom( void ) {
     fprintf( stderr, "? out of memory\n" );
     exit( EXIT_FAILURE );
@@ -117,10 +125,10 @@ static int compare_blockinfo( const void* a, const void* b ) {
     return 0;
 }
 
-static blocklist_t getBlockList( bool freeBit ) {
+static blocklist_t getAllocatedBlocks( void ) {
     handle_t numBlocks = 0;
     for ( handle_t i=0; i < theHandleSpace.usedObjRefs; ++i ) {
-        if ( isUserMemoryFreed( theHandleSpace.objrefs[i] ) == freeBit ) numBlocks++;
+        if ( theHandleSpace.objrefs[i] ) numBlocks++;
     }
     blocklist_t list;
     if ( numBlocks == 0 ) {
@@ -132,7 +140,7 @@ static blocklist_t getBlockList( bool freeBit ) {
     if ( list.info == 0 ) oom();
     numBlocks = 0;
     for ( handle_t i=0; i < theHandleSpace.usedObjRefs; ++i ) {
-        if ( isUserMemoryFreed( theHandleSpace.objrefs[i] ) == freeBit ) {
+        if ( theHandleSpace.objrefs[i] ) {
             blockinfo_t info;
             info.block  = theHandleSpace.objrefs[i];
             info.handle = i;
@@ -146,27 +154,7 @@ static blocklist_t getBlockList( bool freeBit ) {
     return list;
 }
 
-static blocklist_t getFreeBlocks( void ) {
-    return getBlockList( true );
-}
-
-static blocklist_t getAllocatedBlocks( void ) {
-    return getBlockList( false );
-}
-
-typedef struct _memregion_t {
-    size_t offsetStart;
-    size_t offsetEnd;           // points one byte past the end of the region
-    size_t listIndexStart;
-    size_t listIndexEnd;
-} memregion_t;
-
-typedef struct _memlist_t {
-    memregion_t* regions;
-    size_t       numRegions;
-} memlist_t;
-
-static memlist_t getContiguousRegions( const blocklist_t* list ) {
+static memlist_t getContiguousRegionsFromBlockList( const blocklist_t* list ) {
     memregion_t current; memlist_t regions;
     size_t sizeField = sizeof(size_t) < CHUNKALIGN ? CHUNKALIGN : sizeof(size_t);
     for ( size_t j=0; j <= 1U; ++j ) {
@@ -175,12 +163,12 @@ static memlist_t getContiguousRegions( const blocklist_t* list ) {
         current.listIndexStart = 0;
         current.listIndexEnd   = 0;
         if ( j == 1U ) {
-            regions.regions    = (memregion_t*) calloc( regions.numRegions, sizeof(memregion_t) );
+            regions.regions = (memregion_t*) calloc( regions.numRegions, sizeof(memregion_t) );
             if ( regions.regions == 0 ) oom();
         } else {
-            regions.regions    = 0;
-            regions.numRegions = 0;
+            regions.regions = 0;
         }
+        regions.numRegions = 0;
         bool haveStart = false; 
         for ( size_t i=0; i < list->count; ++i ) {
            size_t newStart = list->info[i].block - sizeField;
@@ -216,20 +204,25 @@ static memlist_t getContiguousRegions( const blocklist_t* list ) {
 }
 
 static void compactUserMemory( void ) {
+    // currently, I categorically rule out memory compaction with locked memory blocks
     if ( !canChangeUserMemory() ) {
         fprintf( stderr, "? cannot compact user memory, there are locked memory blocks inside\n" );
         exit( EXIT_FAILURE );
     }
-    blocklist_t freeBlocks = getFreeBlocks();
-    if ( freeBlocks.count == 0 ) return;    // compaction impossible
     blocklist_t allocatedBlocks = getAllocatedBlocks();
-    if ( allocatedBlocks.count == 0 ) return; // compaction impossible
+    if ( allocatedBlocks.count == 0 ) { // compaction impossible
+        return;
+    }
+    memlist_t allocatedRegions = getContiguousRegionsFromBlockList( &allocatedBlocks );
+
+
 
 
 }
 
 static void growUserMemory( void ) {
-    // canChangeUserMemory() has been called already in compactUserMemory()
+    // cannot be called when there are locked memory blocks inside user memory
+    // but canChangeUserMemory() has been called already in compactUserMemory(), which is called first
     size_t maxSize = SIZE_MAX / 2U;
     size_t newSize;
     if ( theUserMemory.memSize < maxSize ) {

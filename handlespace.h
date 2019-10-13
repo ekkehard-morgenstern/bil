@@ -23,7 +23,9 @@
 #ifndef HANDLESPACE_H
 #define HANDLESPACE_H   1
 
-#include <stddef.h>
+#ifndef TYPES_H
+#include "types.h"
+#endif
 
 typedef size_t objref_t;
 

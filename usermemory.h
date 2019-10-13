@@ -27,16 +27,29 @@
 #include "handlespace.h"
 #endif
 
+#ifndef BASEDLISTS_H
+#include "basedlists.h"
+#endif
+
 #define CHUNKMAX    (SIZE_MAX>>2U)
 #define FREEBIT     (CHUNKMAX+1U)
 #define LOCKBIT     (FREEBIT<<1U)
 
 #define CHUNKALIGN  8U      // align chunks to 8-byte-boundaries
 
+typedef struct _memhdr_t {
+    basednode_t node;
+    size_t      size;   // size and flags
+    // ATTN: TODO: possible memory alignment issue when sizeof(size_t) != sizeof(ptrdiff_t)
+    // followed by actual memory
+} memhdr_t;
+
 typedef struct _usermemory_t {
     char*       memory;
     size_t      memSize;
     size_t      memUsed;
+    basedlist_t allocList;
+    basedlist_t freeList;
 } usermemory_t;
 
 extern usermemory_t theUserMemory;
