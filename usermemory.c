@@ -81,6 +81,10 @@ void initUserMemory( size_t initialSize ) {
         fprintf( stderr, "? initial user memory size too small: %zu\n", initialSize );
         exit( EXIT_FAILURE );
     }
+    if ( sizeof(size_t) != sizeof(ptrdiff_t) ) {
+        fprintf( stderr, "? sizeof(size_t) != sizeof(ptrdiff_t) [%zu!=%zu]\n", sizeof(size_t), sizeof(ptrdiff_t) );
+        exit( EXIT_FAILURE );
+    }
     theUserMemory.memory = (char*) calloc( initialSize, sizeof(char) );
     if ( theUserMemory.memory == 0 ) {
         fprintf( stderr, "? failed to allocate user memory of %zu bytes: %m\n", initialSize );
@@ -248,10 +252,8 @@ static void growUserMemory( void ) {
 }
 
 objref_t allocUserMemory( size_t requestSize ) {
-    // make sure size field does not interfere with memory alignment of user area
-    size_t sizeField   = sizeof(size_t) < CHUNKALIGN ? CHUNKALIGN : sizeof(size_t);
     // align memory block size
-    size_t alignedSize = ( sizeField + requestSize + (CHUNKALIGN-1U) ) & ~((size_t)(CHUNKALIGN-1U));
+    size_t alignedSize = ( sizeof(memhdr_t) + requestSize + (CHUNKALIGN-1U) ) & ~((size_t)(CHUNKALIGN-1U));
     // begin
     if ( alignedSize > CHUNKMAX ) {
         fprintf( stderr, "? requested block size too large: %zu (from: %zu) > %zu\n", alignedSize, requestSize, (size_t) CHUNKMAX );
@@ -271,8 +273,11 @@ objref_t allocUserMemory( size_t requestSize ) {
     }
     char* blk = (char*) theUserMemory.memory + theUserMemory.memUsed;
     theUserMemory.memUsed += alignedSize;
-    blk += sizeField;
-    *( (size_t*)( blk - sizeof(size_t) ) ) = alignedSize;
+    memhdr_t* hdr = (memhdr_t*) blk;
+    blk += sizeof(memhdr_t);
+    initBasedNode( theUserMemory.memory, &hdr->node );
+    hdr->size = alignedSize;
+    addBasedNodeAtTail( theUserMemory.memory, &theUserMemory.allocList, &hdr->node );
     return (objref_t)( blk - theUserMemory.memory );
 }
 
@@ -289,6 +294,9 @@ void freeUserMemory( objref_t block ) {
     }
     size |= FREEBIT;
     setBlockSize( blk, size );
+    memhdr_t* hdr = (memhdr_t*)( blk - sizeof(memhdr_t) );
+    removeBasedNode( theUserMemory.memory, &hdr->node );
+    addBasedNodeAtTail( theUserMemory.memory, &theUserMemory.freeList, &hdr->node );
 }
 
 void* lockUserMemory( objref_t block ) {
