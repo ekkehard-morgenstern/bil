@@ -45,7 +45,7 @@ typedef struct _memlist_t {
 } memlist_t;
 
 typedef struct _freeinfo_t {
-    ptrdiff_t   offset;
+    size_t      offset;
     size_t      size;
 } freeinfo_t;
 
@@ -142,7 +142,7 @@ static int compare_blockinfo( const void* a, const void* b ) {
 static blocklist_t getAllocatedBlocks( void ) {
     handle_t numBlocks = 0;
     for ( handle_t i=0; i < theHandleSpace.usedObjRefs; ++i ) {
-        if ( theHandleSpace.objrefs[i] ) numBlocks++;
+        if ( theHandleSpace.objrefs[i] && !isUserMemoryLocked( theHandleSpace.objrefs[i] ) ) numBlocks++;
     }
     blocklist_t list;
     if ( numBlocks == 0 ) {
@@ -154,7 +154,7 @@ static blocklist_t getAllocatedBlocks( void ) {
     if ( list.info == 0 ) oom();
     numBlocks = 0;
     for ( handle_t i=0; i < theHandleSpace.usedObjRefs; ++i ) {
-        if ( theHandleSpace.objrefs[i] ) {
+        if ( theHandleSpace.objrefs[i] && !isUserMemoryLocked( theHandleSpace.objrefs[i] ) ) {
             blockinfo_t info;
             info.block  = theHandleSpace.objrefs[i];
             info.handle = i;
@@ -170,7 +170,6 @@ static blocklist_t getAllocatedBlocks( void ) {
 
 static memlist_t getContiguousRegionsFromBlockList( const blocklist_t* list ) {
     memregion_t current; memlist_t regions;
-    size_t sizeField = sizeof(size_t) < CHUNKALIGN ? CHUNKALIGN : sizeof(size_t);
     for ( size_t j=0; j <= 1U; ++j ) {
         current.offsetStart    = 0;
         current.offsetEnd      = 0;
@@ -185,8 +184,8 @@ static memlist_t getContiguousRegionsFromBlockList( const blocklist_t* list ) {
         regions.numRegions = 0;
         bool haveStart = false; 
         for ( size_t i=0; i < list->count; ++i ) {
-           size_t newStart = list->info[i].block - sizeField;
-           size_t newEnd   = current.offsetStart + sizeField + sizeofUserMemory( list->info[i].block );
+           size_t newStart = list->info[i].block - sizeof(memhdr_t);
+           size_t newEnd   = current.offsetStart + sizeof(memhdr_t) + sizeofUserMemory( list->info[i].block );
             if ( !haveStart ) {
                 haveStart = true;
                 current.offsetStart    = newStart;
@@ -217,17 +216,132 @@ static memlist_t getContiguousRegionsFromBlockList( const blocklist_t* list ) {
     return regions;
 }
 
+static memlist_t getContiguousRegionsFromFreeList( const freelist_t* list ) {
+    memregion_t current; memlist_t regions;
+    for ( size_t j=0; j <= 1U; ++j ) {
+        current.offsetStart    = 0;
+        current.offsetEnd      = 0;
+        current.listIndexStart = 0;
+        current.listIndexEnd   = 0;
+        if ( j == 1U && regions.numRegions ) {
+            regions.regions = (memregion_t*) calloc( regions.numRegions, sizeof(memregion_t) );
+            if ( regions.regions == 0 ) oom();
+        } else {
+            regions.regions = 0;
+        }
+        regions.numRegions = 0;
+        bool haveStart = false; 
+        for ( size_t i=0; i < list->count; ++i ) {
+           size_t newStart = list->info[i].offset;
+           size_t newEnd   = current.offsetStart + sizeof(memhdr_t) + sizeofUserMemory( list->info[i].offset );
+            if ( !haveStart ) {
+                haveStart = true;
+                current.offsetStart    = newStart;
+                current.offsetEnd      = newEnd;
+                current.listIndexStart = i;
+                current.listIndexEnd   = i;
+            } else if ( newStart == current.offsetEnd ) {  // contiguous
+                current.offsetEnd      = newEnd;
+                current.listIndexEnd   = i;
+            } else { // a gap has occurred
+                if ( j == 1U ) {
+                    regions.regions[regions.numRegions++] = current;
+                } else {
+                    regions.numRegions++;
+                }
+                haveStart = false;
+                --i;
+            }
+            if ( i == list->count-1U ) {
+                if ( j == 1U ) {
+                    regions.regions[regions.numRegions++] = current;
+                } else {
+                    regions.numRegions++;
+                }
+            } 
+        } // i
+    } // j
+    return regions;
+}
+
+static int compare_freeinfo( const void* a, const void* b ) {
+    const freeinfo_t* infoA = (const freeinfo_t*) a;
+    const freeinfo_t* infoB = (const freeinfo_t*) b;
+    if ( infoA->size < infoB->size ) return -1;
+    if ( infoA->size > infoB->size ) return  1;
+    return 0;
+}
+
+static freelist_t getFreeList( size_t minSize, size_t maxSize ) {
+    freelist_t list;
+    list.info = 0;
+    for ( int i=0; i <= 1; ++i ) {
+        list.count = 0;
+        basednode_t* node = (basednode_t*) firstBasedNode( theUserMemory.memory, &theUserMemory.freeList );
+        while ( node ) {
+            memhdr_t* hdr = (memhdr_t*) node;
+            size_t    siz = hdr->size & CHUNKMAX;
+            if ( siz >= minSize && siz <= maxSize ) {
+                if ( i == 1 ) {
+                    freeinfo_t info;
+                    info.offset = (size_t)( ((char*)hdr) - theUserMemory.memory );
+                    info.size   = siz;
+                    list.info[list.count] = info;
+                }
+                list.count++;
+            }
+            node = (basednode_t*) nextBasedNode( theUserMemory.memory, node );
+        }
+        if ( i == 0 && list.count ) {
+            list.info = (freeinfo_t*) calloc( list.count, sizeof(freeinfo_t) );
+            if ( list.info == 0 ) oom();
+        }
+    }
+    if ( list.count >= 2 ) {
+        qsort( list.info, list.count, sizeof(freeinfo_t), compare_freeinfo );
+    }
+    return list;
+}
+
+static bool findFreeBlock( size_t size, freeinfo_t* outInfo ) {
+    freelist_t list = getFreeList( size, size + ( size / 3U ) );    // min = ideal size, max = ideal size + 33%
+    if ( list.info == 0 || list.count == 0 ) return false;
+    *outInfo = list.info[0];
+    free( list.info );
+    return true;
+}
+
 static void compactUserMemory( void ) {
-    // currently, I categorically rule out memory compaction with locked memory blocks
     blocklist_t allocatedBlocks = getAllocatedBlocks();
     if ( allocatedBlocks.count == 0 ) { // compaction impossible
         return;
     }
     memlist_t allocatedRegions = getContiguousRegionsFromBlockList( &allocatedBlocks );
+    if ( allocatedRegions.numRegions == 0 ) {
+        free( allocatedBlocks.info );
+        return;
+    }
+    freelist_t freeList = getFreeList( 0, CHUNKMAX );
+    if ( freeList.count == 0 ) {
+        free( allocatedRegions.regions );
+        free( allocatedBlocks .info    );
+        return;
+    }
+    memlist_t freeRegions = getContiguousRegionsFromFreeList( &freeList );
+    if ( freeRegions.numRegions == 0 ) {
+        free( freeList        .info    );
+        free( allocatedRegions.regions );
+        free( allocatedBlocks .info    );
+        return;
+    }
+
+    // ...
 
 
-
-
+    free( freeRegions     .regions );
+    free( freeList        .info    );
+    free( allocatedRegions.regions );
+    free( allocatedBlocks .info    );
 }
 
 static void growUserMemory( void ) {
@@ -258,51 +372,6 @@ static void growUserMemory( void ) {
     free( theUserMemory.memory );
     theUserMemory.memory  = newMem;
     theUserMemory.memSize = newSize;
-}
-
-static int compare_freeinfo( const void* a, const void* b ) {
-    const freeinfo_t* infoA = (const freeinfo_t*) a;
-    const freeinfo_t* infoB = (const freeinfo_t*) b;
-    if ( infoA->size < infoB->size ) return -1;
-    if ( infoA->size > infoB->size ) return  1;
-    return 0;
-}
-
-static freelist_t getFreeList( size_t minSize, size_t maxSize ) {
-    freelist_t list;
-    list.info = 0;
-    for ( int i=0; i <= 1; ++i ) {
-        list.count = 0;
-        basednode_t* node = (basednode_t*) firstBasedNode( theUserMemory.memory, &theUserMemory.freeList );
-        while ( node ) {
-            memhdr_t* hdr = (memhdr_t*) node;
-            if ( hdr->size >= minSize && hdr->size <= maxSize ) {
-                if ( i == 1 ) {
-                    freeinfo_t info;
-                    info.offset = ((char*)hdr) - theUserMemory.memory;
-                    info.size   = hdr->size;
-                    list.info[list.count] = info;
-                }
-                list.count++;
-            }
-            node = (basednode_t*) nextBasedNode( theUserMemory.memory, node );
-        }
-        if ( i == 0 && list.count ) {
-            list.info = (freeinfo_t*) calloc( list.count, sizeof(freeinfo_t) );
-            if ( list.info == 0 ) oom();
-        }
-    }
-    if ( list.count >= 2 ) {
-        qsort( list.info, list.count, sizeof(freeinfo_t), compare_freeinfo );
-    }
-    return list;
-}
-
-static bool findFreeBlock( size_t size, freeinfo_t* outInfo ) {
-    freelist_t list = getFreeList( size, size + ( size / 3U ) );    // min = ideal size, max = ideal size + 33%
-    if ( list.info == 0 || list.count == 0 ) return false;
-    *outInfo = list.info[0];
-    return true;
 }
 
 objref_t allocUserMemory( size_t requestSize ) {
@@ -418,7 +487,6 @@ size_t sizeofUserMemory( objref_t block ) {
         fprintf( stderr, "? block %#zx not allocated\n", block );
         exit( EXIT_FAILURE );
     }
-    size_t sizeField = sizeof(size_t) < CHUNKALIGN ? CHUNKALIGN : sizeof(size_t);
-    return ( size & CHUNKMAX ) - sizeField;
+    return ( size & CHUNKMAX ) - sizeof(memhdr_t);
 }
 
