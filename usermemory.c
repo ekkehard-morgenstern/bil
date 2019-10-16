@@ -44,6 +44,16 @@ typedef struct _memlist_t {
     size_t       numRegions;
 } memlist_t;
 
+typedef struct _freeinfo_t {
+    ptrdiff_t   offset;
+    size_t      size;
+} freeinfo_t;
+
+typedef struct _freelist_t {
+    freeinfo_t* info;
+    size_t      count;
+} freelist_t;
+
 usermemory_t theUserMemory;
 
 static void badBlockOffset( objref_t block ) {
@@ -92,8 +102,8 @@ void initUserMemory( size_t initialSize ) {
     }
     theUserMemory.memSize = initialSize;
     theUserMemory.memUsed = 0;
-    initBasedList( &theUserMemory.allocList );
-    initBasedList( &theUserMemory.freeList  );
+    initBasedList( theUserMemory.memory, &theUserMemory.allocList );
+    initBasedList( theUserMemory.memory, &theUserMemory.freeList  );
 }
 
 /*
@@ -166,7 +176,7 @@ static memlist_t getContiguousRegionsFromBlockList( const blocklist_t* list ) {
         current.offsetEnd      = 0;
         current.listIndexStart = 0;
         current.listIndexEnd   = 0;
-        if ( j == 1U ) {
+        if ( j == 1U && regions.numRegions ) {
             regions.regions = (memregion_t*) calloc( regions.numRegions, sizeof(memregion_t) );
             if ( regions.regions == 0 ) oom();
         } else {
@@ -209,10 +219,6 @@ static memlist_t getContiguousRegionsFromBlockList( const blocklist_t* list ) {
 
 static void compactUserMemory( void ) {
     // currently, I categorically rule out memory compaction with locked memory blocks
-    if ( !canChangeUserMemory() ) {
-        fprintf( stderr, "? cannot compact user memory, there are locked memory blocks inside\n" );
-        exit( EXIT_FAILURE );
-    }
     blocklist_t allocatedBlocks = getAllocatedBlocks();
     if ( allocatedBlocks.count == 0 ) { // compaction impossible
         return;
@@ -226,7 +232,10 @@ static void compactUserMemory( void ) {
 
 static void growUserMemory( void ) {
     // cannot be called when there are locked memory blocks inside user memory
-    // but canChangeUserMemory() has been called already in compactUserMemory(), which is called first
+    if ( !canChangeUserMemory() ) {
+        fprintf( stderr, "? cannot grow user memory, there are locked memory blocks inside\n" );
+        exit( EXIT_FAILURE );
+    }
     size_t maxSize = SIZE_MAX / 2U;
     size_t newSize;
     if ( theUserMemory.memSize < maxSize ) {
@@ -251,6 +260,51 @@ static void growUserMemory( void ) {
     theUserMemory.memSize = newSize;
 }
 
+static int compare_freeinfo( const void* a, const void* b ) {
+    const freeinfo_t* infoA = (const freeinfo_t*) a;
+    const freeinfo_t* infoB = (const freeinfo_t*) b;
+    if ( infoA->size < infoB->size ) return -1;
+    if ( infoA->size > infoB->size ) return  1;
+    return 0;
+}
+
+static freelist_t getFreeList( size_t minSize, size_t maxSize ) {
+    freelist_t list;
+    list.info = 0;
+    for ( int i=0; i <= 1; ++i ) {
+        list.count = 0;
+        basednode_t* node = (basednode_t*) firstBasedNode( theUserMemory.memory, &theUserMemory.freeList );
+        while ( node ) {
+            memhdr_t* hdr = (memhdr_t*) node;
+            if ( hdr->size >= minSize && hdr->size <= maxSize ) {
+                if ( i == 1 ) {
+                    freeinfo_t info;
+                    info.offset = ((char*)hdr) - theUserMemory.memory;
+                    info.size   = hdr->size;
+                    list.info[list.count] = info;
+                }
+                list.count++;
+            }
+            node = (basednode_t*) nextBasedNode( theUserMemory.memory, node );
+        }
+        if ( i == 0 && list.count ) {
+            list.info = (freeinfo_t*) calloc( list.count, sizeof(freeinfo_t) );
+            if ( list.info == 0 ) oom();
+        }
+    }
+    if ( list.count >= 2 ) {
+        qsort( list.info, list.count, sizeof(freeinfo_t), compare_freeinfo );
+    }
+    return list;
+}
+
+static bool findFreeBlock( size_t size, freeinfo_t* outInfo ) {
+    freelist_t list = getFreeList( size, size + ( size / 3U ) );    // min = ideal size, max = ideal size + 33%
+    if ( list.info == 0 || list.count == 0 ) return false;
+    *outInfo = list.info[0];
+    return true;
+}
+
 objref_t allocUserMemory( size_t requestSize ) {
     // align memory block size
     size_t alignedSize = ( sizeof(memhdr_t) + requestSize + (CHUNKALIGN-1U) ) & ~((size_t)(CHUNKALIGN-1U));
@@ -259,24 +313,37 @@ objref_t allocUserMemory( size_t requestSize ) {
         fprintf( stderr, "? requested block size too large: %zu (from: %zu) > %zu\n", alignedSize, requestSize, (size_t) CHUNKMAX );
         exit( EXIT_FAILURE );
     }
+    size_t allocPos = theUserMemory.memUsed; size_t allocSize = alignedSize;
     if ( alignedSize > theUserMemory.memSize - theUserMemory.memUsed ) {
-        // request does not meet remaining space: attempt to garbage collect first
-        compactUserMemory();        
-        if ( alignedSize > theUserMemory.memSize - theUserMemory.memUsed ) {
-            // didn't work: resize it
-            growUserMemory();
+        // request does not meet remaining space: attempt to find suitable free block
+        freeinfo_t info;
+        bool found = findFreeBlock( alignedSize, &info );
+        if ( found ) {
+            allocPos  = info.offset;
+            allocSize = info.size;
+        } else {
+            // attempt to garbage collect
+            compactUserMemory();        
             if ( alignedSize > theUserMemory.memSize - theUserMemory.memUsed ) {
-                fprintf( stderr, "? internal error: not enough space for allocation of %zu bytes.\n", alignedSize );
-                exit( EXIT_FAILURE );
+                // didn't work: resize it
+                growUserMemory();
+                if ( alignedSize > theUserMemory.memSize - theUserMemory.memUsed ) {
+                    fprintf( stderr, "? internal error: not enough space for allocation of %zu bytes.\n", alignedSize );
+                    exit( EXIT_FAILURE );
+                } else {
+                    allocPos = theUserMemory.memUsed;
+                }
+            } else {
+                allocPos = theUserMemory.memUsed;
             }
         }
-    }
-    char* blk = (char*) theUserMemory.memory + theUserMemory.memUsed;
-    theUserMemory.memUsed += alignedSize;
+    } 
+    char* blk = (char*) theUserMemory.memory + allocPos;
+    theUserMemory.memUsed += allocSize;
     memhdr_t* hdr = (memhdr_t*) blk;
     blk += sizeof(memhdr_t);
     initBasedNode( theUserMemory.memory, &hdr->node );
-    hdr->size = alignedSize;
+    hdr->size = allocSize;
     addBasedNodeAtTail( theUserMemory.memory, &theUserMemory.allocList, &hdr->node );
     return (objref_t)( blk - theUserMemory.memory );
 }
@@ -296,6 +363,20 @@ void freeUserMemory( objref_t block ) {
     setBlockSize( blk, size );
     memhdr_t* hdr = (memhdr_t*)( blk - sizeof(memhdr_t) );
     removeBasedNode( theUserMemory.memory, &hdr->node );
+    // check last node in free list if it would form a contiguous region with this node
+    memhdr_t* last = (memhdr_t*) lastBasedNode( theUserMemory.memory, &theUserMemory.freeList );
+    if ( last && ((char*)last) + last->size == (char*) hdr ) {
+        // yes: merge into that node
+        size_t newSize = ( last->size & CHUNKMAX ) + ( hdr->size & CHUNKMAX );
+        if ( newSize <= CHUNKMAX ) {    // can safely merge
+            last->size = newSize | FREEBIT;           
+            // clear whole memory region that was added
+            memset( hdr, 0, hdr->size );
+            return;
+        }
+    }
+    // unmerged: simply clear and add to end of free list
+    if ( hdr->size > sizeof(memhdr_t) ) memset( blk, 0, hdr->size - sizeof(memhdr_t) );
     addBasedNodeAtTail( theUserMemory.memory, &theUserMemory.freeList, &hdr->node );
 }
 
