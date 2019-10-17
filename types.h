@@ -23,6 +23,10 @@
 #ifndef TYPES_H
 #define TYPES_H 1
 
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE     199309L
+#endif 
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -30,5 +34,12 @@
 #include <string.h>
 #include <limits.h>
 #include <stdio.h>
+
+#include <unistd.h>
+#if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0 && defined(_POSIX_MONOTONIC_CLOCK)
+#include <time.h>
+#else
+#error "POSIX timers not available"
+#endif
 
 #endif

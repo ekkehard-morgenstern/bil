@@ -45,11 +45,11 @@ typedef struct _memhdr_t {
 } memhdr_t;
 
 typedef struct _usermemory_t {
-    char*       memory;
-    size_t      memSize;
-    size_t      memUsed;
-    basedlist_t allocList;
-    basedlist_t freeList;
+    char*        memory;
+    size_t       memSize;
+    size_t       memUsed;
+    ptrdiff_t    allocList;
+    ptrdiff_t    freeList;
 } usermemory_t;
 
 extern usermemory_t theUserMemory;

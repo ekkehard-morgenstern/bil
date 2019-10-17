@@ -61,7 +61,7 @@ void addBasedNodeAtHead( char* base, basedlist_t* list, basednode_t* node ) {
         fprintf( stderr, "? enterBasedNode(): invalid parameters: list=%p, node=%p (if non-null, node may be in some list)\n", list, node );
         exit( EXIT_FAILURE );
     }
-    enterBasedNode( base, &list->head, node, list->head.next );
+    enterBasedNode( base, &list->head, node, (basednode_t*)( base + list->head.next ) );
 }
 
 void addBasedNodeAtTail( char* base, basedlist_t* list, basednode_t* node ) {
@@ -69,7 +69,7 @@ void addBasedNodeAtTail( char* base, basedlist_t* list, basednode_t* node ) {
         fprintf( stderr, "? enterBasedNode(): invalid parameters: list=%p, node=%p (if non-null, node may be in some list)\n", list, node );
         exit( EXIT_FAILURE );
     }
-    enterBasedNode( base, list->tail.prev, node, &list->tail );
+    enterBasedNode( base, (basednode_t*)( base + list->tail.prev ), node, &list->tail );
 }
 
 bool listEmpty( char* base, basedlist_t* list ) {

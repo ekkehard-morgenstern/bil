@@ -100,10 +100,14 @@ void initUserMemory( size_t initialSize ) {
         fprintf( stderr, "? failed to allocate user memory of %zu bytes: %m\n", initialSize );
         exit( EXIT_FAILURE );
     }
-    theUserMemory.memSize = initialSize;
-    theUserMemory.memUsed = 0;
-    initBasedList( theUserMemory.memory, &theUserMemory.allocList );
-    initBasedList( theUserMemory.memory, &theUserMemory.freeList  );
+    theUserMemory.memSize   = initialSize;
+    theUserMemory.memUsed   = 8U + sizeof(basedlist_t) * 2U;
+    theUserMemory.allocList = 8;
+    theUserMemory.freeList  = 8 + sizeof(basedlist_t);
+    initBasedList( theUserMemory.memory, 
+        (basedlist_t*)( theUserMemory.memory + theUserMemory.allocList ) );
+    initBasedList( theUserMemory.memory, 
+        (basedlist_t*)( theUserMemory.memory + theUserMemory.freeList  ) );
 }
 
 /*
@@ -119,7 +123,7 @@ static bool canChangeUserMemory( void ) {
         objref_t ref = theHandleSpace.objrefs[i];
         if ( ref == 0 ) continue;   // skip freed blocks
         if ( isUserMemoryLocked( ref ) ) {
-            fprintf( stderr, "? locked memory block at %#zu\n", ref );
+            fprintf( stderr, "? locked memory block at %zu\n", ref );
             ok = false;
         }
     }
@@ -277,7 +281,8 @@ static freelist_t getFreeList( size_t minSize, size_t maxSize ) {
     list.info = 0;
     for ( int i=0; i <= 1; ++i ) {
         list.count = 0;
-        basednode_t* node = (basednode_t*) firstBasedNode( theUserMemory.memory, &theUserMemory.freeList );
+        basednode_t* node = (basednode_t*) firstBasedNode( theUserMemory.memory, 
+            (basedlist_t*)( theUserMemory.memory + theUserMemory.freeList ) );
         while ( node ) {
             memhdr_t* hdr = (memhdr_t*) node;
             size_t    siz = hdr->size & CHUNKMAX;
@@ -383,20 +388,22 @@ objref_t allocUserMemory( size_t requestSize ) {
         exit( EXIT_FAILURE );
     }
     size_t allocPos = theUserMemory.memUsed; size_t allocSize = alignedSize;
-    if ( alignedSize > theUserMemory.memSize - theUserMemory.memUsed ) {
+    bool recycled = false;
+    if ( allocSize > theUserMemory.memSize - theUserMemory.memUsed ) {
         // request does not meet remaining space: attempt to find suitable free block
         freeinfo_t info;
-        bool found = findFreeBlock( alignedSize, &info );
+        bool found = findFreeBlock( allocSize, &info );
         if ( found ) {
             allocPos  = info.offset;
             allocSize = info.size;
+            recycled  = true;
         } else {
             // attempt to garbage collect
-            compactUserMemory();        
-            if ( alignedSize > theUserMemory.memSize - theUserMemory.memUsed ) {
+            // compactUserMemory();        
+            if ( allocSize > theUserMemory.memSize - theUserMemory.memUsed ) {
                 // didn't work: resize it
-                growUserMemory();
-                if ( alignedSize > theUserMemory.memSize - theUserMemory.memUsed ) {
+                // growUserMemory();
+                if ( allocSize > theUserMemory.memSize - theUserMemory.memUsed ) {
                     fprintf( stderr, "? internal error: not enough space for allocation of %zu bytes.\n", alignedSize );
                     exit( EXIT_FAILURE );
                 } else {
@@ -408,12 +415,14 @@ objref_t allocUserMemory( size_t requestSize ) {
         }
     } 
     char* blk = (char*) theUserMemory.memory + allocPos;
-    theUserMemory.memUsed += allocSize;
+    if ( !recycled ) theUserMemory.memUsed += allocSize;
     memhdr_t* hdr = (memhdr_t*) blk;
     blk += sizeof(memhdr_t);
     initBasedNode( theUserMemory.memory, &hdr->node );
     hdr->size = allocSize;
-    addBasedNodeAtTail( theUserMemory.memory, &theUserMemory.allocList, &hdr->node );
+    addBasedNodeAtTail( theUserMemory.memory, 
+        (basedlist_t*)( theUserMemory.memory + theUserMemory.allocList ), 
+        &hdr->node );
     return (objref_t)( blk - theUserMemory.memory );
 }
 
@@ -433,20 +442,23 @@ void freeUserMemory( objref_t block ) {
     memhdr_t* hdr = (memhdr_t*)( blk - sizeof(memhdr_t) );
     removeBasedNode( theUserMemory.memory, &hdr->node );
     // check last node in free list if it would form a contiguous region with this node
-    memhdr_t* last = (memhdr_t*) lastBasedNode( theUserMemory.memory, &theUserMemory.freeList );
+    memhdr_t* last = (memhdr_t*) lastBasedNode( theUserMemory.memory, 
+        (basedlist_t*)( theUserMemory.memory + theUserMemory.freeList ) );
     if ( last && ((char*)last) + last->size == (char*) hdr ) {
         // yes: merge into that node
         size_t newSize = ( last->size & CHUNKMAX ) + ( hdr->size & CHUNKMAX );
         if ( newSize <= CHUNKMAX ) {    // can safely merge
             last->size = newSize | FREEBIT;           
             // clear whole memory region that was added
-            memset( hdr, 0, hdr->size );
+            memset( hdr, 0, hdr->size & CHUNKMAX );
             return;
         }
     }
     // unmerged: simply clear and add to end of free list
-    if ( hdr->size > sizeof(memhdr_t) ) memset( blk, 0, hdr->size - sizeof(memhdr_t) );
-    addBasedNodeAtTail( theUserMemory.memory, &theUserMemory.freeList, &hdr->node );
+    size = ( hdr->size & CHUNKMAX ) - sizeof(memhdr_t);
+    if ( size ) memset( blk, 0, size );
+    addBasedNodeAtTail( theUserMemory.memory, 
+        (basedlist_t*)( theUserMemory.memory + theUserMemory.freeList ), &hdr->node );
 }
 
 void* lockUserMemory( objref_t block ) {
@@ -462,7 +474,7 @@ void* lockUserMemory( objref_t block ) {
     }
     size |= LOCKBIT;
     setBlockSize( blk, size );
-    return block;
+    return (void*) blk;
 }
 
 void unlockUserMemory( objref_t block ) {
