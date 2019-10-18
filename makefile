@@ -41,7 +41,7 @@ CFLAGS+= -Wall
 	$(CC) -c $(CFLAGS) $<
 
 
-all: testparser memtest1
+all: testparser memtest1 testbasedlist
 	echo ok >all
 
 parsingtable.c:	bil.ebnf separateparsingtable
@@ -51,6 +51,8 @@ parsingtable.c:	bil.ebnf separateparsingtable
 TESTPARSER_MODULES=testparser.o parser.o
 MEMTEST1_MODULES=memtest1.o handlespace.o usermemory.o basedlists.o
 MEMTEST1_INCLUDES=types.h basedlists.h handlespace.h usermemory.h
+TESTBASEDLIST_MODULES=testbasedlist.o basedlists.o
+TESTBASEDLIST_INCLUDES=basedlists.h types.h
 
 testparser: $(TESTPARSER_MODULES)
 	$(CC) $(CFLAGS) -o $@ $(TESTPARSER_MODULES)
@@ -78,4 +80,10 @@ handlespace.o: handlespace.c $(MEMTEST1_INCLUDES)
 usermemory.o: usermemory.c $(MEMTEST1_INCLUDES)
 
 basedlists.o: basedlists.c $(MEMTEST1_INCLUDES)
+
+testbasedlist: $(TESTBASEDLIST_MODULES)
+	$(CC) $(CFLAGS) -o $@ $(TESTBASEDLIST_MODULES)
+
+testbasedlist.o: testbasedlist.c $(TESTBASEDLIST_INCLUDES)
+
 

@@ -169,6 +169,11 @@ static blocklist_t getAllocatedBlocks( void ) {
     if ( list.count >= 2U ) {
         qsort( list.info, list.count, sizeof(blockinfo_t), compare_blockinfo );
     }
+    printf( "blocklist:\n" );
+    for ( size_t i=0; i < list.count; ++i ) {
+        const blockinfo_t* info = &list.info[i];
+        printf( "[%zu] handle %u, block %zu\n", i, info->handle, info->block );
+    }
     return list;
 }
 
@@ -188,8 +193,9 @@ static memlist_t getContiguousRegionsFromBlockList( const blocklist_t* list ) {
         regions.numRegions = 0;
         bool haveStart = false; 
         for ( size_t i=0; i < list->count; ++i ) {
+           size_t memSize  = sizeofUserMemory( list->info[i].block );
            size_t newStart = list->info[i].block - sizeof(memhdr_t);
-           size_t newEnd   = current.offsetStart + sizeof(memhdr_t) + sizeofUserMemory( list->info[i].block );
+           size_t newEnd   = newStart + sizeof(memhdr_t) + memSize;
             if ( !haveStart ) {
                 haveStart = true;
                 current.offsetStart    = newStart;
@@ -236,8 +242,9 @@ static memlist_t getContiguousRegionsFromFreeList( const freelist_t* list ) {
         regions.numRegions = 0;
         bool haveStart = false; 
         for ( size_t i=0; i < list->count; ++i ) {
+           size_t memSize  = list->info[i].size;
            size_t newStart = list->info[i].offset;
-           size_t newEnd   = current.offsetStart + sizeof(memhdr_t) + sizeofUserMemory( list->info[i].offset );
+           size_t newEnd   = newStart + memSize;
             if ( !haveStart ) {
                 haveStart = true;
                 current.offsetStart    = newStart;
@@ -276,7 +283,15 @@ static int compare_freeinfo( const void* a, const void* b ) {
     return 0;
 }
 
-static freelist_t getFreeList( size_t minSize, size_t maxSize ) {
+static int compare_freeinfo2( const void* a, const void* b ) {
+    const freeinfo_t* infoA = (const freeinfo_t*) a;
+    const freeinfo_t* infoB = (const freeinfo_t*) b;
+    if ( infoA->offset < infoB->offset ) return -1;
+    if ( infoA->offset > infoB->offset ) return  1;
+    return 0;
+}
+
+static freelist_t getFreeList( size_t minSize, size_t maxSize, bool sortBySize ) {
     freelist_t list;
     list.info = 0;
     for ( int i=0; i <= 1; ++i ) {
@@ -302,14 +317,17 @@ static freelist_t getFreeList( size_t minSize, size_t maxSize ) {
             if ( list.info == 0 ) oom();
         }
     }
-    if ( list.count >= 2 ) {
+    if ( list.count >= 2 && sortBySize ) {
         qsort( list.info, list.count, sizeof(freeinfo_t), compare_freeinfo );
+    } else {
+        qsort( list.info, list.count, sizeof(freeinfo_t), compare_freeinfo2 );
     }
     return list;
 }
 
 static bool findFreeBlock( size_t size, freeinfo_t* outInfo ) {
-    freelist_t list = getFreeList( size, size + ( size / 3U ) );    // min = ideal size, max = ideal size + 33%
+    freelist_t list = getFreeList( size, size + ( size / 3U ), true );
+    // min = ideal size, max = ideal size + 33%
     if ( list.info == 0 || list.count == 0 ) return false;
     *outInfo = list.info[0];
     free( list.info );
@@ -326,7 +344,7 @@ static void compactUserMemory( void ) {
         free( allocatedBlocks.info );
         return;
     }
-    freelist_t freeList = getFreeList( 0, CHUNKMAX );
+    freelist_t freeList = getFreeList( 0, CHUNKMAX, false );
     if ( freeList.count == 0 ) {
         free( allocatedRegions.regions );
         free( allocatedBlocks .info    );
@@ -341,6 +359,22 @@ static void compactUserMemory( void ) {
     }
 
     // ...
+    
+    printf( "allocated regions:\n" );
+    for ( size_t i=0; i < allocatedRegions.numRegions; ++i ) {
+        const memregion_t* rgn = &allocatedRegions.regions[i];
+        printf( "[%zu] #%zu .. #%zu, %zu .. %zu\n"
+            , i, rgn->listIndexStart, rgn->listIndexEnd, rgn->offsetStart, rgn->offsetEnd
+        );
+    }
+
+    printf( "free regions:\n" );
+    for ( size_t i=0; i < freeRegions.numRegions; ++i ) {
+        const memregion_t* rgn = &freeRegions.regions[i];
+        printf( "[%zu] #%zu .. #%zu, %zu .. %zu\n"
+            , i, rgn->listIndexStart, rgn->listIndexEnd, rgn->offsetStart, rgn->offsetEnd
+        );
+    }
 
 
     free( freeRegions     .regions );
@@ -399,7 +433,7 @@ objref_t allocUserMemory( size_t requestSize ) {
             recycled  = true;
         } else {
             // attempt to garbage collect
-            // compactUserMemory();        
+            compactUserMemory();
             if ( allocSize > theUserMemory.memSize - theUserMemory.memUsed ) {
                 // didn't work: resize it
                 // growUserMemory();
