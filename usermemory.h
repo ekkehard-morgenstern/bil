@@ -131,4 +131,7 @@ size_t sizeofUserMemory( objref_t block );
         If the block address specified is incorrect, the behavior may be undefined.
     */
 
+extern size_t numGCCycles;
+extern size_t numScaleCycles;
+
 #endif

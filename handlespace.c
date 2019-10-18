@@ -34,7 +34,7 @@ void initHandleSpace( unsigned initialMaxHandles ) {
         fprintf( stderr, "? bad maximum number of handles: %u\n", initialMaxHandles );
         exit( EXIT_FAILURE );
     }
-    theHandleSpace.objrefs = (objref_t*) calloc( initialMaxHandles, sizeof(objref_t*) );
+    theHandleSpace.objrefs = (objref_t*) calloc( initialMaxHandles, sizeof(objref_t) );
     if ( theHandleSpace.objrefs == 0 ) {
         fprintf( stderr, "? failed to allocate handle space of size %u: %m\n", initialMaxHandles );
         exit( EXIT_FAILURE );
@@ -64,13 +64,13 @@ handle_t allocHandle( size_t requestSize ) {
             } else {
                 newSize = UINT_MAX;
             }
-            objref_t* newChunk = (objref_t*) calloc( newSize, sizeof(objref_t*) );
+            objref_t* newChunk = (objref_t*) calloc( newSize, sizeof(objref_t) );
             if ( newChunk == 0 ) {
                 fprintf( stderr, "? failed to allocate handle space of size %u: %m\n", newSize );
                 exit( EXIT_FAILURE );
             }
             // copy over object references from old chunk
-            memcpy( newChunk, theHandleSpace.objrefs, sizeof(objref_t*) * theHandleSpace.usedObjRefs );
+            memcpy( newChunk, theHandleSpace.objrefs, sizeof(objref_t) * theHandleSpace.usedObjRefs );
             // free old chunk and assign new chunk
             free( theHandleSpace.objrefs ); 
             theHandleSpace.objrefs    = newChunk;
@@ -120,7 +120,18 @@ void unlockHandle( handle_t handle ) {
 memusage_t memoryUsage( void ) {
     memusage_t out;
     memset( &out, 0, sizeof(out) );
-
+    out.allocatedHandleSpace = theHandleSpace.usedObjRefs;
+    out.freeHandleSpace      = theHandleSpace.numObjRefs - theHandleSpace.usedObjRefs;
+    out.totalHandleSpace     = theHandleSpace.numObjRefs;
+    out.allocatedUserSpace   = theUserMemory.memUsed;
+    out.freeUserSpace        = theUserMemory.memSize - theUserMemory.memUsed;
+    out.totalUserSpace       = theUserMemory.memSize;
+    out.allocatedMemory      = out.allocatedHandleSpace * sizeof(objref_t) +
+                               out.allocatedUserSpace;
+    out.freeMemory           = out.freeHandleSpace * sizeof(objref_t) +
+                               out.freeUserSpace;
+    out.totalMemory          = out.totalHandleSpace * sizeof(objref_t) +
+                               out.totalUserSpace;
     return out;
 }
 

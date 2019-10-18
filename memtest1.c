@@ -71,6 +71,8 @@ int main( int argc, char** argv ) {
     
     handle_t handles[NUM_ITERATIONS];
     size_t   numHandles = 0;
+    size_t   numAllocs  = 0;
+    size_t   numFrees   = 0;
 
     double ti0 = gettime();
 
@@ -85,7 +87,7 @@ int main( int argc, char** argv ) {
                 void* mem = lockHandle( handles[numHandles] );
                 fillrand( mem, reqSize );
                 unlockHandle( handles[numHandles] );
-                numHandles++;
+                numHandles++; numAllocs++;
             }
         } else if ( r >= 30U ) {    // in 40% of cases, do something with an existing block
             if ( numHandles > 0U ) {
@@ -107,6 +109,7 @@ int main( int argc, char** argv ) {
                         sizeof(handle_t)*( numHandles - (handle+1U) ) );
                     --numHandles;
                 }
+                numFrees++;
             }
         }
     }
@@ -116,6 +119,8 @@ int main( int argc, char** argv ) {
 
     printf( "duration: %g sec(s)\n", dur );
     printf( "numHandles at end: %zu\n", numHandles );
+    printf( "numAllocs: %zu, numFrees: %zu\n", numAllocs, numFrees );
+    printf( "numGCCycles: %zu, numScaleCycles: %zu\n", numGCCycles, numScaleCycles );
     
     memusage_t usage = memoryUsage();
     printf( "total user space: %zu\nallocated user space: %zu\n"

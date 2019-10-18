@@ -55,6 +55,8 @@ typedef struct _freelist_t {
 } freelist_t;
 
 usermemory_t theUserMemory;
+size_t       numGCCycles = 0;
+size_t       numScaleCycles = 0;
 
 static void badBlockOffset( objref_t block ) {
     fprintf( stderr, "? illegal user memory block: %#zx\n", (objref_t) block );
@@ -484,10 +486,10 @@ objref_t allocUserMemory( size_t requestSize ) {
             recycled  = true;
         } else {
             // attempt to garbage collect
-            compactUserMemory();
+            compactUserMemory(); numGCCycles++;
             if ( allocSize > theUserMemory.memSize - theUserMemory.memUsed ) {
                 // didn't work: resize it
-                growUserMemory();
+                growUserMemory(); numScaleCycles++;
                 if ( allocSize > theUserMemory.memSize - theUserMemory.memUsed ) {
                     fprintf( stderr, "? internal error: not enough space for allocation of %zu bytes.\n", alignedSize );
                     exit( EXIT_FAILURE );
