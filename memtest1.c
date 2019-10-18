@@ -42,6 +42,10 @@ static unsigned randu( unsigned modVal ) {
 }
 
 static void fillrand( void* mem, size_t size ) {
+    if ( mem == 0 || size == 0 ) {
+        fprintf( stderr, "? bad args to fillrand(): mem=%p, size=%zu\n", mem, size );
+        exit( EXIT_FAILURE );
+    }
     if ( fread( mem, size, 1U, randFp ) != 1U ) {
         fprintf( stderr, "I/O error from /dev/urandom\n" );
         exit( EXIT_FAILURE );
@@ -57,6 +61,11 @@ static double gettime( void ) {
     return ( (double) ts.tv_sec ) + ( ( (double) ts.tv_nsec ) / 1.0e9 );
 }
 
+
+static handle_t handles[NUM_ITERATIONS];
+static void*    hnddata[NUM_ITERATIONS];
+static size_t   hnddlen[NUM_ITERATIONS];
+
 int main( int argc, char** argv ) {
 
     initHandleSpace( MAX_HANDLES );
@@ -69,10 +78,13 @@ int main( int argc, char** argv ) {
     }
     setvbuf( randFp, 0, _IOFBF, MAX_RANDOMBUF );
     
-    handle_t handles[NUM_ITERATIONS];
     size_t   numHandles = 0;
     size_t   numAllocs  = 0;
     size_t   numFrees   = 0;
+
+    memset( handles, 0, sizeof(handles) );
+    memset( hnddata, 0, sizeof(hnddata) );
+    memset( hnddlen, 0, sizeof(hnddlen) );
 
     double ti0 = gettime();
 
@@ -86,6 +98,14 @@ int main( int argc, char** argv ) {
                 handles[numHandles] = allocHandle( reqSize );
                 void* mem = lockHandle( handles[numHandles] );
                 fillrand( mem, reqSize );
+                if ( hnddata[numHandles] ) free( hnddata[numHandles] );
+                hnddata[numHandles] = malloc( reqSize );
+                if ( hnddata[numHandles] == 0 ) {
+                    fprintf( stderr, "? out of memory\n" );
+                    return EXIT_FAILURE;
+                }
+                memcpy( hnddata[numHandles], mem, reqSize );
+                hnddlen[numHandles] = reqSize;
                 unlockHandle( handles[numHandles] );
                 numHandles++; numAllocs++;
             }
@@ -94,20 +114,39 @@ int main( int argc, char** argv ) {
                 size_t handle = randu( numHandles );
                 void*  mem    = lockHandle( handles[handle] );
                 size_t siz    = handleSize( handles[handle] );
+                if ( siz < hnddlen[handle] ) {
+                    fprintf( stderr, "? bad length, handle %zu, %zu vs %zu\n", 
+                        handle, siz, hnddlen[handle] );
+                    return EXIT_FAILURE;
+                } else {
+                    siz = hnddlen[handle];
+                }
+                if ( memcmp( hnddata[handle], mem, siz ) != 0 ) {
+                    fprintf( stderr, "? bad data, handle %zu\n", handle );
+                    return EXIT_FAILURE;
+                }                
                 fillrand( mem, siz );
+                memcpy( hnddata[handle], mem, siz );
                 unlockHandle( handles[handle] );
             }
         } else {                    // in 30% of cases, free a block
             if ( numHandles > 0U ) {
                 size_t handle = randu( numHandles );
+                freeHandle( handles[handle] );
+                free( hnddata[handle] ); hnddata[handle] = 0; hnddlen[handle] = 0;
                 if ( handle == numHandles-1U ) {
-                    freeHandle( handles[handle] );
                     --numHandles;
                 } else {
-                    freeHandle( handles[handle] );
-                    memmove( &handles[handle], &handles[handle+1U],
-                        sizeof(handle_t)*( numHandles - (handle+1U) ) );
+                    size_t remain = numHandles - ( handle + 1U );
+                    if ( remain == 0 ) {
+                        fprintf( stderr, "? internal error\n" );
+                        return EXIT_FAILURE;
+                    }
+                    memmove( &handles[handle], &handles[handle+1U], sizeof(handle_t)*remain );
+                    memmove( &hnddata[handle], &hnddata[handle+1U], sizeof(void   *)*remain );
+                    memmove( &hnddlen[handle], &hnddlen[handle+1U], sizeof(size_t  )*remain );
                     --numHandles;
+                    handles[numHandles] = 0; hnddata[numHandles] = 0; hnddlen[numHandles] = 0;
                 }
                 numFrees++;
             }
