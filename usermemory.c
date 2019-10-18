@@ -483,23 +483,33 @@ void freeUserMemory( objref_t block ) {
     }
     size |= FREEBIT;
     setBlockSize( blk, size );
-    memhdr_t* hdr = (memhdr_t*)( blk - sizeof(memhdr_t) );
+    size_t    chunkSize = size & CHUNKMAX;
+    char*     blkStart  = blk - sizeof(memhdr_t);
+    char*     blkEnd    = blkStart + chunkSize;
+    memhdr_t* hdr       = (memhdr_t*) blkStart;
     removeBasedNode( theUserMemory.memory, &hdr->node );
+    if ( blkEnd == theUserMemory.memory + theUserMemory.memUsed ) {
+        // chunk was exactly at end of allocated area: in this case, don't add to free list
+        theUserMemory.memUsed -= chunkSize;
+        memset( blkStart, 0, chunkSize );
+        return;
+    }
     // check last node in free list if it would form a contiguous region with this node
     memhdr_t* last = (memhdr_t*) lastBasedNode( theUserMemory.memory, 
         (basedlist_t*)( theUserMemory.memory + theUserMemory.freeList ) );
-    if ( last && ((char*)last) + last->size == (char*) hdr ) {
+    size_t lastSize = last ? last->size & CHUNKMAX : 0;
+    if ( last && ((char*)last) + lastSize == (char*) hdr ) {
         // yes: merge into that node
-        size_t newSize = ( last->size & CHUNKMAX ) + ( hdr->size & CHUNKMAX );
+        size_t newSize = lastSize + chunkSize;
         if ( newSize <= CHUNKMAX ) {    // can safely merge
             last->size = newSize | FREEBIT;           
             // clear whole memory region that was added
-            memset( hdr, 0, hdr->size & CHUNKMAX );
+            memset( hdr, 0, chunkSize );
             return;
         }
     }
     // unmerged: simply clear and add to end of free list
-    size = ( hdr->size & CHUNKMAX ) - sizeof(memhdr_t);
+    size = chunkSize - sizeof(memhdr_t);
     if ( size ) memset( blk, 0, size );
     addBasedNodeAtTail( theUserMemory.memory, 
         (basedlist_t*)( theUserMemory.memory + theUserMemory.freeList ), &hdr->node );
