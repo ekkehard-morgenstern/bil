@@ -143,8 +143,8 @@ static void oom( void ) {
 static int compare_blockinfo( const void* a, const void* b ) {
     const blockinfo_t* infoA = (const blockinfo_t*) a;
     const blockinfo_t* infoB = (const blockinfo_t*) b;
-    if ( infoA->block < infoB->block ) return -1;
-    if ( infoA->block > infoB->block ) return  1;
+    if ( infoA->block < infoB->block ) return  1;
+    if ( infoA->block > infoB->block ) return -1;
     return 0;
 }
 
@@ -174,61 +174,7 @@ static blocklist_t getAllocatedBlocks( void ) {
     if ( list.count >= 2U ) {
         qsort( list.info, list.count, sizeof(blockinfo_t), compare_blockinfo );
     }
-    printf( "blocklist:\n" );
-    for ( size_t i=0; i < list.count; ++i ) {
-        const blockinfo_t* info = &list.info[i];
-        printf( "[%zu] handle %u, block %zu\n", i, info->handle, info->block );
-    }
     return list;
-}
-
-static memlist_t getContiguousRegionsFromBlockList( const blocklist_t* list ) {
-    memregion_t current; memlist_t regions;
-    for ( size_t j=0; j <= 1U; ++j ) {
-        current.offsetStart    = 0;
-        current.offsetEnd      = 0;
-        current.listIndexStart = 0;
-        current.listIndexEnd   = 0;
-        if ( j == 1U && regions.numRegions ) {
-            regions.regions = (memregion_t*) calloc( regions.numRegions, sizeof(memregion_t) );
-            if ( regions.regions == 0 ) oom();
-        } else {
-            regions.regions = 0;
-        }
-        regions.numRegions = 0;
-        bool haveStart = false; 
-        for ( size_t i=0; i < list->count; ++i ) {
-           size_t memSize  = sizeofUserMemory( list->info[i].block );
-           size_t newStart = list->info[i].block - sizeof(memhdr_t);
-           size_t newEnd   = newStart + sizeof(memhdr_t) + memSize;
-            if ( !haveStart ) {
-                haveStart = true;
-                current.offsetStart    = newStart;
-                current.offsetEnd      = newEnd;
-                current.listIndexStart = i;
-                current.listIndexEnd   = i;
-            } else if ( newStart == current.offsetEnd ) {  // contiguous
-                current.offsetEnd      = newEnd;
-                current.listIndexEnd   = i;
-            } else { // a gap has occurred
-                if ( j == 1U ) {
-                    regions.regions[regions.numRegions++] = current;
-                } else {
-                    regions.numRegions++;
-                }
-                haveStart = false;
-                --i;
-            }
-            if ( i == list->count-1U ) {
-                if ( j == 1U ) {
-                    regions.regions[regions.numRegions++] = current;
-                } else {
-                    regions.numRegions++;
-                }
-            } 
-        } // i
-    } // j
-    return regions;
 }
 
 static memlist_t getContiguousRegionsFromFreeList( const freelist_t* list ) {
@@ -339,44 +285,7 @@ static bool findFreeBlock( size_t size, freeinfo_t* outInfo ) {
     return true;
 }
 
-static void compactUserMemory( void ) {
-    blocklist_t allocatedBlocks;
-    memlist_t   allocatedRegions;
-    freelist_t  freeList;
-    memlist_t   freeRegions;
-
-    allocatedBlocks = getAllocatedBlocks();
-    if ( allocatedBlocks.count == 0 ) goto END1; // compaction impossible
-    allocatedRegions = getContiguousRegionsFromBlockList( &allocatedBlocks );
-    if ( allocatedRegions.numRegions == 0 ) goto END2;
-
-    printf( "allocated regions:\n" );
-    for ( size_t i=0; i < allocatedRegions.numRegions; ++i ) {
-        const memregion_t* rgn = &allocatedRegions.regions[i];
-        printf( "[%zu] #%zu .. #%zu, %zu .. %zu\n"
-            , i, rgn->listIndexStart, rgn->listIndexEnd, rgn->offsetStart, rgn->offsetEnd
-        );
-    }
-
-REDO_FREELIST:
-
-    freeList = getFreeList( 0, CHUNKMAX, false );
-    if ( freeList.count == 0 ) goto END3;
-    freeRegions = getContiguousRegionsFromFreeList( &freeList );
-    if ( freeRegions.numRegions == 0 ) goto END4;
-
-    // ...
-    
-    printf( "free regions:\n" );
-    for ( size_t i=0; i < freeRegions.numRegions; ++i ) {
-        const memregion_t* rgn = &freeRegions.regions[i];
-        printf( "[%zu] #%zu .. #%zu, %zu .. %zu\n"
-            , i, rgn->listIndexStart, rgn->listIndexEnd, rgn->offsetStart, rgn->offsetEnd
-        );
-    }
-
-    // merge free regions
-
+static bool mergeFreeRegions( freelist_t freeList, memlist_t freeRegions ) {
     bool change = false;
     for ( size_t i=0; i < freeRegions.numRegions; ++i ) {
         const memregion_t* rgn = &freeRegions.regions[i];
@@ -404,24 +313,120 @@ REDO_FREELIST:
             }
         }
     }
+    return change;
+}
+
+static bool moveBlocks( blocklist_t allocatedBlocks, freelist_t freeList ) {
+    bool change = false;
+    for ( size_t i=0; i < allocatedBlocks.count; ++i ) {
+        const blockinfo_t* info = &allocatedBlocks.info[i];
+        memhdr_t* hdr = (memhdr_t*)( theUserMemory.memory + info->block - sizeof(memhdr_t) );
+        size_t    siz = hdr->size & CHUNKMAX;
+        size_t    cpy = siz;
+        for ( size_t j=0; j < freeList.count; ++j ) {
+            freeinfo_t* info2 = &freeList.info[j];
+            // don't move blocks to higher addresses
+            if ( info2->offset + sizeof(memhdr_t) > info->block ) break;
+            if ( siz < info2->size ) {  // found a suitable free region
+                memhdr_t* hdr2 = (memhdr_t*)( theUserMemory.memory + info2->offset );
+                removeBasedNode( theUserMemory.memory, &hdr2->node );
+                memset( hdr2, 0, sizeof(memhdr_t) );
+                objref_t newPos = info2->offset;
+                // see if the header can be moved forward
+                size_t remain = info2->size - siz;
+                if ( remain <= sizeof(memhdr_t) ) {     // no!
+                    // allocate it all
+                    siz = info2->size;
+                    info2->offset = 0;
+                    info2->size   = 0;
+                } else {
+                    // move block start address forward
+                    info2->offset += siz;
+                    info2->size   -= siz;
+                    hdr2 = (memhdr_t*)( theUserMemory.memory + info2->offset );
+                    initBasedNode( theUserMemory.memory, &hdr2->node );
+                    hdr2->size  = info2->size | FREEBIT;
+                    hdr2->magic = MEMHDR_MAGIC;
+                    addBasedNodeAtTail( theUserMemory.memory, 
+                        (basedlist_t*)( theUserMemory.memory + theUserMemory.freeList ),
+                        &hdr2->node );
+                }
+                // relocate node
+                removeBasedNode( theUserMemory.memory, &hdr->node );
+                memcpy( theUserMemory.memory + newPos, hdr, cpy );
+                memhdr_t* old = hdr;
+                memset( old, 0, cpy );
+                initBasedNode( theUserMemory.memory, &old->node );
+                old->size  = cpy | FREEBIT;
+                old->magic = MEMHDR_MAGIC;
+                addBasedNodeAtTail( theUserMemory.memory, 
+                    (basedlist_t*)( theUserMemory.memory + theUserMemory.freeList ),
+                    &old->node );
+                hdr = (memhdr_t*)( theUserMemory.memory + newPos );
+                addBasedNodeAtTail( theUserMemory.memory, 
+                    (basedlist_t*)( theUserMemory.memory + theUserMemory.allocList ),
+                    &hdr->node );
+                theHandleSpace.objrefs[ info->handle ] = newPos + sizeof(memhdr_t);
+                change = true;
+                break;  // process next handle
+            }
+        }
+    }
+    return change;
+}
+
+static void compactUserMemory( void ) {
+    blocklist_t allocatedBlocks;
+    freelist_t  freeList;
+    memlist_t   freeRegions;
+    bool        change;
+
+REDO_ALLOCATED_BLOCKS:
+
+    allocatedBlocks = getAllocatedBlocks();
+    if ( allocatedBlocks.count == 0 ) goto END1; // compaction impossible
+
+REDO_FREELIST:
+
+    freeList = getFreeList( 0, CHUNKMAX, false );
+    if ( freeList.count == 0 ) goto END3;
+    freeRegions = getContiguousRegionsFromFreeList( &freeList );
+    if ( freeRegions.numRegions == 0 ) goto END4;
+
+    // merge free regions
+    change = mergeFreeRegions( freeList, freeRegions );
 
     if ( change ) {
         free( freeRegions.regions );
         free( freeList   .info    );
         goto REDO_FREELIST;
     }
+ 
+    free( freeRegions.regions );
 
     // begin moving blocks from the end of the memory area to the available free areas
-    
+    change = moveBlocks( allocatedBlocks, freeList );
 
+    if ( change ) {
+        free( freeList       .info );
+        free( allocatedBlocks.info );
+        goto REDO_ALLOCATED_BLOCKS;
+    }
 
-    // ...
+    // see if the end of the free list could be used to reduce memUsed
+    if ( freeList.count > 0U ) {
+        const freeinfo_t* info = &freeList.info[freeList.count-1U];
+        size_t offsetEnd = info->offset + info->size;
+        if ( offsetEnd == theUserMemory.memUsed ) {
+            theUserMemory.memUsed -= info->size;
+            memhdr_t* hdr = (memhdr_t*)( theUserMemory.memory + info->offset );
+            removeBasedNode( theUserMemory.memory, &hdr->node );
+            memset( hdr, 0, info->size );
+        }
+    } 
 
-//END5:   
-        free( freeRegions     .regions );
 END4:   free( freeList        .info    );
-END3:   free( allocatedRegions.regions );
-END2:   free( allocatedBlocks .info    );
+END3:   free( allocatedBlocks .info    );
 END1:   ;
 }
 
@@ -434,7 +439,7 @@ static void growUserMemory( void ) {
     size_t maxSize = SIZE_MAX / 2U;
     size_t newSize;
     if ( theUserMemory.memSize < maxSize ) {
-        newSize = maxSize * 2U;
+        newSize = theUserMemory.memSize * 2U;
     } else {
         newSize = SIZE_MAX;
         if ( theUserMemory.memSize == newSize ) {
@@ -482,7 +487,7 @@ objref_t allocUserMemory( size_t requestSize ) {
             compactUserMemory();
             if ( allocSize > theUserMemory.memSize - theUserMemory.memUsed ) {
                 // didn't work: resize it
-                // growUserMemory();
+                growUserMemory();
                 if ( allocSize > theUserMemory.memSize - theUserMemory.memUsed ) {
                     fprintf( stderr, "? internal error: not enough space for allocation of %zu bytes.\n", alignedSize );
                     exit( EXIT_FAILURE );
