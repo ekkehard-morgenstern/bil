@@ -63,15 +63,20 @@ static void badBlockOffset( objref_t block ) {
 
 static inline char* validateUserMemory( objref_t block ) {
     if ( block < sizeof(memhdr_t) || block >= theUserMemory.memUsed ) badBlockOffset( block );
-    return theUserMemory.memory + block;
+    char* blk = theUserMemory.memory + block;
+    memhdr_t* hdr = (memhdr_t*)( blk - sizeof(memhdr_t) );
+    if ( hdr->magic != MEMHDR_MAGIC ) badBlockOffset( block );
+    return blk;
 }
 
 static inline size_t getBlockSize( char* blk ) {
-    return ((memhdr_t*)( blk - sizeof(memhdr_t) ))->size;
+    memhdr_t* hdr = (memhdr_t*)( blk - sizeof(memhdr_t) );
+    return hdr->size;
 }
 
 static inline void setBlockSize( char* blk, size_t size ) {
-    ((memhdr_t*)( blk - sizeof(memhdr_t) ))->size = size;
+    memhdr_t* hdr = (memhdr_t*)( blk - sizeof(memhdr_t) );
+    hdr->size = size;
 }
 
 static inline bool isUserMemoryLocked( objref_t block ) {
@@ -428,6 +433,10 @@ objref_t allocUserMemory( size_t requestSize ) {
         freeinfo_t info;
         bool found = findFreeBlock( allocSize, &info );
         if ( found ) {
+            // remove node from free list
+            basednode_t* node = (basednode_t*)( theUserMemory.memory + info.offset );
+            removeBasedNode( theUserMemory.memory, node );
+            // now recycle it
             allocPos  = info.offset;
             allocSize = info.size;
             recycled  = true;
@@ -453,7 +462,8 @@ objref_t allocUserMemory( size_t requestSize ) {
     memhdr_t* hdr = (memhdr_t*) blk;
     blk += sizeof(memhdr_t);
     initBasedNode( theUserMemory.memory, &hdr->node );
-    hdr->size = allocSize;
+    hdr->size  = allocSize;
+    hdr->magic = MEMHDR_MAGIC;
     addBasedNodeAtTail( theUserMemory.memory, 
         (basedlist_t*)( theUserMemory.memory + theUserMemory.allocList ), 
         &hdr->node );

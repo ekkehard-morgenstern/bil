@@ -37,9 +37,12 @@
 
 #define CHUNKALIGN  8U      // align chunks to 8-byte-boundaries
 
+#define MEMHDR_MAGIC    (0X555345524D484452UL)
+
 typedef struct _memhdr_t {
     basednode_t node;
     size_t      size;   // size and flags
+    size_t      magic;  // to test for mem header validity
     // ATTN: TODO: possible memory alignment issue when sizeof(size_t) != sizeof(ptrdiff_t)
     // followed by actual memory
 } memhdr_t;
