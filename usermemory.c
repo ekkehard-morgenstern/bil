@@ -340,31 +340,16 @@ static bool findFreeBlock( size_t size, freeinfo_t* outInfo ) {
 }
 
 static void compactUserMemory( void ) {
-    blocklist_t allocatedBlocks = getAllocatedBlocks();
-    if ( allocatedBlocks.count == 0 ) { // compaction impossible
-        return;
-    }
-    memlist_t allocatedRegions = getContiguousRegionsFromBlockList( &allocatedBlocks );
-    if ( allocatedRegions.numRegions == 0 ) {
-        free( allocatedBlocks.info );
-        return;
-    }
-    freelist_t freeList = getFreeList( 0, CHUNKMAX, false );
-    if ( freeList.count == 0 ) {
-        free( allocatedRegions.regions );
-        free( allocatedBlocks .info    );
-        return;
-    }
-    memlist_t freeRegions = getContiguousRegionsFromFreeList( &freeList );
-    if ( freeRegions.numRegions == 0 ) {
-        free( freeList        .info    );
-        free( allocatedRegions.regions );
-        free( allocatedBlocks .info    );
-        return;
-    }
+    blocklist_t allocatedBlocks;
+    memlist_t   allocatedRegions;
+    freelist_t  freeList;
+    memlist_t   freeRegions;
 
-    // ...
-    
+    allocatedBlocks = getAllocatedBlocks();
+    if ( allocatedBlocks.count == 0 ) goto END1; // compaction impossible
+    allocatedRegions = getContiguousRegionsFromBlockList( &allocatedBlocks );
+    if ( allocatedRegions.numRegions == 0 ) goto END2;
+
     printf( "allocated regions:\n" );
     for ( size_t i=0; i < allocatedRegions.numRegions; ++i ) {
         const memregion_t* rgn = &allocatedRegions.regions[i];
@@ -373,6 +358,15 @@ static void compactUserMemory( void ) {
         );
     }
 
+REDO_FREELIST:
+
+    freeList = getFreeList( 0, CHUNKMAX, false );
+    if ( freeList.count == 0 ) goto END3;
+    freeRegions = getContiguousRegionsFromFreeList( &freeList );
+    if ( freeRegions.numRegions == 0 ) goto END4;
+
+    // ...
+    
     printf( "free regions:\n" );
     for ( size_t i=0; i < freeRegions.numRegions; ++i ) {
         const memregion_t* rgn = &freeRegions.regions[i];
@@ -381,11 +375,53 @@ static void compactUserMemory( void ) {
         );
     }
 
+    // merge free regions
 
-    free( freeRegions     .regions );
-    free( freeList        .info    );
-    free( allocatedRegions.regions );
-    free( allocatedBlocks .info    );
+    bool change = false;
+    for ( size_t i=0; i < freeRegions.numRegions; ++i ) {
+        const memregion_t* rgn = &freeRegions.regions[i];
+        if ( rgn->listIndexStart < rgn->listIndexEnd ) { // mergeable
+            memhdr_t* hdr = (memhdr_t*)( theUserMemory.memory + rgn->offsetStart );
+            size_t    siz = hdr->size & CHUNKMAX;
+            // remove nodes from free list
+            for ( size_t j=rgn->listIndexStart + 1U; j <= rgn->listIndexEnd; ++j ) {
+                const freeinfo_t* info = &freeList.info[j];
+                memhdr_t* blkhdr = (memhdr_t*)( theUserMemory.memory + info->offset );
+                size_t    blksiz = blkhdr->size & CHUNKMAX;
+                if ( siz + blksiz > CHUNKMAX ) { // merged block would be too large
+                    // start new header
+                    hdr = blkhdr;
+                    siz = blksiz;
+                } else {
+                    // extend current header
+                    siz += blksiz;
+                    hdr->size = siz | FREEBIT;
+                    removeBasedNode( theUserMemory.memory, &blkhdr->node );
+                    // clear memory header
+                    memset( theUserMemory.memory + info->offset, 0, sizeof(memhdr_t) );
+                    change = true;
+                }
+            }
+        }
+    }
+
+    if ( change ) {
+        free( freeRegions.regions );
+        free( freeList   .info    );
+        goto REDO_FREELIST;
+    }
+
+
+
+
+    // ...
+
+//END5:   
+        free( freeRegions     .regions );
+END4:   free( freeList        .info    );
+END3:   free( allocatedRegions.regions );
+END2:   free( allocatedBlocks .info    );
+END1:   ;
 }
 
 static void growUserMemory( void ) {
