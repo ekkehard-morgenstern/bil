@@ -411,7 +411,8 @@ REDO_FREELIST:
         goto REDO_FREELIST;
     }
 
-
+    // begin moving blocks from the end of the memory area to the available free areas
+    
 
 
     // ...
