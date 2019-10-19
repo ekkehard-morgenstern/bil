@@ -27,7 +27,8 @@
 #include <limits.h>
 #include <stdio.h>
 
-handlespace_t theHandleSpace;
+handlespace_t           theHandleSpace;
+extern pthread_mutex_t  userMemLock;
 
 void initHandleSpace( unsigned initialMaxHandles ) {
     if ( initialMaxHandles < 1024U ) {
@@ -44,6 +45,7 @@ void initHandleSpace( unsigned initialMaxHandles ) {
 }
 
 handle_t allocHandle( size_t requestSize ) {
+    pthread_mutex_lock( &userMemLock );
     // attempt to allocate handle quickly
     handle_t hnd = UINT_MAX;
     if ( theHandleSpace.usedObjRefs < theHandleSpace.numObjRefs ) {
@@ -56,7 +58,7 @@ handle_t allocHandle( size_t requestSize ) {
         if ( hnd == UINT_MAX ) {    // no unassigned handles: have to resize
             if ( theHandleSpace.numObjRefs == UINT_MAX ) {  // no way to resize
                 fprintf( stderr, "? maximum number of handles exceeded\n" );
-                exit( EXIT_FAILURE );
+                _exit( EXIT_FAILURE );
             }
             unsigned newSize;
             if ( theHandleSpace.numObjRefs <= UINT_MAX/2U ) {
@@ -67,7 +69,7 @@ handle_t allocHandle( size_t requestSize ) {
             objref_t* newChunk = (objref_t*) calloc( newSize, sizeof(objref_t) );
             if ( newChunk == 0 ) {
                 fprintf( stderr, "? failed to allocate handle space of size %u: %m\n", newSize );
-                exit( EXIT_FAILURE );
+                _exit( EXIT_FAILURE );
             }
             // copy over object references from old chunk
             memcpy( newChunk, theHandleSpace.objrefs, sizeof(objref_t) * theHandleSpace.usedObjRefs );
@@ -82,44 +84,56 @@ handle_t allocHandle( size_t requestSize ) {
     // the handle is allocated; now get a chunk of user memory
     theHandleSpace.objrefs[hnd] = allocUserMemory( requestSize );
     // return the handle
+    pthread_mutex_unlock( &userMemLock );
     return hnd;
 }
 
 static void validateHandle( handle_t handle ) {
     if ( handle >= theHandleSpace.usedObjRefs ) {
         fprintf( stderr, "? handle out of range: %u\n", handle );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
     if ( theHandleSpace.objrefs[handle] == 0 ) {
         fprintf( stderr, "? handle %u not allocated\n", handle );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
 }
 
 void freeHandle( handle_t handle ) {
+    pthread_mutex_lock( &userMemLock );
     validateHandle( handle );
     freeUserMemory( theHandleSpace.objrefs[handle] );
     theHandleSpace.objrefs[handle] = 0;
+    pthread_mutex_unlock( &userMemLock );
 }
 
 size_t handleSize( handle_t handle ) {
+    pthread_mutex_lock( &userMemLock );
     validateHandle( handle );
-    return sizeofUserMemory( theHandleSpace.objrefs[handle] );
+    size_t result = sizeofUserMemory( theHandleSpace.objrefs[handle] );
+    pthread_mutex_unlock( &userMemLock );
+    return result;
 }
 
 void* lockHandle( handle_t handle ) {
+    pthread_mutex_lock( &userMemLock );
     validateHandle( handle );
-    return lockUserMemory( theHandleSpace.objrefs[handle] );
+    void* ptr = lockUserMemory( theHandleSpace.objrefs[handle] );
+    pthread_mutex_unlock( &userMemLock );
+    return ptr;
 }
 
 void unlockHandle( handle_t handle ) {
+    pthread_mutex_lock( &userMemLock );
     validateHandle( handle );
     unlockUserMemory( theHandleSpace.objrefs[handle] );
+    pthread_mutex_unlock( &userMemLock );
 }
 
 memusage_t memoryUsage( void ) {
     memusage_t out;
     memset( &out, 0, sizeof(out) );
+    pthread_mutex_lock( &userMemLock );
     out.allocatedHandleSpace = theHandleSpace.usedObjRefs;
     out.freeHandleSpace      = theHandleSpace.numObjRefs - theHandleSpace.usedObjRefs;
     out.totalHandleSpace     = theHandleSpace.numObjRefs;
@@ -132,6 +146,7 @@ memusage_t memoryUsage( void ) {
                                out.freeUserSpace;
     out.totalMemory          = out.totalHandleSpace * sizeof(objref_t) +
                                out.totalUserSpace;
+    pthread_mutex_unlock( &userMemLock );
     return out;
 }
 

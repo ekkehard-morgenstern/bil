@@ -34,6 +34,8 @@
 #include <string.h>
 #include <limits.h>
 #include <stdio.h>
+#include <errno.h>
+#include <math.h>
 
 #include <unistd.h>
 #if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0 && defined(_POSIX_MONOTONIC_CLOCK)
@@ -41,5 +43,7 @@
 #else
 #error "POSIX timers not available"
 #endif
+
+#include <pthread.h>
 
 #endif

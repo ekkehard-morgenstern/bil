@@ -35,7 +35,7 @@ CFLAGS=-g
 else
 CFLAGS=-O3
 endif
-CFLAGS+= -Wall
+CFLAGS+= -Wall -pthread
 
 .c.o:
 	$(CC) -c $(CFLAGS) $<
@@ -53,6 +53,7 @@ MEMTEST1_MODULES=memtest1.o handlespace.o usermemory.o basedlists.o
 MEMTEST1_INCLUDES=types.h basedlists.h handlespace.h usermemory.h
 TESTBASEDLIST_MODULES=testbasedlist.o basedlists.o
 TESTBASEDLIST_INCLUDES=basedlists.h types.h
+LIBS=-lrt -lm
 
 testparser: $(TESTPARSER_MODULES)
 	$(CC) $(CFLAGS) -o $@ $(TESTPARSER_MODULES)
@@ -71,7 +72,7 @@ separateparsingtable: separateparsingtable.o
 	$(CC) $(CFLAGS) -o $@ $<
 
 memtest1: $(MEMTEST1_MODULES)
-	$(CC) $(CFLAGS) -o $@ $(MEMTEST1_MODULES)
+	$(CC) $(CFLAGS) -o $@ $(MEMTEST1_MODULES) $(LIBS)
 
 memtest1.o: memtest1.c $(MEMTEST1_INCLUDES)
 

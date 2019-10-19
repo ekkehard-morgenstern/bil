@@ -54,13 +54,17 @@ typedef struct _freelist_t {
     size_t      count;
 } freelist_t;
 
-usermemory_t theUserMemory;
-size_t       numGCCycles = 0;
-size_t       numScaleCycles = 0;
+usermemory_t        theUserMemory;
+size_t              numGCCycles = 0;
+size_t              numScaleCycles = 0;
+static pthread_t    compactorThread;
+static bool         compactorRun  = false;
+static bool         compactorQuit = false;
+pthread_mutex_t     userMemLock   = PTHREAD_MUTEX_INITIALIZER;
 
 static void badBlockOffset( objref_t block ) {
     fprintf( stderr, "? illegal user memory block: %#zx\n", (objref_t) block );
-    exit( EXIT_FAILURE );
+    _exit( EXIT_FAILURE );
 }
 
 static inline char* validateUserMemory( objref_t block ) {
@@ -93,19 +97,66 @@ static inline bool isUserMemoryFreed( objref_t block ) {
     return size & FREEBIT ? true : false;
 }
 
+static void compactUserMemory( void );
+
+static double gettime( void ) {
+    struct timespec ts;
+    if ( clock_gettime( CLOCK_MONOTONIC, &ts ) == -1 ) {
+        fprintf( stderr, "clock_gettime(2) failed: %m\n" );
+        _exit( EXIT_FAILURE );
+    }
+    return ( (double) ts.tv_sec ) + ( ( (double) ts.tv_nsec ) / 1.0e9 );
+}
+
+#define CYCLETIME   0.1    // 1/10 sec
+
+static void* compactorMain( void* arg ) {
+    double cycleTime = CYCLETIME;
+    while ( !compactorQuit ) {
+        if ( compactorRun ) {
+            double ti0 = gettime();
+            pthread_mutex_lock( &userMemLock );
+            compactUserMemory();
+            pthread_mutex_unlock( &userMemLock );
+            double ti1 = gettime();
+            double dur = ti1 - ti0;
+            if ( dur < cycleTime ) {
+                double slp = cycleTime - dur;
+                struct timespec ts, tsrem; double secs = trunc( slp );
+                ts.tv_sec  = (long) secs;
+                ts.tv_nsec = (long) ( ( slp - secs ) * 1e9 );
+                for (;;) {
+                    int rv = nanosleep( &ts, &tsrem );
+                    if ( rv == -1 && errno == EINTR ) ts = tsrem; else break;
+                }
+                // if ( dur < cycleTime / 10.0 ) cycleTime /= 2.0;
+            } else {
+                cycleTime *= 2.0;
+            }
+        }
+    }
+    return 0;
+}
+
+static void compactorTerm( void ) {
+    compactorQuit = true;
+    void* retval = 0;
+    pthread_join( compactorThread, &retval );
+}
+
 void initUserMemory( size_t initialSize ) {
     if ( initialSize < 65536U ) {
         fprintf( stderr, "? initial user memory size too small: %zu\n", initialSize );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
     if ( sizeof(size_t) != sizeof(ptrdiff_t) ) {
         fprintf( stderr, "? sizeof(size_t) != sizeof(ptrdiff_t) [%zu!=%zu]\n", sizeof(size_t), sizeof(ptrdiff_t) );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
     theUserMemory.memory = (char*) calloc( initialSize, sizeof(char) );
     if ( theUserMemory.memory == 0 ) {
         fprintf( stderr, "? failed to allocate user memory of %zu bytes: %m\n", initialSize );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
     theUserMemory.memSize   = initialSize;
     theUserMemory.memUsed   = 8U + sizeof(basedlist_t) * 2U;
@@ -115,6 +166,14 @@ void initUserMemory( size_t initialSize ) {
         (basedlist_t*)( theUserMemory.memory + theUserMemory.allocList ) );
     initBasedList( theUserMemory.memory, 
         (basedlist_t*)( theUserMemory.memory + theUserMemory.freeList  ) );
+    int rv = pthread_create( &compactorThread, 0, compactorMain, 0 );
+    if ( rv != 0 ) {
+        errno = rv;
+        fprintf( stderr, "? failed to create compactor thread: %m\n" );
+        _exit( EXIT_FAILURE );
+    }
+    atexit( compactorTerm );
+    compactorRun = true;
 }
 
 /*
@@ -139,7 +198,7 @@ static bool canChangeUserMemory( void ) {
 
 static void oom( void ) {
     fprintf( stderr, "? out of memory\n" );
-    exit( EXIT_FAILURE );
+    _exit( EXIT_FAILURE );
 }
 
 static int compare_blockinfo( const void* a, const void* b ) {
@@ -279,12 +338,21 @@ static freelist_t getFreeList( size_t minSize, size_t maxSize, bool sortBySize )
 }
 
 static bool findFreeBlock( size_t size, freeinfo_t* outInfo ) {
-    freelist_t list = getFreeList( size, size + ( size / 3U ), true );
-    // min = ideal size, max = ideal size + 33%
-    if ( list.info == 0 || list.count == 0 ) return false;
-    *outInfo = list.info[0];
-    free( list.info );
-    return true;
+    basednode_t* node = (basednode_t*) firstBasedNode( theUserMemory.memory, 
+        (basedlist_t*)( theUserMemory.memory + theUserMemory.freeList ) );
+    while ( node ) {
+        memhdr_t* hdr = (memhdr_t*) node;
+        size_t    siz = hdr->size & CHUNKMAX;
+        if ( siz >= size ) {
+            freeinfo_t info;
+            info.offset = (size_t)( ((char*)hdr) - theUserMemory.memory );
+            info.size   = siz;
+            *outInfo = info;
+            return true;
+        }
+        node = (basednode_t*) nextBasedNode( theUserMemory.memory, node );
+    }
+    return false;
 }
 
 static bool mergeFreeRegions( freelist_t freeList, memlist_t freeRegions ) {
@@ -429,14 +497,14 @@ REDO_FREELIST:
 
 END4:   free( freeList        .info    );
 END3:   free( allocatedBlocks .info    );
-END1:   ;
+END1:   numGCCycles++;
 }
 
 static void growUserMemory( void ) {
     // cannot be called when there are locked memory blocks inside user memory
     if ( !canChangeUserMemory() ) {
         fprintf( stderr, "? cannot grow user memory, there are locked memory blocks inside\n" );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
     size_t maxSize = SIZE_MAX / 2U;
     size_t newSize;
@@ -446,13 +514,13 @@ static void growUserMemory( void ) {
         newSize = SIZE_MAX;
         if ( theUserMemory.memSize == newSize ) {
             fprintf( stderr, "? cannot grow user memory, it's too big\n" );
-            exit( EXIT_FAILURE );
+            _exit( EXIT_FAILURE );
         }
     }
     char* newMem = calloc( newSize, sizeof(char) );
     if ( newMem == 0 ) {
         fprintf( stderr, "? failed to allocate user memory of %zu bytes: %m\n", newSize );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
     if ( theUserMemory.memUsed ) {
         memcpy( newMem, theUserMemory.memory, theUserMemory.memUsed );
@@ -460,6 +528,7 @@ static void growUserMemory( void ) {
     free( theUserMemory.memory );
     theUserMemory.memory  = newMem;
     theUserMemory.memSize = newSize;
+    numScaleCycles++;
 }
 
 objref_t allocUserMemory( size_t requestSize ) {
@@ -468,7 +537,7 @@ objref_t allocUserMemory( size_t requestSize ) {
     // begin
     if ( alignedSize > CHUNKMAX ) {
         fprintf( stderr, "? requested block size too large: %zu (from: %zu) > %zu\n", alignedSize, requestSize, (size_t) CHUNKMAX );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
     size_t allocPos = theUserMemory.memUsed; size_t allocSize = alignedSize;
     bool recycled = false;
@@ -485,14 +554,14 @@ objref_t allocUserMemory( size_t requestSize ) {
             allocSize = info.size;
             recycled  = true;
         } else {
-            // attempt to garbage collect
-            compactUserMemory(); numGCCycles++;
+            // compact now!
+            compactUserMemory();
             if ( allocSize > theUserMemory.memSize - theUserMemory.memUsed ) {
                 // didn't work: resize it
-                growUserMemory(); numScaleCycles++;
+                growUserMemory();
                 if ( allocSize > theUserMemory.memSize - theUserMemory.memUsed ) {
                     fprintf( stderr, "? internal error: not enough space for allocation of %zu bytes.\n", alignedSize );
-                    exit( EXIT_FAILURE );
+                    _exit( EXIT_FAILURE );
                 } else {
                     allocPos = theUserMemory.memUsed;
                 }
@@ -511,7 +580,8 @@ objref_t allocUserMemory( size_t requestSize ) {
     addBasedNodeAtTail( theUserMemory.memory, 
         (basedlist_t*)( theUserMemory.memory + theUserMemory.allocList ), 
         &hdr->node );
-    return (objref_t)( blk - theUserMemory.memory );
+    objref_t result = (objref_t)( blk - theUserMemory.memory );
+    return result;
 }
 
 void freeUserMemory( objref_t block ) {
@@ -519,11 +589,11 @@ void freeUserMemory( objref_t block ) {
     size_t size = getBlockSize( blk );
     if ( size & FREEBIT ) {
         fprintf( stderr, "? block %#zx already freed\n", block );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
     if ( size & LOCKBIT ) {
         fprintf( stderr, "? block %#zx still locked\n", block );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
     size |= FREEBIT;
     setBlockSize( blk, size );
@@ -564,11 +634,11 @@ void* lockUserMemory( objref_t block ) {
     size_t size = getBlockSize( blk );
     if ( size & FREEBIT ) {
         fprintf( stderr, "? block %#zx not allocated\n", block );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
     if ( size & LOCKBIT ) {
         fprintf( stderr, "? block %#zx already locked\n", block );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
     size |= LOCKBIT;
     setBlockSize( blk, size );
@@ -580,11 +650,11 @@ void unlockUserMemory( objref_t block ) {
     size_t size = getBlockSize( blk );
     if ( size & FREEBIT ) {
         fprintf( stderr, "? block %#zx not allocated\n", block );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
     if ( ( size & LOCKBIT ) == 0 ) {
         fprintf( stderr, "? block %#zx not locked\n", block );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
     size &= ~LOCKBIT;
     setBlockSize( blk, size );
@@ -595,7 +665,7 @@ size_t sizeofUserMemory( objref_t block ) {
     size_t size = getBlockSize( blk );
     if ( size & FREEBIT ) {
         fprintf( stderr, "? block %#zx not allocated\n", block );
-        exit( EXIT_FAILURE );
+        _exit( EXIT_FAILURE );
     }
     return ( size & CHUNKMAX ) - sizeof(memhdr_t);
 }
